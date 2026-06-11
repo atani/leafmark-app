@@ -1,0 +1,10 @@
+schemaVersion: 1
+enabledWorkflows:
+  - device
+  - simulator
+  - ui-automation
+  - debugging
+sessionDefaults:
+  scheme: EPUBReaderSpike
+  projectPath: ./EPUBReaderSpike.xcodeproj
+  simulatorName: iPhone 16

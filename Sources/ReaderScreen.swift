@@ -3,19 +3,34 @@ import ReadiumShared
 import ReadiumNavigator
 
 /// Full-screen reading experience: navigator + tap-to-toggle chrome,
-/// table of contents and appearance settings.
+/// table of contents, highlights and appearance settings.
 struct ReaderScreen: View {
     let book: Book
     let publication: Publication
     @ObservedObject var library: LibraryStore
     @EnvironmentObject private var appearance: AppearanceStore
+    @EnvironmentObject private var highlightStore: HighlightStore
+    @EnvironmentObject private var stats: StatsStore
     @Environment(\.dismiss) private var dismiss
 
     @StateObject private var bridge = NavigatorBridge()
     @State private var chromeVisible = true
     @State private var showContents = false
     @State private var showSettings = false
+    @State private var showHighlights = false
     @State private var progression: Double?
+    @State private var sessionStart = Date()
+
+    /// Highlight being edited in the note sheet.
+    @State private var noteTarget: Highlight?
+    /// Highlight whose actions dialog (color/note/delete) is shown.
+    @State private var actionTarget: Highlight?
+
+    @AppStorage("highlight.color") private var highlightColorRaw = HighlightColor.yellow.rawValue
+
+    private var highlightColor: HighlightColor {
+        HighlightColor(rawValue: highlightColorRaw) ?? .yellow
+    }
 
     private var initialLocator: Locator? {
         guard let json = book.locatorJSON,
@@ -44,6 +59,11 @@ struct ReaderScreen: View {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         chromeVisible.toggle()
                     }
+                },
+                onHighlightSelection: { makeHighlight(withNote: false) },
+                onNoteSelection: { makeHighlight(withNote: true) },
+                onHighlightActivated: { id in
+                    actionTarget = highlightStore.highlights.first { $0.id == id }
                 }
             )
             .ignoresSafeArea()
@@ -59,22 +79,98 @@ struct ReaderScreen: View {
                 bridge.go(to: link)
             }
         }
+        .sheet(isPresented: $showHighlights) {
+            HighlightsSheet(
+                book: book,
+                store: highlightStore,
+                onSelect: { highlight in
+                    showHighlights = false
+                    if let locator = highlightStore.locator(of: highlight) {
+                        bridge.go(to: locator)
+                    }
+                }
+            )
+        }
         .sheet(isPresented: $showSettings) {
             AppearanceSheet()
                 .presentationDetents([.height(320)])
-                .onDisappear {
-                    bridge.submit(appearance.preferences)
-                }
         }
+        .sheet(item: $noteTarget) { highlight in
+            NoteEditorSheet(highlight: highlight, store: highlightStore)
+        }
+        .confirmationDialog(
+            "Highlight",
+            isPresented: Binding(
+                get: { actionTarget != nil },
+                set: { if !$0 { actionTarget = nil } }
+            ),
+            titleVisibility: .hidden
+        ) {
+            if let target = actionTarget {
+                ForEach(HighlightColor.allCases) { color in
+                    if color != target.color {
+                        Button(color.label) { recolor(target, to: color) }
+                    }
+                }
+                Button(target.note?.isEmpty == false ? "Edit Note" : "Add Note") {
+                    noteTarget = target
+                }
+                Button("Delete Highlight", role: .destructive) {
+                    highlightStore.remove(target.id)
+                    refreshDecorations()
+                }
+            }
+        }
+        .onReceive(highlightStore.$highlights) { _ in refreshDecorations() }
         .onChange(of: appearance.themeRaw) { bridge.submit(appearance.preferences) }
         .onChange(of: appearance.fontRaw) { bridge.submit(appearance.preferences) }
         .onChange(of: appearance.fontSize) { bridge.submit(appearance.preferences) }
-        .onAppear { library.markOpened(book) }
+        .onAppear {
+            library.markOpened(book)
+            sessionStart = Date()
+            // The navigator is created in the same render pass; defer one
+            // turn of the run loop so decorations land on a live web view.
+            DispatchQueue.main.async { refreshDecorations() }
+        }
+        .onDisappear {
+            stats.recordSession(bookID: book.id, startedAt: sessionStart, endedAt: Date())
+        }
     }
+
+    // MARK: - Highlights
+
+    private func makeHighlight(withNote: Bool) {
+        guard let locator = bridge.selectionLocator else { return }
+        bridge.clearSelection()
+        let highlight = highlightStore.add(
+            bookID: book.id,
+            locator: locator,
+            color: highlightColor
+        )
+        refreshDecorations()
+        if withNote {
+            noteTarget = highlight
+        }
+    }
+
+    private func recolor(_ highlight: Highlight, to color: HighlightColor) {
+        highlightColorRaw = color.rawValue
+        highlightStore.update(highlight.id) { $0.color = color }
+        refreshDecorations()
+    }
+
+    private func refreshDecorations() {
+        bridge.applyHighlights(
+            highlightStore.highlights(for: book.id),
+            store: highlightStore
+        )
+    }
+
+    // MARK: - Chrome
 
     private var chrome: some View {
         VStack {
-            HStack {
+            HStack(spacing: 16) {
                 Button {
                     dismiss()
                 } label: {
@@ -97,6 +193,13 @@ struct ReaderScreen: View {
                     Image(systemName: "textformat.size")
                 }
                 .accessibilityLabel("Appearance")
+
+                Button {
+                    showHighlights = true
+                } label: {
+                    Image(systemName: "highlighter")
+                }
+                .accessibilityLabel("Highlights")
 
                 Button {
                     showContents = true
@@ -180,6 +283,128 @@ private struct ContentsSheet: View {
         links.flatMap { link in
             [(link, level)] + flatten(link.children, level: level + 1)
         }
+    }
+}
+
+/// All highlights of the open book, with Markdown export.
+private struct HighlightsSheet: View {
+    let book: Book
+    @ObservedObject var store: HighlightStore
+    let onSelect: (Highlight) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+
+    private var items: [Highlight] {
+        store.highlights(for: book.id)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if items.isEmpty {
+                    ContentUnavailableView(
+                        "No Highlights",
+                        systemImage: "highlighter",
+                        description: Text("Select text while reading to create a highlight.")
+                    )
+                } else {
+                    List {
+                        ForEach(items) { highlight in
+                            Button {
+                                onSelect(highlight)
+                            } label: {
+                                HStack(alignment: .top, spacing: 10) {
+                                    RoundedRectangle(cornerRadius: 2)
+                                        .fill(highlight.color.color)
+                                        .frame(width: 4)
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(highlight.text)
+                                            .font(.subheadline)
+                                            .lineLimit(3)
+                                        if let note = highlight.note, !note.isEmpty {
+                                            Text(note)
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                                .lineLimit(2)
+                                        }
+                                    }
+                                }
+                            }
+                            .tint(.primary)
+                        }
+                        .onDelete { offsets in
+                            for offset in offsets {
+                                store.remove(items[offset].id)
+                            }
+                        }
+                    }
+                    .listStyle(.plain)
+                }
+            }
+            .navigationTitle("Highlights")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    if !items.isEmpty {
+                        ShareLink(
+                            item: store.exportMarkdown(for: book),
+                            preview: SharePreview("\(book.title) — Highlights")
+                        ) {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                        .accessibilityLabel("Export as Markdown")
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+}
+
+/// Edits the note attached to a highlight.
+private struct NoteEditorSheet: View {
+    let highlight: Highlight
+    @ObservedObject var store: HighlightStore
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var text = ""
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(highlight.text)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(3)
+                    .padding(.horizontal, 4)
+
+                TextEditor(text: $text)
+                    .font(.body)
+                    .scrollContentBackground(.hidden)
+                    .padding(8)
+                    .background(Color(.secondarySystemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+            .padding()
+            .navigationTitle("Note")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Save") {
+                        store.update(highlight.id) { $0.note = text }
+                        dismiss()
+                    }
+                    .fontWeight(.semibold)
+                }
+            }
+        }
+        .presentationDetents([.medium])
+        .onAppear { text = highlight.note ?? "" }
     }
 }
 

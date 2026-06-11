@@ -4,7 +4,9 @@ import ReadiumShared
 /// The home screen: a grid of imported books.
 struct LibraryView: View {
     @ObservedObject var library: LibraryStore
+    @EnvironmentObject private var stats: StatsStore
     @State private var showImporter = false
+    @State private var showStats = false
     @State private var openedBook: Book?
 
     private let columns = [GridItem(.adaptive(minimum: 110, maximum: 160), spacing: 16)]
@@ -46,6 +48,14 @@ struct LibraryView: View {
             }
             .navigationTitle("Library")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showStats = true
+                    } label: {
+                        Image(systemName: "chart.bar")
+                    }
+                    .accessibilityLabel("Statistics")
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showImporter = true
@@ -54,6 +64,9 @@ struct LibraryView: View {
                     }
                     .accessibilityLabel("Import Books")
                 }
+            }
+            .sheet(isPresented: $showStats) {
+                StatsView(stats: stats, library: library)
             }
             .fileImporter(
                 isPresented: $showImporter,

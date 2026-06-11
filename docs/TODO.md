@@ -11,6 +11,7 @@
 
 ## v0.3 候補
 
+- [ ] iPad ランドスケープの 2 カラム表示(P7): Readium `columnCount` preference。実装コスト低・Marvin 同等の差別化
 - [ ] ハイライト色の追加とアンダーライン形式
 - [ ] 検索(本文全文検索 — Readium `SearchService`)
 - [ ] ページめくりアニメーション / スクロールモード切替(Readium `scroll` preference)
@@ -23,7 +24,7 @@
 - [ ] iCloud 同期(位置・ハイライト・蔵書メタデータ)
 - [ ] OPDS カタログ / Calibre 連携
 - [ ] アクセシビリティ監査(VoiceOver / Dynamic Type)
-- [ ] App Store 申請(価格: 買い切り or freemium は未決定 — 要 ADR)
+- [ ] App Store 申請。価格モデルは**買い切り**を明言する方向(P8: サブスク反発の受け皿。「買い切り・ロックインなし・エクスポート自由」を訴求文の軸に — customer-pains.md 参照。最終決定は要 ADR)
 
 ## 技術的負債
 

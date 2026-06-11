@@ -18,6 +18,7 @@ struct ReaderScreen: View {
     @State private var showContents = false
     @State private var showSettings = false
     @State private var showHighlights = false
+    @State private var showSearch = false
     @State private var progression: Double?
     @State private var sessionStart = Date()
 
@@ -93,7 +94,13 @@ struct ReaderScreen: View {
         }
         .sheet(isPresented: $showSettings) {
             AppearanceSheet()
-                .presentationDetents([.height(320)])
+                .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $showSearch) {
+            SearchSheet(publication: publication) { locator in
+                showSearch = false
+                bridge.go(to: locator)
+            }
         }
         .sheet(item: $noteTarget) { highlight in
             NoteEditorSheet(highlight: highlight, store: highlightStore)
@@ -125,6 +132,10 @@ struct ReaderScreen: View {
         .onChange(of: appearance.themeRaw) { bridge.submit(appearance.preferences) }
         .onChange(of: appearance.fontRaw) { bridge.submit(appearance.preferences) }
         .onChange(of: appearance.fontSize) { bridge.submit(appearance.preferences) }
+        .onChange(of: appearance.columnsRaw) { bridge.submit(appearance.preferences) }
+        .onChange(of: appearance.scrollEnabled) { bridge.submit(appearance.preferences) }
+        .onChange(of: appearance.lineHeight) { bridge.submit(appearance.preferences) }
+        .onChange(of: appearance.pageMargins) { bridge.submit(appearance.preferences) }
         .onAppear {
             library.markOpened(book)
             sessionStart = Date()
@@ -186,6 +197,15 @@ struct ReaderScreen: View {
                     .lineLimit(1)
 
                 Spacer()
+
+                if publication.isSearchable {
+                    Button {
+                        showSearch = true
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                    }
+                    .accessibilityLabel("Search")
+                }
 
                 Button {
                     showSettings = true
@@ -452,6 +472,51 @@ private struct AppearanceSheet: View {
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.bordered)
+                    }
+                }
+
+                Section("Layout") {
+                    Picker("Columns", selection: $appearance.columnsRaw) {
+                        ForEach(AppearanceStore.ReaderColumns.allCases) { columns in
+                            Text(columns.rawValue).tag(columns.rawValue)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+
+                    Toggle("Scroll Mode", isOn: $appearance.scrollEnabled)
+
+                    Stepper(
+                        value: $appearance.lineHeight,
+                        in: 0 ... AppearanceStore.lineHeightRange.upperBound,
+                        step: AppearanceStore.lineHeightStep
+                    ) {
+                        HStack {
+                            Text("Line Height")
+                            Spacer()
+                            Text(appearance.lineHeight > 0
+                                ? String(format: "%.1f", appearance.lineHeight)
+                                : "Default")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .onChange(of: appearance.lineHeight) { _, value in
+                        // Snap from "Default" (0) straight into the valid range.
+                        if value > 0, value < AppearanceStore.lineHeightRange.lowerBound {
+                            appearance.lineHeight = AppearanceStore.lineHeightRange.lowerBound
+                        }
+                    }
+
+                    Stepper(
+                        value: $appearance.pageMargins,
+                        in: AppearanceStore.pageMarginsRange,
+                        step: AppearanceStore.pageMarginsStep
+                    ) {
+                        HStack {
+                            Text("Margins")
+                            Spacer()
+                            Text(String(format: "%.2fx", appearance.pageMargins))
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
             }

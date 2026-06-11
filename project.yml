@@ -32,11 +32,10 @@ targets:
           - ReadiumShared
           - ReadiumStreamer
           - ReadiumNavigator
-          - ReadiumAdapterGCDWebServer
     info:
       path: Info.plist
       properties:
-        CFBundleDisplayName: EPUB Reader Spike
+        CFBundleDisplayName: EPUB Reader
         UILaunchScreen:
           UIColorName: ""
         UISupportedInterfaceOrientations:
@@ -44,6 +43,13 @@ targets:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         LSSupportsOpeningDocumentsInPlace: true
+        UIFileSharingEnabled: true
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: EPUB Publication
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes:
+              - org.idpf.epub-container
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.atani.EPUBReaderSpike

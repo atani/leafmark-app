@@ -1,4 +1,4 @@
-name: EPUBReaderSpike
+name: Inkwell
 options:
   bundleIdPrefix: com.atani
   deploymentTarget:
@@ -20,7 +20,7 @@ settings:
     ENABLE_USER_SCRIPT_SANDBOXING: NO
 
 targets:
-  EPUBReaderSpike:
+  Inkwell:
     type: application
     platform: iOS
     sources:
@@ -35,7 +35,7 @@ targets:
     info:
       path: Info.plist
       properties:
-        CFBundleDisplayName: EPUB Reader
+        CFBundleDisplayName: Inkwell Reader
         UILaunchScreen:
           UIColorName: ""
         UISupportedInterfaceOrientations:
@@ -52,7 +52,7 @@ targets:
               - org.idpf.epub-container
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.atani.EPUBReaderSpike
+        PRODUCT_BUNDLE_IDENTIFIER: com.atani.inkwell
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon

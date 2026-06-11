@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct EPUBReaderSpikeApp: App {
+struct InkwellApp: App {
     @StateObject private var library = LibraryStore()
     @StateObject private var appearance = AppearanceStore()
     @StateObject private var highlights = HighlightStore()

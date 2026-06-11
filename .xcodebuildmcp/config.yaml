@@ -5,6 +5,9 @@ enabledWorkflows:
   - ui-automation
   - debugging
 sessionDefaults:
-  scheme: EPUBReaderSpike
-  projectPath: ./EPUBReaderSpike.xcodeproj
-  simulatorName: iPhone 16
+  projectPath: /Users/akira/src/github.com/atani/epub-reader-ios/Inkwell.xcodeproj
+  scheme: Inkwell
+  simulatorName: iPhone 17
+  simulatorId: C1733B32-17F9-4209-B5F3-CC0AB29B852A
+  bundleId: com.atani.inkwell
+  simulatorPlatform: iOS Simulator

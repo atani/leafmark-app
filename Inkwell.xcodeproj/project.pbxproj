@@ -1,0 +1,412 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0121E7A778A5601EBA8CCD15 /* Highlight.swift in Sources */ = {isa = PBXBuildFile; fileRef = C79DFA3247AA03F7A64DC762 /* Highlight.swift */; };
+		0A47D8B97E1B8A752550EA0C /* ReadiumContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFFF9A93266A355C62CAD77C /* ReadiumContext.swift */; };
+		1A15004C16346F708E8E712D /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D61990AE4EAD8D2C81AC80E8 /* StatsView.swift */; };
+		34DD080615EA355B310ADC68 /* LibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C01DCB88DDB194257061A8 /* LibraryStore.swift */; };
+		360133DDF5985AD99BF4A4F5 /* Book.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A64A8F464ED20E4588B914 /* Book.swift */; };
+		395FDD8E28BFA05480824ACA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC576BF61FC0E6B89F918E89 /* Assets.xcassets */; };
+		698A2BF24A170CD35B14B274 /* InkwellApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E4B6E8AE2C336AEDFEDBFB /* InkwellApp.swift */; };
+		7B24A3C4807BADEAC18B9720 /* ReadiumNavigator in Frameworks */ = {isa = PBXBuildFile; productRef = E0E76CF82A47B15F1EFD5332 /* ReadiumNavigator */; };
+		7B348478FD5421439759A324 /* AppearanceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E51CFEF70D104A3CDC04B79 /* AppearanceStore.swift */; };
+		97BFD826FDE42287AA2DE6F5 /* ReadiumShared in Frameworks */ = {isa = PBXBuildFile; productRef = AB4A0C23DE59289EB068EFFE /* ReadiumShared */; };
+		A40B47A89B40E6E9A123E19B /* ReaderScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0A3B41ED0E31CFFAF28DAB7 /* ReaderScreen.swift */; };
+		A58E2F826CE765373D260FAF /* ReadiumStreamer in Frameworks */ = {isa = PBXBuildFile; productRef = 7EDE0B31B5D2CD79BC072A29 /* ReadiumStreamer */; };
+		C9B7489E711D07C94C4E4FD4 /* ReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B94DAD4E01F7765FBEC117E7 /* ReaderView.swift */; };
+		D0CA990F026EEDE8DE7626CD /* SearchSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF2BB9401046C30A6D2130F0 /* SearchSheet.swift */; };
+		D44514729F897AB8B63F5973 /* HighlightStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B140FE56D3E2B3C9F07D0250 /* HighlightStore.swift */; };
+		D59FD4FFC23C1EFFDD2A2EBC /* StatsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAC5403A01A72F0CDED402DA /* StatsStore.swift */; };
+		F74D05E77022F94D16885701 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 925A2A78DBBD0A77BACFE447 /* LibraryView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		02E4B6E8AE2C336AEDFEDBFB /* InkwellApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkwellApp.swift; sourceTree = "<group>"; };
+		26A5A86D94E2F0B6EBA77B76 /* Inkwell.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Inkwell.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		55A64A8F464ED20E4588B914 /* Book.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Book.swift; sourceTree = "<group>"; };
+		8E51CFEF70D104A3CDC04B79 /* AppearanceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceStore.swift; sourceTree = "<group>"; };
+		925A2A78DBBD0A77BACFE447 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		B140FE56D3E2B3C9F07D0250 /* HighlightStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightStore.swift; sourceTree = "<group>"; };
+		B94DAD4E01F7765FBEC117E7 /* ReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderView.swift; sourceTree = "<group>"; };
+		BAC5403A01A72F0CDED402DA /* StatsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsStore.swift; sourceTree = "<group>"; };
+		C79DFA3247AA03F7A64DC762 /* Highlight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Highlight.swift; sourceTree = "<group>"; };
+		C9C01DCB88DDB194257061A8 /* LibraryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryStore.swift; sourceTree = "<group>"; };
+		D61990AE4EAD8D2C81AC80E8 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
+		DC576BF61FC0E6B89F918E89 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DF2BB9401046C30A6D2130F0 /* SearchSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSheet.swift; sourceTree = "<group>"; };
+		DFFF9A93266A355C62CAD77C /* ReadiumContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadiumContext.swift; sourceTree = "<group>"; };
+		E0A3B41ED0E31CFFAF28DAB7 /* ReaderScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderScreen.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AE4F6E6CD460B0620E038941 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				97BFD826FDE42287AA2DE6F5 /* ReadiumShared in Frameworks */,
+				A58E2F826CE765373D260FAF /* ReadiumStreamer in Frameworks */,
+				7B24A3C4807BADEAC18B9720 /* ReadiumNavigator in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		18732601985C9245DC3D64CA = {
+			isa = PBXGroup;
+			children = (
+				AC685A4048C7199AEA78FC45 /* Sources */,
+				C63BBB90BC918F1125C5ED9D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AC685A4048C7199AEA78FC45 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				8E51CFEF70D104A3CDC04B79 /* AppearanceStore.swift */,
+				DC576BF61FC0E6B89F918E89 /* Assets.xcassets */,
+				55A64A8F464ED20E4588B914 /* Book.swift */,
+				C79DFA3247AA03F7A64DC762 /* Highlight.swift */,
+				B140FE56D3E2B3C9F07D0250 /* HighlightStore.swift */,
+				02E4B6E8AE2C336AEDFEDBFB /* InkwellApp.swift */,
+				C9C01DCB88DDB194257061A8 /* LibraryStore.swift */,
+				925A2A78DBBD0A77BACFE447 /* LibraryView.swift */,
+				E0A3B41ED0E31CFFAF28DAB7 /* ReaderScreen.swift */,
+				B94DAD4E01F7765FBEC117E7 /* ReaderView.swift */,
+				DFFF9A93266A355C62CAD77C /* ReadiumContext.swift */,
+				DF2BB9401046C30A6D2130F0 /* SearchSheet.swift */,
+				BAC5403A01A72F0CDED402DA /* StatsStore.swift */,
+				D61990AE4EAD8D2C81AC80E8 /* StatsView.swift */,
+			);
+			name = Sources;
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		C63BBB90BC918F1125C5ED9D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				26A5A86D94E2F0B6EBA77B76 /* Inkwell.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		43FA894527ECF67699BDD019 /* Inkwell */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FADFE3B9E0F76BDEA1042D11 /* Build configuration list for PBXNativeTarget "Inkwell" */;
+			buildPhases = (
+				1FDBE47A6BC23ED85FC17DEA /* Sources */,
+				7FD03C216336B01C0CFBB0A2 /* Resources */,
+				AE4F6E6CD460B0620E038941 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Inkwell;
+			packageProductDependencies = (
+				AB4A0C23DE59289EB068EFFE /* ReadiumShared */,
+				7EDE0B31B5D2CD79BC072A29 /* ReadiumStreamer */,
+				E0E76CF82A47B15F1EFD5332 /* ReadiumNavigator */,
+			);
+			productName = Inkwell;
+			productReference = 26A5A86D94E2F0B6EBA77B76 /* Inkwell.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D94428674BB0F9B3CF935623 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					43FA894527ECF67699BDD019 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 82E3D81AB1F977EAA4AE5679 /* Build configuration list for PBXProject "Inkwell" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 18732601985C9245DC3D64CA;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				F8D9E3CC1F4E48C302FDF322 /* XCRemoteSwiftPackageReference "swift-toolkit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = C63BBB90BC918F1125C5ED9D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				43FA894527ECF67699BDD019 /* Inkwell */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7FD03C216336B01C0CFBB0A2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				395FDD8E28BFA05480824ACA /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1FDBE47A6BC23ED85FC17DEA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7B348478FD5421439759A324 /* AppearanceStore.swift in Sources */,
+				360133DDF5985AD99BF4A4F5 /* Book.swift in Sources */,
+				0121E7A778A5601EBA8CCD15 /* Highlight.swift in Sources */,
+				D44514729F897AB8B63F5973 /* HighlightStore.swift in Sources */,
+				698A2BF24A170CD35B14B274 /* InkwellApp.swift in Sources */,
+				34DD080615EA355B310ADC68 /* LibraryStore.swift in Sources */,
+				F74D05E77022F94D16885701 /* LibraryView.swift in Sources */,
+				A40B47A89B40E6E9A123E19B /* ReaderScreen.swift in Sources */,
+				C9B7489E711D07C94C4E4FD4 /* ReaderView.swift in Sources */,
+				0A47D8B97E1B8A752550EA0C /* ReadiumContext.swift in Sources */,
+				D0CA990F026EEDE8DE7626CD /* SearchSheet.swift in Sources */,
+				D59FD4FFC23C1EFFDD2A2EBC /* StatsStore.swift in Sources */,
+				1A15004C16346F708E8E712D /* StatsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		4C2E9709DCDA9F77A1239BE7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		856B1F6CED97DA85FC803DF8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		9E1DFFD8FA2FE2694BE37F81 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.atani.inkwell;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		BD74D0761D34293F6A1D1140 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.atani.inkwell;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		82E3D81AB1F977EAA4AE5679 /* Build configuration list for PBXProject "Inkwell" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4C2E9709DCDA9F77A1239BE7 /* Debug */,
+				856B1F6CED97DA85FC803DF8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FADFE3B9E0F76BDEA1042D11 /* Build configuration list for PBXNativeTarget "Inkwell" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9E1DFFD8FA2FE2694BE37F81 /* Debug */,
+				BD74D0761D34293F6A1D1140 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F8D9E3CC1F4E48C302FDF322 /* XCRemoteSwiftPackageReference "swift-toolkit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/readium/swift-toolkit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7EDE0B31B5D2CD79BC072A29 /* ReadiumStreamer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F8D9E3CC1F4E48C302FDF322 /* XCRemoteSwiftPackageReference "swift-toolkit" */;
+			productName = ReadiumStreamer;
+		};
+		AB4A0C23DE59289EB068EFFE /* ReadiumShared */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F8D9E3CC1F4E48C302FDF322 /* XCRemoteSwiftPackageReference "swift-toolkit" */;
+			productName = ReadiumShared;
+		};
+		E0E76CF82A47B15F1EFD5332 /* ReadiumNavigator */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F8D9E3CC1F4E48C302FDF322 /* XCRemoteSwiftPackageReference "swift-toolkit" */;
+			productName = ReadiumNavigator;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = D94428674BB0F9B3CF935623 /* Project object */;
+}

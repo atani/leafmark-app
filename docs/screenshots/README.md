@@ -36,6 +36,7 @@ xcrun simctl status_bar $SIM clear
 | `05-paywall.png` | Inkwell Pro(買い切り訴求)。無制限ハイライト/エクスポート/統計、購入復元 |
 | `06-highlights.png` | ハイライト一覧。4 色ハイライト + ノート + Markdown エクスポート |
 | `07-statistics.png` | 読書統計。今日/週/累計の時間、連続 5 日、本ごとの時間 |
+| `08-ipad-2column.png` | iPad Pro 13" の 2 カラム表示(`columnCount: 2`)。レイアウト検証用 |
 
 XcodeBuildMCP(`.mcp.json`)の UI 自動化で撮影。`osascript` のピクセルタップでは届かなかった
 ツールバーの小アイコンも、`snapshot_ui` の elementRef タップで正確に操作できた。
@@ -43,6 +44,9 @@ XcodeBuildMCP(`.mcp.json`)の UI 自動化で撮影。`osascript` のピクセ�
 ### 撮影上の注意
 
 - 03〜07 は iPhone 17(1206×2622)。01/02 と同じくプレビュー/構図確認用。最終は 6.9"(1320×2868)で撮り直す
+- 08 は iPad Pro 13"(2064×2752)。2 カラム表示の検証用。ランドスケープは MCP で回転を
+  自動化できず縦向きで撮影、ステータスバーの日付がシステムロケールの日本語表示のため、
+  英語版の最終 iPad スクショは手動で撮り直す(回転 + 英語ロケール)
 - 05/06/07 は Pro 限定画面。MCP / `simctl launch` で起動したアプリには StoreKit 設定の商品が
   配信されない(購入ボタンが非活性)ため、DEBUG 限定の `-inkwellForcePro` launch 引数(`StoreManager`)で
   エンタイトルメントを解放して撮影した。リリースビルドには非搭載

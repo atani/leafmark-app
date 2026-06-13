@@ -14,8 +14,11 @@ Program 登録済み(承認待ち)。承認が下りたら上から順に潰し�
       開発者プロファイルの信頼が必要(Settings → General → VPN & Device Management)
 - [ ] ハイライトのタップ動線(色変更・ノート編集・削除)を実機で確認
       — シミュレータでは座標タップで検証できず未確認のまま
-- [ ] iPhone・iPad 両方で起動とレイアウトを確認(`TARGETED_DEVICE_FAMILY: 1,2`)
-- [ ] ランドスケープの 2 カラム表示(iPad)を確認
+- [x] iPhone・iPad 両方で起動とレイアウトを確認(`TARGETED_DEVICE_FAMILY: 1,2`)
+      — iPhone 17(実機 andphoto)/ iPad Pro 13"(Simulator)で起動・レイアウト確認
+- [x] 2 カラム表示(iPad)を確認 — iPad Pro 13" で `columnCount: 2` の 2 段組みを確認
+      (`docs/screenshots/08-ipad-2column.png`)。ランドスケープでの最終撮影は手動
+      (MCP では回転を自動化できず、システムロケールが日本語のため英語版は撮り直し)
 - [x] ユニットテスト 19 件が pass する(`HighlightStore` / `StatsStore` /
       `StoreManager`)。`StorePurchase` の 3 件は SKTestSession が必要で
       ヘッドレス `xcodebuild test` ではスキップ(Xcode 実行時に検証)

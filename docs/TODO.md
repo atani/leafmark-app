@@ -35,5 +35,5 @@
 ## 技術的負債
 
 - [ ] `locationDidChange` ごとのカタログ全書き込みをデバウンス(ADR-0003)
-- [ ] ユニットテスト導入(LibraryStore / HighlightStore / StatsStore のロジック)
+- [x] ユニットテスト導入(HighlightStore / StatsStore のロジック。Tests/ + InkwellTests ターゲット。LibraryStore は Readium パース依存のため別途)
 - [ ] 蔵書が増えた場合の SQLite 移行判断(ADR-0002 の見直し条件)

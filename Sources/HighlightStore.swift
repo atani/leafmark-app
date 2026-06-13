@@ -7,13 +7,12 @@ import ReadiumShared
 final class HighlightStore: ObservableObject {
     @Published private(set) var highlights: [Highlight] = []
 
-    private var storeURL: URL {
-        FileManager.default
+    private let storeURL: URL
+
+    init(storeURL: URL? = nil) {
+        self.storeURL = storeURL ?? FileManager.default
             .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("highlights.json")
-    }
-
-    init() {
         load()
     }
 

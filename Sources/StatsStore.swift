@@ -13,13 +13,12 @@ struct ReadingSession: Codable, Identifiable, Equatable {
 final class StatsStore: ObservableObject {
     @Published private(set) var sessions: [ReadingSession] = []
 
-    private var storeURL: URL {
-        FileManager.default
+    private let storeURL: URL
+
+    init(storeURL: URL? = nil) {
+        self.storeURL = storeURL ?? FileManager.default
             .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("reading-sessions.json")
-    }
-
-    init() {
         load()
     }
 

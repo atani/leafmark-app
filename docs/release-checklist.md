@@ -9,7 +9,9 @@ Program 登録済み(承認待ち)。承認が下りたら上から順に潰し�
 
 ## 1. ビルド・技術要件
 
-- [ ] 実機(Apple Developer Program 承認後)でビルド・起動を確認
+- [x] 実機(andphoto / iOS 26.5)で署名ビルド・インストール・起動を確認
+      — Team `3PC87Z3WVT` の Apple Development 署名。初回はデバイス側で
+      開発者プロファイルの信頼が必要(Settings → General → VPN & Device Management)
 - [ ] ハイライトのタップ動線(色変更・ノート編集・削除)を実機で確認
       — シミュレータでは座標タップで検証できず未確認のまま
 - [ ] iPhone・iPad 両方で起動とレイアウトを確認(`TARGETED_DEVICE_FAMILY: 1,2`)

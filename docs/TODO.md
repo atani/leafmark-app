@@ -36,7 +36,9 @@
 - [ ] アクセシビリティ監査(VoiceOver / Dynamic Type)
 - [x] 価格モデル決定(ADR-0005: 無料 DL + 非消費型 IAP「Inkwell Pro」$9.99。サブスクなし)
 - [x] StoreKit 2 課金実装(`StoreManager`・Paywall・Pro 機能ゲーティング・購入復元。ADR-0005 の境界線。`Inkwell.storekit` を scheme Run に紐付け)
-  - 実機 UI での購入フロー目視確認は未実施(Simulator の小アイコンへの osascript タップが精度不足。XcodeBuildMCP の新セッションで確認)
+  - XcodeBuildMCP でゲーティング動線(無料枠超過・統計・エクスポートで `PaywallView` 提示)と Pro 画面(統計・ハイライト・エクスポート)を確認・撮影
+  - 実購入の目視確認は未実施。XcodeBuildMCP / `simctl launch` で起動したアプリには StoreKit 設定の商品が配信されず購入ボタンが非活性。Xcode の Run か App Store Connect への IAP 登録後に検証する
+  - Pro 画面の撮影は DEBUG 限定の `-inkwellForcePro` launch 引数(`StoreManager`)で解放。リリースには非搭載
   - 購入フローの自動テストは headless `xcodebuild test` では SKTestSession が config の商品を配信しないためスキップ(Xcode 実行時は有効)
 - [ ] App Store 申請。「買い切り・ロックインなし・エクスポート自由」を訴求文の軸に(P2 × P8)
 

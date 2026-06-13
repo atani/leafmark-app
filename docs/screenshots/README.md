@@ -31,16 +31,25 @@ xcrun simctl status_bar $SIM clear
 |---|---|
 | `01-library.png` | ライブラリ。Peter and Wendy の表紙・書名・著者 |
 | `02-reader-cover.png` | リーダーで表紙を全面レンダリング + ツールバー(検索/AA/ハイライト/目次) |
+| `03-reader-text.png` | 本文ページ。Chapter I「Peter Breaks Through」のリフロー描画とセリフ体タイポグラフィ |
+| `04-appearance.png` | レイアウト設定パネル(AA)。テーマ・フォント・文字サイズ・カラム数 |
+| `05-paywall.png` | Inkwell Pro(買い切り訴求)。無制限ハイライト/エクスポート/統計、購入復元 |
+| `06-highlights.png` | ハイライト一覧。4 色ハイライト + ノート + Markdown エクスポート |
+| `07-statistics.png` | 読書統計。今日/週/累計の時間、連続 5 日、本ごとの時間 |
 
-## 未撮影(XcodeBuildMCP の UI 自動化で撮る)
+XcodeBuildMCP(`.mcp.json`)の UI 自動化で撮影。`osascript` のピクセルタップでは届かなかった
+ツールバーの小アイコンも、`snapshot_ui` の elementRef タップで正確に操作できた。
 
-`osascript` のピクセルタップはツールバーの小アイコンに精度が足りず、本文・設定・ハイライト画面まで
-到達できなかった。残りは XcodeBuildMCP(`.mcp.json`)が有効な新セッションの UI 自動化で撮る。
+### 撮影上の注意
 
-- [ ] 本文ページ(Chapter I の冒頭。リフロー描画・日本語/英語タイポグラフィ)
-- [ ] レイアウト設定パネル(AA。フォント・行間・余白・2カラム)
-- [ ] ハイライト一覧 + Markdown エクスポートの共有シート
-- [ ] 読書統計
+- 03〜07 は iPhone 17(1206×2622)。01/02 と同じくプレビュー/構図確認用。最終は 6.9"(1320×2868)で撮り直す
+- 05/06/07 は Pro 限定画面。MCP / `simctl launch` で起動したアプリには StoreKit 設定の商品が
+  配信されない(購入ボタンが非活性)ため、DEBUG 限定の `-inkwellForcePro` launch 引数(`StoreManager`)で
+  エンタイトルメントを解放して撮影した。リリースビルドには非搭載
+- 06/07 のデータ(ハイライト 4 件・5 日分の読書セッション)はコンテナの `highlights.json` /
+  `reading-sessions.json` にシードした。文面は J. M. Barrie の原文(パブリックドメイン)
+- エクスポートの共有シートはシステム UI が日本語表示のため英語スクショには採用せず、`06` で
+  エクスポート導線(ShareLink)を示すに留めた
 
 ## サイズ
 

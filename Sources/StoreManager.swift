@@ -19,7 +19,19 @@ final class StoreManager: ObservableObject {
 
     private var updatesTask: Task<Void, Never>?
 
+#if DEBUG
+    /// Forces the Pro entitlement for App Store screenshot capture, enabled
+    /// only by the `-inkwellForcePro` launch argument in DEBUG builds. The
+    /// simulator does not serve the bundled StoreKit configuration to apps
+    /// launched outside Xcode, so this is the only way to render the Pro-only
+    /// screens (statistics, export) for screenshots. Never compiled into release.
+    private let forcePro = ProcessInfo.processInfo.arguments.contains("-inkwellForcePro")
+#endif
+
     init() {
+#if DEBUG
+        if forcePro { isPro = true }
+#endif
         // Apply Transaction.updates (purchases made on other devices, Ask to
         // Buy approvals, refunds) for the whole app lifetime.
         updatesTask = Task { [weak self] in
@@ -95,6 +107,10 @@ final class StoreManager: ObservableObject {
                 unlocked = true
             }
         }
+#if DEBUG
+        isPro = forcePro || unlocked
+#else
         isPro = unlocked
+#endif
     }
 }

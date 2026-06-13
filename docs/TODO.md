@@ -24,13 +24,19 @@
 - [ ] 両端揃え・文字間の設定追加
 - [ ] 蔵書のコレクション・タグ整理(Marvin のスマートコレクション相当)
 - [ ] オンボーディング・App Store スクリーンショット素材(英語)
+  - 撮影用の書籍は**パブリックドメイン**(Standard Ebooks / Project Gutenberg)を使う。
+    手元の `Docker入門.epub` は技術評論社の著作物なので表紙・本文を申請素材に使わない
+  - サイズは 6.9"(1320×2868)を基準に。iPhone 17 Pro Max Simulator で撮る
+  - `xcrun simctl status_bar override --time "9:41"` でステータスバーを整える
 
 ## v1.0 リリース準備
 
 - [ ] iCloud 同期(位置・ハイライト・蔵書メタデータ)
 - [ ] OPDS カタログ / Calibre 連携
 - [ ] アクセシビリティ監査(VoiceOver / Dynamic Type)
-- [ ] App Store 申請。価格モデルは**買い切り**を明言する方向(P8: サブスク反発の受け皿。「買い切り・ロックインなし・エクスポート自由」を訴求文の軸に — customer-pains.md 参照。最終決定は要 ADR)
+- [x] 価格モデル決定(ADR-0005: 無料 DL + 非消費型 IAP「Inkwell Pro」$9.99。サブスクなし)
+- [ ] StoreKit 2 課金実装(`StoreManager`・Pro 機能ゲーティング・購入復元。ADR-0005 の境界線)
+- [ ] App Store 申請。「買い切り・ロックインなし・エクスポート自由」を訴求文の軸に(P2 × P8)
 
 ## 技術的負債
 

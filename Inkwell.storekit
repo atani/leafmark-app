@@ -1,0 +1,32 @@
+{
+  "identifier" : "B1C2D3E4-0005-4A6B-9C8D-0123456789AB",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "9.99",
+      "familyShareable" : false,
+      "internalID" : "1",
+      "localizations" : [
+        {
+          "description" : "Unlimited highlights, Markdown export and reading statistics. A one-time purchase, no subscription.",
+          "displayName" : "Inkwell Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.atani.inkwell.pro",
+      "referenceName" : "Inkwell Pro",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 1,
+    "minor" : 0
+  }
+}

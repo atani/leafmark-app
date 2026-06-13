@@ -11,6 +11,7 @@ struct ReaderScreen: View {
     @EnvironmentObject private var appearance: AppearanceStore
     @EnvironmentObject private var highlightStore: HighlightStore
     @EnvironmentObject private var stats: StatsStore
+    @EnvironmentObject private var store: StoreManager
     @Environment(\.dismiss) private var dismiss
 
     @StateObject private var bridge = NavigatorBridge()
@@ -19,6 +20,7 @@ struct ReaderScreen: View {
     @State private var showSettings = false
     @State private var showHighlights = false
     @State private var showSearch = false
+    @State private var showPaywall = false
     @State private var progression: Double?
     @State private var sessionStart = Date()
 
@@ -84,6 +86,7 @@ struct ReaderScreen: View {
             HighlightsSheet(
                 book: book,
                 store: highlightStore,
+                purchases: store,
                 onSelect: { highlight in
                     showHighlights = false
                     if let locator = highlightStore.locator(of: highlight) {
@@ -91,6 +94,9 @@ struct ReaderScreen: View {
                     }
                 }
             )
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(store: store)
         }
         .sheet(isPresented: $showSettings) {
             AppearanceSheet()
@@ -152,6 +158,14 @@ struct ReaderScreen: View {
 
     private func makeHighlight(withNote: Bool) {
         guard let locator = bridge.selectionLocator else { return }
+        guard StoreManager.canAddHighlight(
+            isPro: store.isPro,
+            currentCount: highlightStore.highlights(for: book.id).count
+        ) else {
+            bridge.clearSelection()
+            showPaywall = true
+            return
+        }
         bridge.clearSelection()
         let highlight = highlightStore.add(
             bookID: book.id,
@@ -310,9 +324,11 @@ private struct ContentsSheet: View {
 private struct HighlightsSheet: View {
     let book: Book
     @ObservedObject var store: HighlightStore
+    @ObservedObject var purchases: StoreManager
     let onSelect: (Highlight) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @State private var showPaywall = false
 
     private var items: [Highlight] {
         store.highlights(for: book.id)
@@ -366,18 +382,30 @@ private struct HighlightsSheet: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     if !items.isEmpty {
-                        ShareLink(
-                            item: store.exportMarkdown(for: book),
-                            preview: SharePreview("\(book.title) — Highlights")
-                        ) {
-                            Image(systemName: "square.and.arrow.up")
+                        if purchases.isPro {
+                            ShareLink(
+                                item: store.exportMarkdown(for: book),
+                                preview: SharePreview("\(book.title) — Highlights")
+                            ) {
+                                Image(systemName: "square.and.arrow.up")
+                            }
+                            .accessibilityLabel("Export as Markdown")
+                        } else {
+                            Button {
+                                showPaywall = true
+                            } label: {
+                                Image(systemName: "square.and.arrow.up")
+                            }
+                            .accessibilityLabel("Export as Markdown (Inkwell Pro)")
                         }
-                        .accessibilityLabel("Export as Markdown")
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
                 }
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView(store: purchases)
             }
         }
     }

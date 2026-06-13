@@ -62,6 +62,8 @@ targets:
     platform: iOS
     sources:
       - path: Tests
+      - path: Inkwell.storekit
+        buildPhase: resources
     dependencies:
       - target: Inkwell
       - package: Readium
@@ -82,3 +84,4 @@ schemes:
         - InkwellTests
     run:
       config: Debug
+      storeKitConfiguration: Inkwell.storekit

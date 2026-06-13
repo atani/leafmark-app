@@ -35,7 +35,9 @@
 - [ ] OPDS カタログ / Calibre 連携
 - [ ] アクセシビリティ監査(VoiceOver / Dynamic Type)
 - [x] 価格モデル決定(ADR-0005: 無料 DL + 非消費型 IAP「Inkwell Pro」$9.99。サブスクなし)
-- [ ] StoreKit 2 課金実装(`StoreManager`・Pro 機能ゲーティング・購入復元。ADR-0005 の境界線)
+- [x] StoreKit 2 課金実装(`StoreManager`・Paywall・Pro 機能ゲーティング・購入復元。ADR-0005 の境界線。`Inkwell.storekit` を scheme Run に紐付け)
+  - 実機 UI での購入フロー目視確認は未実施(Simulator の小アイコンへの osascript タップが精度不足。XcodeBuildMCP の新セッションで確認)
+  - 購入フローの自動テストは headless `xcodebuild test` では SKTestSession が config の商品を配信しないためスキップ(Xcode 実行時は有効)
 - [ ] App Store 申請。「買い切り・ロックインなし・エクスポート自由」を訴求文の軸に(P2 × P8)
 
 ## 技術的負債

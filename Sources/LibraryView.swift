@@ -5,8 +5,10 @@ import ReadiumShared
 struct LibraryView: View {
     @ObservedObject var library: LibraryStore
     @EnvironmentObject private var stats: StatsStore
+    @EnvironmentObject private var store: StoreManager
     @State private var showImporter = false
     @State private var showStats = false
+    @State private var showPaywall = false
     @State private var openedBook: Book?
 
     private let columns = [GridItem(.adaptive(minimum: 110, maximum: 160), spacing: 16)]
@@ -50,7 +52,11 @@ struct LibraryView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
-                        showStats = true
+                        if store.isPro {
+                            showStats = true
+                        } else {
+                            showPaywall = true
+                        }
                     } label: {
                         Image(systemName: "chart.bar")
                     }
@@ -67,6 +73,9 @@ struct LibraryView: View {
             }
             .sheet(isPresented: $showStats) {
                 StatsView(stats: stats, library: library)
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView(store: store)
             }
             .fileImporter(
                 isPresented: $showImporter,

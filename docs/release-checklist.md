@@ -26,7 +26,7 @@ Program 登録済み(承認待ち)。承認が下りたら上から順に潰し�
       — Release ビルド成功・警告 0(iPad 全方向対応で orientation 警告も解消)
 - [x] バージョン番号・ビルド番号を設定(初回は 1.0 / 1)
       — `MARKETING_VERSION: 1.0` / `CURRENT_PROJECT_VERSION: 1`(project.yml)
-- [ ] 最低 OS バージョンが iOS 17.0 で間違いないこと
+- [x] 最低 OS バージョンが iOS 17.0 で間違いないこと(`IPHONEOS_DEPLOYMENT_TARGET: 17.0`)
 
 ## 2. App Store Connect のメタデータ
 

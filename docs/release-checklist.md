@@ -19,19 +19,24 @@ Program 登録済み(承認待ち)。承認が下りたら上から順に潰し�
 - [x] ユニットテスト 19 件が pass する(`HighlightStore` / `StatsStore` /
       `StoreManager`)。`StorePurchase` の 3 件は SKTestSession が必要で
       ヘッドレス `xcodebuild test` ではスキップ(Xcode 実行時に検証)
-- [ ] リリースビルド(Release 構成)でクラッシュ・警告がないこと
-- [ ] バージョン番号・ビルド番号を設定(初回は 1.0 / 1)
+- [x] リリースビルド(Release 構成)でクラッシュ・警告がないこと
+      — Release ビルド成功・警告 0(iPad 全方向対応で orientation 警告も解消)
+- [x] バージョン番号・ビルド番号を設定(初回は 1.0 / 1)
+      — `MARKETING_VERSION: 1.0` / `CURRENT_PROJECT_VERSION: 1`(project.yml)
 - [ ] 最低 OS バージョンが iOS 17.0 で間違いないこと
 
 ## 2. App Store Connect のメタデータ
 
+テキストの英語草案は [app-store-metadata.md](app-store-metadata.md) に用意済み。
+App Store Connect への転記は Developer Program 承認後。
+
 - [ ] アプリ名: Inkwell Reader(`CFBundleDisplayName` と一致)
 - [ ] Bundle ID: `com.atani.inkwell`
-- [ ] サブタイトル(30 字)・プロモーションテキスト
-- [ ] 説明文(英語)。訴求の軸は「買い切り・ロックインなし・エクスポート自由」
-      (P2 × P8)
-- [ ] キーワード(EPUB / reader / highlight / annotation / Obsidian など)
-- [ ] カテゴリ(Books を主、Productivity を副で検討)
+- [x] サブタイトル(30 字)・プロモーションテキスト — 草案済み(25 字 / 156 字)
+- [x] 説明文(英語)。訴求の軸は「買い切り・ロックインなし・エクスポート自由」
+      (P2 × P8) — 草案済み
+- [x] キーワード(EPUB / reader / highlight / annotation / Obsidian など) — 草案済み(91 字)
+- [x] カテゴリ(Books を主、Productivity を副で検討) — 主 Books / 副 Productivity で確定
 - [ ] スクリーンショット(英語、6.9 インチ = 1320×2868 基準)
   - 撮影用の書籍は**パブリックドメイン**(Standard Ebooks / Project Gutenberg)を使う。
     技術評論社の `Docker入門.epub` など著作物は申請素材に使わない

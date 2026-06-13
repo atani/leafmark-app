@@ -58,6 +58,7 @@ INKWELL PRO
 Reading is always free. Import your library, render any book and try the feel before you decide. A single one-time purchase, Inkwell Pro, unlocks the full annotation workflow: unlimited highlights (the free tier keeps up to three per book), Markdown export, and reading statistics. Restore your purchase any time.
 
 GOOD TO KNOW
+• Import EPUBs straight from Files — iCloud Drive, Google Drive, Dropbox, or right off your device.
 • Works with DRM-free EPUB files. DRM-protected books and PDF are not supported.
 • Public-domain EPUBs are available from Standard Ebooks and Project Gutenberg.
 ```

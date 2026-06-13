@@ -19,6 +19,10 @@
 
 ## v0.4 候補
 
+- [x] クラウド取り込み(Google Drive 等): 専用 SDK は持たず標準 Files プロバイダ経由に決定(ADR-0006)。
+      `.fileImporter` が Drive / iCloud / Dropbox を既にカバー。説明文に明記済み
+- [ ] フォーマット拡張の検討: PDF は注釈パリティ期待 + MarginNote 競合のリスクがあり read-only で v1.1+。
+      Marvin も PDF 非対応で EPUB + CBZ/CBR のみだったため、Marvin パリティなら CBZ/CBR が優先。ベータで実需確認
 - [ ] ハイライト色の追加とアンダーライン形式
 - [ ] ページめくりアニメーション
 - [ ] 両端揃え・文字間の設定追加

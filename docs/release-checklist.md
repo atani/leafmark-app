@@ -92,3 +92,31 @@ ADR-0005 に従う。アプリ側の課金実装は完了。残りは App Store 
 - [ ] 端末内完結・アカウント不要をプライバシー申告と説明文で一致させる
 - [ ] 外部リンク(GitHub Issues)が機能し、サポート手段として成立していること
 - [ ] アプリ内に未完成機能・プレースホルダ・「Coming soon」表示がないこと
+
+## 6. 申請手順(承認後の操作順)
+
+Developer Program の本人確認は 2026-06-13 受付・2 営業日以内に連絡(6/16〜6/17 見込み)。
+**有効化されたら上から順に実行する**。IA(課金)があるため、税・銀行が販売開始の関門になる。
+
+1. [ ] **Program License Agreement に同意**(App Store Connect / Account Holder)
+       — 未同意だと submit 不可
+2. [ ] **Agreements, Tax, and Banking** を完了 — **IAP の必須関門**
+   - [ ] Paid Applications Agreement(有料/IAP 用契約)に同意
+   - [ ] 税務フォーム(W-8BEN 等)を提出
+   - [ ] 銀行口座を登録 — これが揃わないと Inkwell Pro が販売可能にならない
+3. [ ] **Small Business Program に登録**(手数料 15%。ADR-0005)
+4. [ ] **アプリレコード作成**: 名称 Inkwell Reader / Bundle ID `com.atani.inkwell` /
+       プライマリ言語 英語 / SKU 任意
+5. [ ] **非消費型 IAP を登録**: `com.atani.inkwell.pro`($9.99 = 提出時の Tier)。
+       表示名・説明・審査用スクショ・審査メモ(`app-store-metadata.md` の審査メモ)を設定。
+       **初回は IAP をアプリのバージョンに添付して同時審査に出す**
+6. [ ] **ビルドを upload**: Xcode で Release アーカイブ → Distribution 署名 →
+       App Store Connect へ(または Transporter)。バージョン 1.0 / ビルド 1
+7. [ ] **メタデータ入力**(`app-store-metadata.md` から転記): 名称/サブタイトル/プロモ/
+       説明/キーワード/カテゴリ(Books 主・Productivity 副)
+8. [ ] **スクリーンショットをアップロード**: `docs/screenshots/6.9-inch/` の 7 枚(1320×2868)
+9. [ ] **App プライバシー(栄養成分)**: データ収集なし・トラッキングなしで申告(§2 と一致)
+10. [ ] **年齢レーティングアンケート**に回答(2026-07 新分類。外部 EPUB 読み込みの扱いに注意。§4)
+11. [ ] サポート URL / プライバシーポリシー URL を設定(§2)
+12. [ ] **審査提出**(アプリ + IAP を同時に)。§5 のリジェクト回避チェックを最終確認
+13. [ ] 審査通過後、リリース(手動公開 or 自動公開を選択)

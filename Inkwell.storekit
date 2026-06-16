@@ -11,12 +11,12 @@
       "localizations" : [
         {
           "description" : "Unlimited highlights, Markdown export and reading statistics. A one-time purchase, no subscription.",
-          "displayName" : "Inkwell Pro",
+          "displayName" : "Leafmark Pro",
           "locale" : "en_US"
         }
       ],
       "productID" : "com.atani.inkwell.pro",
-      "referenceName" : "Inkwell Pro",
+      "referenceName" : "Leafmark Pro",
       "type" : "NonConsumable"
     }
   ],

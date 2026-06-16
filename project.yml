@@ -35,7 +35,7 @@ targets:
     info:
       path: Info.plist
       properties:
-        CFBundleDisplayName: Inkwell Reader
+        CFBundleDisplayName: Leafmark
         UILaunchScreen:
           UIColorName: ""
         UISupportedInterfaceOrientations:

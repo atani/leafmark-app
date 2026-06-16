@@ -33,7 +33,7 @@ xcrun simctl status_bar $SIM clear
 | `02-reader-cover.png` | リーダーで表紙を全面レンダリング + ツールバー(検索/AA/ハイライト/目次) |
 | `03-reader-text.png` | 本文ページ。Chapter I「Peter Breaks Through」のリフロー描画とセリフ体タイポグラフィ |
 | `04-appearance.png` | レイアウト設定パネル(AA)。テーマ・フォント・文字サイズ・カラム数 |
-| `05-paywall.png` | Inkwell Pro(買い切り訴求)。無制限ハイライト/エクスポート/統計、購入復元 |
+| `05-paywall.png` | Leafmark Pro(買い切り訴求)。無制限ハイライト/エクスポート/統計、購入復元 |
 | `06-highlights.png` | ハイライト一覧。4 色ハイライト + ノート + Markdown エクスポート |
 | `07-statistics.png` | 読書統計。今日/週/累計の時間、連続 5 日、本ごとの時間 |
 | `08-ipad-2column.png` | iPad Pro 13" の 2 カラム表示(`columnCount: 2`)。レイアウト検証用 |
@@ -69,7 +69,7 @@ iPhone 17 Pro Max(1320×2868 = 6.9" スロット・英語・9:41 ステータス
 | `04-appearance.png` | レイアウト設定 |
 | `05-highlights.png` | ハイライト一覧 + エクスポート |
 | `06-statistics.png` | 読書統計 |
-| `07-paywall.png` | Inkwell Pro(買い切り) |
+| `07-paywall.png` | Leafmark Pro(買い切り) |
 
 - 05/06 は `-inkwellForcePro` で Pro 解放、07 は非 Pro 起動で撮影(上の注意参照)。
 - iPad ランドスケープ 2 カラムの提出用は未取得(MCP で回転を自動化できず)。手動で撮り直す。

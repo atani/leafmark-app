@@ -1,8 +1,8 @@
-# Inkwell Reader — Privacy Policy
+# Leafmark — Privacy Policy
 
 _Last updated: June 11, 2026_
 
-Inkwell Reader is built on a simple principle: **your books, highlights, and
+Leafmark is built on a simple principle: **your books, highlights, and
 reading habits belong to you — and to no one else, including us.**
 
 ## What we collect
@@ -30,7 +30,7 @@ asked us to, because we never had it.
 
 ## Third parties
 
-Inkwell Reader uses the open-source [Readium Swift Toolkit](https://github.com/readium/swift-toolkit)
+Leafmark uses the open-source [Readium Swift Toolkit](https://github.com/readium/swift-toolkit)
 to render EPUB files. It runs entirely on your device and sends nothing
 anywhere.
 

@@ -1,7 +1,7 @@
 import SwiftUI
 import StoreKit
 
-/// Upgrade screen for the one-time "Inkwell Pro" purchase (ADR-0005).
+/// Upgrade screen for the one-time "Leafmark Pro" purchase (ADR-0005).
 /// Sells ownership, not a subscription: "Your highlights are yours."
 struct PaywallView: View {
     @ObservedObject var store: StoreManager
@@ -21,7 +21,7 @@ struct PaywallView: View {
                         Image(systemName: "book.closed.fill")
                             .font(.system(size: 44))
                             .foregroundStyle(.tint)
-                        Text("Inkwell Pro")
+                        Text("Leafmark Pro")
                             .font(.largeTitle.bold())
                         Text("Your highlights are yours.")
                             .font(.headline)

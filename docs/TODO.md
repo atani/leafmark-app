@@ -38,7 +38,7 @@
 - [ ] iCloud 同期(位置・ハイライト・蔵書メタデータ)
 - [ ] OPDS カタログ / Calibre 連携
 - [ ] アクセシビリティ監査(VoiceOver / Dynamic Type)
-- [x] 価格モデル決定(ADR-0005: 無料 DL + 非消費型 IAP「Inkwell Pro」$9.99。サブスクなし)
+- [x] 価格モデル決定(ADR-0005: 無料 DL + 非消費型 IAP「Leafmark Pro」$9.99。サブスクなし)
 - [x] StoreKit 2 課金実装(`StoreManager`・Paywall・Pro 機能ゲーティング・購入復元。ADR-0005 の境界線。`Inkwell.storekit` を scheme Run に紐付け)
   - XcodeBuildMCP でゲーティング動線(無料枠超過・統計・エクスポートで `PaywallView` 提示)と Pro 画面(統計・ハイライト・エクスポート)を確認・撮影
   - 実購入の目視確認は未実施。XcodeBuildMCP / `simctl launch` で起動したアプリには StoreKit 設定の商品が配信されず購入ボタンが非活性。Xcode の Run か App Store Connect への IAP 登録後に検証する

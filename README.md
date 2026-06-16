@@ -1,4 +1,4 @@
-# Inkwell Reader
+# Leafmark
 
 パワーユーザー向け・買い切り EPUB リーダー。開発放棄された Marvin の難民市場を対象にする。
 

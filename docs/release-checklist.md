@@ -1,6 +1,6 @@
 # App Store 申請チェックリスト
 
-Inkwell Reader を App Store に出すまでの確認項目をまとめる。Apple Developer
+Leafmark を App Store に出すまでの確認項目をまとめる。Apple Developer
 Program 登録済み(承認待ち)。承認が下りたら上から順に潰していく。
 
 関連ドキュメント: 価格方針は [ADR-0005](adr/0005-buy-once-pricing-storekit.md)、
@@ -33,7 +33,8 @@ Program 登録済み(承認待ち)。承認が下りたら上から順に潰し�
 テキストの英語草案は [app-store-metadata.md](app-store-metadata.md) に用意済み。
 App Store Connect への転記は Developer Program 承認後。
 
-- [ ] アプリ名: Inkwell Reader(`CFBundleDisplayName` と一致)
+- [x] アプリ名: App Store 名 `Leafmark — EPUB Reader`(App Store Connect 受理済み)/
+      `CFBundleDisplayName` は `Leafmark`(ホーム画面用に短縮。意図的に別)
 - [ ] Bundle ID: `com.atani.inkwell`
 - [x] サブタイトル(30 字)・プロモーションテキスト — 草案済み(25 字 / 156 字)
 - [x] 説明文(英語)。訴求の軸は「買い切り・ロックインなし・エクスポート自由」
@@ -51,7 +52,7 @@ App Store Connect への転記は Developer Program 承認後。
 - [ ] App プライバシー(栄養成分表示): データ収集なし・トラッキングなしで申告
       — アカウントとクラウドを持たず端末内で完結するため
 
-## 3. 課金(StoreKit 2 / Inkwell Pro)
+## 3. 課金(StoreKit 2 / Leafmark Pro)
 
 ADR-0005 に従う。アプリ側の課金実装は完了。残りは App Store Connect 側の登録作業。
 
@@ -73,14 +74,14 @@ ADR-0005 に従う。アプリ側の課金実装は完了。残りは App Store 
 
 - [ ] **年齢レーティングの新分類(2026 年 7 月〜)**: 従来の 4 区分から
       13+ / 16+ / 18+ を加えた区分に細分化される。App Store Connect で
-      レーティングアンケートに再回答が必要。Inkwell Reader は
+      レーティングアンケートに再回答が必要。Leafmark は
       ユーザーが任意の EPUB を読み込めるため、**ユーザー生成・外部コンテンツ**
       の扱いに注意する。自前で成人向けコンテンツを同梱しなくても、
       外部読み込みの有無は正しく申告する
 - [ ] **豪州・ベトナムのレーティング変更(2026-06-18〜)**: 両国向けの
       レーティング基準が更新される。対象国に配信するなら影響を確認
 - [ ] **コピーキャット取り締まり強化**: 既存有名アプリ(MarginNote 等)の
-      名称・アイコン・スクリーンショットに寄せていないか確認。Inkwell Reader
+      名称・アイコン・スクリーンショットに寄せていないか確認。Leafmark
       は独自名・独自アイコンで差別化できているが、説明文で他社名を
       不適切に使わないこと
 
@@ -103,10 +104,10 @@ Developer Program の本人確認は 2026-06-13 受付・2 営業日以内に連
 2. [ ] **Agreements, Tax, and Banking** を完了 — **IAP の必須関門**
    - [ ] Paid Applications Agreement(有料/IAP 用契約)に同意
    - [ ] 税務フォーム(W-8BEN 等)を提出
-   - [ ] 銀行口座を登録 — これが揃わないと Inkwell Pro が販売可能にならない
+   - [ ] 銀行口座を登録 — これが揃わないと Leafmark Pro が販売可能にならない
 3. [ ] **Small Business Program に登録**(手数料 15%。ADR-0005)
-4. [ ] **アプリレコード作成**: 名称 Inkwell Reader / Bundle ID `com.atani.inkwell` /
-       プライマリ言語 英語 / SKU 任意
+4. [x] **アプリレコード作成**: 名称 `Leafmark — EPUB Reader` / Bundle ID `com.atani.inkwell` /
+       プライマリ言語 英語 / SKU 任意(App Store Connect で作成済み)
 5. [ ] **非消費型 IAP を登録**: `com.atani.inkwell.pro`($9.99 = 提出時の Tier)。
        表示名・説明・審査用スクショ・審査メモ(`app-store-metadata.md` の審査メモ)を設定。
        **初回は IAP をアプリのバージョンに添付して同時審査に出す**

@@ -11,7 +11,7 @@ Like many of you I never really got over Marvin. I tried the alternatives —
 Apple Books locks my highlights in, the subscription apps want $100/year for
 my own books — and eventually decided to build the thing I was missing.
 
-**Inkwell Reader** is an EPUB reader for iPhone and iPad with one principle:
+**Leafmark** is an EPUB reader for iPhone and iPad with one principle:
 your books and highlights are yours.
 
 What works today:

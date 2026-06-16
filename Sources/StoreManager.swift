@@ -1,7 +1,7 @@
 import Foundation
 import StoreKit
 
-/// Owns the single "Inkwell Pro" non-consumable purchase (ADR-0005).
+/// Owns the single "Leafmark Pro" non-consumable purchase (ADR-0005).
 ///
 /// Free reading is always available; Pro unlocks the annotation workflow:
 /// unlimited highlights, Markdown export and reading statistics.

@@ -1,4 +1,4 @@
-# Inkwell Reader — Support
+# Leafmark — Support
 
 ## Frequently asked questions
 
@@ -7,7 +7,7 @@
 Three ways:
 
 1. Tap **+** in the library and pick EPUB files from the Files app
-2. Use **Share → Inkwell Reader** from any app that hands over an EPUB
+2. Use **Share → Leafmark** from any app that hands over an EPUB
 3. Drop EPUB files into the app's Documents folder via the Files app or
    Finder/iTunes file sharing — they are imported automatically on next launch
 

@@ -21,7 +21,7 @@ go-to-market.md で価格方針は「無料 DL + 買い切り IAP($9.99)のフ�
 
 ## Decision
 
-**無料 DL + 単一の非消費型 IAP「Inkwell Pro」($9.99)** を StoreKit 2 で実装する。
+**無料 DL + 単一の非消費型 IAP「Leafmark Pro」($9.99)** を StoreKit 2 で実装する。
 
 - 課金商品: 非消費型 IAP 1 つ(`com.atani.inkwell.pro`)。サブスク・消費型は作らない
 - フレームワーク: StoreKit 2(`Product`, `Transaction`, `Transaction.currentEntitlements`)。iOS 17+ 前提なので旧 StoreKit 1 は使わない
@@ -31,7 +31,7 @@ go-to-market.md で価格方針は「無料 DL + 買い切り IAP($9.99)のフ�
 
 ### 無料/有料の境界線
 
-| 機能 | 無料 | Inkwell Pro |
+| 機能 | 無料 | Leafmark Pro |
 |---|---|---|
 | EPUB インポート・レンダリング・ページめくり | ✅ | ✅ |
 | レイアウト設定(フォント・行間・余白・2カラム・スクロール) | ✅ | ✅ |

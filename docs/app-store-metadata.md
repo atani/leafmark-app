@@ -11,10 +11,12 @@ App Store Connect 申請用のテキスト草案。承認が下りたら App Sto
 ## App 名(最大 30 字)
 
 ```
-Inkwell Reader
+Leafmark — EPUB Reader
 ```
 
-`CFBundleDisplayName` と一致(14 字)。
+App Store 上の表示名(22 字。App Store Connect で受理済み)。ホーム画面の
+`CFBundleDisplayName` は短く `Leafmark`。両者は意図的に別(App Store 名は ASO 用に
+descriptor を付与、アイコン下は短いブランド名)。
 
 ## サブタイトル(最大 30 字)
 
@@ -33,7 +35,7 @@ A buy-once EPUB reader for readers who annotate. Unlimited highlights, Markdown 
 ## 説明文(最大 4000 字)
 
 ```
-Inkwell Reader is a calm, fast EPUB reader for people who read closely and take their notes with them.
+Leafmark is a calm, fast EPUB reader for people who read closely and take their notes with them.
 
 Buy it once. No subscription, no account, no cloud lock-in. Your library is plain EPUB files on your device, and your highlights are yours to export any time.
 
@@ -54,8 +56,8 @@ PRIVACY BY DESIGN
 • No tracking and no analytics
 • Everything stays on your device
 
-INKWELL PRO
-Reading is always free. Import your library, render any book and try the feel before you decide. A single one-time purchase, Inkwell Pro, unlocks the full annotation workflow: unlimited highlights (the free tier keeps up to three per book), Markdown export, and reading statistics. Restore your purchase any time.
+LEAFMARK PRO
+Reading is always free. Import your library, render any book and try the feel before you decide. A single one-time purchase, Leafmark Pro, unlocks the full annotation workflow: unlimited highlights (the free tier keeps up to three per book), Markdown export, and reading statistics. Restore your purchase any time.
 
 GOOD TO KNOW
 • Import EPUBs straight from Files — iCloud Drive, Google Drive, Dropbox, or right off your device.
@@ -88,7 +90,7 @@ First release. A buy-once EPUB reader with highlights, Markdown export, reading 
 
 ```
 - No account or login is required; all data stays on device.
-- In-app purchase "Inkwell Pro" (com.atani.inkwell.pro) is a single non-consumable, one-time unlock — not a subscription. It unlocks unlimited highlights, Markdown export and reading statistics. Restore is available on the Inkwell Pro screen.
+- In-app purchase "Leafmark Pro" (com.atani.inkwell.pro) is a single non-consumable, one-time unlock — not a subscription. It unlocks unlimited highlights, Markdown export and reading statistics. Restore is available on the Leafmark Pro screen.
 - The app reads DRM-free EPUB files supplied by the user. A public-domain sample (Peter and Wendy, J. M. Barrie) is available from Standard Ebooks: https://standardebooks.org/
 ```
 
@@ -96,7 +98,7 @@ First release. A buy-once EPUB reader with highlights, Markdown export, reading 
 
 | 項目 | 上限 | 状態 |
 |---|---|---|
-| App 名 | 30 | 14 字 ✅ |
+| App 名 | 30 | 22 字 ✅ |
 | サブタイトル | 30 | 25 字 ✅ |
 | プロモテキスト | 170 | 156 字 ✅ |
 | キーワード | 100 | 91 字 ✅ |

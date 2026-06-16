@@ -396,7 +396,7 @@ private struct HighlightsSheet: View {
                             } label: {
                                 Image(systemName: "square.and.arrow.up")
                             }
-                            .accessibilityLabel("Export as Markdown (Inkwell Pro)")
+                            .accessibilityLabel("Export as Markdown (Leafmark Pro)")
                         }
                     }
                 }

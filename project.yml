@@ -36,6 +36,9 @@ targets:
       path: Info.plist
       properties:
         CFBundleDisplayName: Leafmark
+        # No non-exempt encryption (HTTPS + Apple-standard crypto only).
+        # Pre-answers the export-compliance question on every build upload.
+        ITSAppUsesNonExemptEncryption: false
         UILaunchScreen:
           UIColorName: ""
         UISupportedInterfaceOrientations:

@@ -47,8 +47,8 @@ App Store Connect への転記は Developer Program 承認後。
   - 撮影用の書籍は**パブリックドメイン**(Standard Ebooks / Project Gutenberg)を使う。
     技術評論社の `Docker入門.epub` など著作物は申請素材に使わない
   - `xcrun simctl status_bar override` の `--time 9:41` 指定でステータスバーを整える
-- [ ] サポート URL: <https://github.com/atani/epub-reader-ios/issues>(support.md)
-- [ ] プライバシーポリシー URL(privacy-policy.md を公開ページとして配置)
+- [x] サポート URL: <https://atani.github.io/leafmark-app/support.html>
+- [x] プライバシーポリシー URL: <https://atani.github.io/leafmark-app/privacy.html>
 - [ ] App プライバシー(栄養成分表示): データ収集なし・トラッキングなしで申告
       — アカウントとクラウドを持たず端末内で完結するため
 
@@ -118,6 +118,8 @@ Developer Program の本人確認は 2026-06-13 受付・2 営業日以内に連
 8. [ ] **スクリーンショットをアップロード**: `docs/screenshots/6.9-inch/` の 7 枚(1320×2868)
 9. [ ] **App プライバシー(栄養成分)**: データ収集なし・トラッキングなしで申告(§2 と一致)
 10. [ ] **年齢レーティングアンケート**に回答(2026-07 新分類。外部 EPUB 読み込みの扱いに注意。§4)
-11. [ ] サポート URL / プライバシーポリシー URL を設定(§2)
+11. [ ] サポート URL / プライバシーポリシー URL を設定(§2):
+       サポート = `https://atani.github.io/leafmark-app/support.html`
+       プライバシー = `https://atani.github.io/leafmark-app/privacy.html`
 12. [ ] **審査提出**(アプリ + IAP を同時に)。§5 のリジェクト回避チェックを最終確認
 13. [ ] 審査通過後、リリース(手動公開 or 自動公開を選択)

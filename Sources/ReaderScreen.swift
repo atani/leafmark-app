@@ -1,4 +1,5 @@
 import SwiftUI
+import StoreKit
 import ReadiumShared
 import ReadiumNavigator
 
@@ -13,6 +14,7 @@ struct ReaderScreen: View {
     @EnvironmentObject private var stats: StatsStore
     @EnvironmentObject private var store: StoreManager
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.requestReview) private var requestReview
 
     @StateObject private var bridge = NavigatorBridge()
     @State private var chromeVisible = true
@@ -148,6 +150,13 @@ struct ReaderScreen: View {
             // The navigator is created in the same render pass; defer one
             // turn of the run loop so decorations land on a live web view.
             DispatchQueue.main.async { refreshDecorations() }
+            if ReviewRequester.recordBookOpen() {
+                ReviewRequester.markRequested()
+                // Delay slightly so the reader is visible before the dialog.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    requestReview()
+                }
+            }
         }
         .onDisappear {
             stats.recordSession(bookID: book.id, startedAt: sessionStart, endedAt: Date())
@@ -328,6 +337,7 @@ private struct HighlightsSheet: View {
     let onSelect: (Highlight) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.requestReview) private var requestReview
     @State private var showPaywall = false
 
     private var items: [Highlight] {
@@ -390,6 +400,14 @@ private struct HighlightsSheet: View {
                                 Image(systemName: "square.and.arrow.up")
                             }
                             .accessibilityLabel("Export as Markdown")
+                            .simultaneousGesture(TapGesture().onEnded {
+                                if ReviewRequester.recordExport() {
+                                    ReviewRequester.markRequested()
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                        requestReview()
+                                    }
+                                }
+                            })
                         } else {
                             Button {
                                 showPaywall = true

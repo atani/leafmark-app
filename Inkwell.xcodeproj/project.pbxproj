@@ -16,6 +16,7 @@
 		360133DDF5985AD99BF4A4F5 /* Book.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A64A8F464ED20E4588B914 /* Book.swift */; };
 		395FDD8E28BFA05480824ACA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC576BF61FC0E6B89F918E89 /* Assets.xcassets */; };
 		698A2BF24A170CD35B14B274 /* InkwellApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E4B6E8AE2C336AEDFEDBFB /* InkwellApp.swift */; };
+		75243D76F2FACBC83390DCF9 /* ReviewRequester.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1465CD313593A7B1F5E190 /* ReviewRequester.swift */; };
 		7B24A3C4807BADEAC18B9720 /* ReadiumNavigator in Frameworks */ = {isa = PBXBuildFile; productRef = E0E76CF82A47B15F1EFD5332 /* ReadiumNavigator */; };
 		7B348478FD5421439759A324 /* AppearanceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E51CFEF70D104A3CDC04B79 /* AppearanceStore.swift */; };
 		885BC9CC5C8A48D4A7AC4799 /* StatsStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C09754C48F4001FA03EFB97A /* StatsStoreTests.swift */; };
@@ -50,6 +51,7 @@
 		55351BB145ECA98AD7A1B82E /* Inkwell.storekit */ = {isa = PBXFileReference; path = Inkwell.storekit; sourceTree = "<group>"; };
 		55A64A8F464ED20E4588B914 /* Book.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Book.swift; sourceTree = "<group>"; };
 		6EFFA9A253D22B75CDD20234 /* InkwellTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InkwellTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6F1465CD313593A7B1F5E190 /* ReviewRequester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewRequester.swift; sourceTree = "<group>"; };
 		74FEC4652079B406D32F67AD /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
 		75F00B55B730599AFB881896 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		7C02E5C2A47C859473CBF56D /* StoreManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManagerTests.swift; sourceTree = "<group>"; };
@@ -128,6 +130,7 @@
 				E0A3B41ED0E31CFFAF28DAB7 /* ReaderScreen.swift */,
 				B94DAD4E01F7765FBEC117E7 /* ReaderView.swift */,
 				DFFF9A93266A355C62CAD77C /* ReadiumContext.swift */,
+				6F1465CD313593A7B1F5E190 /* ReviewRequester.swift */,
 				DF2BB9401046C30A6D2130F0 /* SearchSheet.swift */,
 				BAC5403A01A72F0CDED402DA /* StatsStore.swift */,
 				D61990AE4EAD8D2C81AC80E8 /* StatsView.swift */,
@@ -269,6 +272,7 @@
 				A40B47A89B40E6E9A123E19B /* ReaderScreen.swift in Sources */,
 				C9B7489E711D07C94C4E4FD4 /* ReaderView.swift in Sources */,
 				0A47D8B97E1B8A752550EA0C /* ReadiumContext.swift in Sources */,
+				75243D76F2FACBC83390DCF9 /* ReviewRequester.swift in Sources */,
 				D0CA990F026EEDE8DE7626CD /* SearchSheet.swift in Sources */,
 				D59FD4FFC23C1EFFDD2A2EBC /* StatsStore.swift in Sources */,
 				1A15004C16346F708E8E712D /* StatsView.swift in Sources */,

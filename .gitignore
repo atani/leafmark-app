@@ -44,3 +44,7 @@ fastlane/test_output
 *.mobileprovision
 .env
 .env.local
+
+# Local test books
+*.epub
+*.epub/

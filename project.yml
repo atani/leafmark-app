@@ -1,4 +1,4 @@
-name: EPUBReaderSpike
+name: Inkwell
 options:
   bundleIdPrefix: com.atani
   deploymentTarget:
@@ -15,12 +15,12 @@ settings:
     SWIFT_VERSION: "5.9"
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
     TARGETED_DEVICE_FAMILY: "1,2"
-    DEVELOPMENT_TEAM: ""
+    DEVELOPMENT_TEAM: "3PC87Z3WVT"
     CODE_SIGN_STYLE: Automatic
     ENABLE_USER_SCRIPT_SANDBOXING: NO
 
 targets:
-  EPUBReaderSpike:
+  Inkwell:
     type: application
     platform: iOS
     sources:
@@ -32,20 +32,68 @@ targets:
           - ReadiumShared
           - ReadiumStreamer
           - ReadiumNavigator
-          - ReadiumAdapterGCDWebServer
     info:
       path: Info.plist
       properties:
-        CFBundleDisplayName: EPUB Reader Spike
+        CFBundleDisplayName: Leafmark
+        # No non-exempt encryption (HTTPS + Apple-standard crypto only).
+        # Pre-answers the export-compliance question on every build upload.
+        ITSAppUsesNonExemptEncryption: false
         UILaunchScreen:
           UIColorName: ""
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
+        # iPad supports all four orientations (multitasking-friendly, clears
+        # the "all interface orientations must be supported" build warning).
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
         LSSupportsOpeningDocumentsInPlace: true
+        UIFileSharingEnabled: true
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: EPUB Publication
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes:
+              - org.idpf.epub-container
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.atani.EPUBReaderSpike
+        PRODUCT_BUNDLE_IDENTIFIER: com.atani.inkwell
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+
+  InkwellTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests
+      - path: Inkwell.storekit
+        buildPhase: resources
+    dependencies:
+      - target: Inkwell
+      - package: Readium
+        products:
+          - ReadiumShared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.atani.inkwellTests
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  Inkwell:
+    build:
+      targets:
+        Inkwell: all
+    test:
+      targets:
+        - InkwellTests
+    run:
+      config: Debug
+      storeKitConfiguration: Inkwell.storekit

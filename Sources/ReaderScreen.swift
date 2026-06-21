@@ -258,13 +258,18 @@ struct ReaderScreen: View {
             Spacer()
 
             if let progression {
-                Text("\(Int((progression * 100).rounded()))%")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(.bar, in: Capsule())
-                    .padding(.bottom, 12)
+                VStack(spacing: 4) {
+                    ProgressView(value: progression)
+                        .tint(.secondary)
+                    Text("\(Int((progression * 100).rounded()))%")
+                        .font(.caption2.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 8)
+                .background(.bar, in: RoundedRectangle(cornerRadius: 8))
+                .padding(.horizontal, 16)
+                .padding(.bottom, 12)
             }
         }
         .transition(.opacity)

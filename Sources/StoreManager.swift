@@ -16,6 +16,7 @@ final class StoreManager: ObservableObject {
     @Published private(set) var isPro = false
     @Published private(set) var product: Product?
     @Published private(set) var purchaseInFlight = false
+    @Published private(set) var productLoadFailed = false
 
     private var updatesTask: Task<Void, Never>?
 
@@ -55,8 +56,10 @@ final class StoreManager: ObservableObject {
         do {
             let products = try await Product.products(for: [Self.proProductID])
             product = products.first
+            productLoadFailed = product == nil
         } catch {
             product = nil
+            productLoadFailed = true
         }
     }
 

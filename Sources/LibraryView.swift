@@ -24,6 +24,13 @@ struct LibraryView: View {
                     } actions: {
                         Button("Import Books") { showImporter = true }
                             .buttonStyle(.borderedProminent)
+
+                        Link(
+                            "Browse free books on Standard Ebooks",
+                            destination: URL(string: "https://standardebooks.org/ebooks")!
+                        )
+                        .font(.footnote)
+                        .padding(.top, 4)
                     }
                 } else {
                     ScrollView {

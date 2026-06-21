@@ -48,25 +48,36 @@ struct PaywallView: View {
                     .padding(.horizontal, 4)
 
                     VStack(spacing: 12) {
-                        Button {
-                            Task {
-                                if await store.purchase() { dismiss() }
+                        if store.productLoadFailed && store.product == nil {
+                            Button {
+                                Task { await store.load() }
+                            } label: {
+                                Label("Could not load price. Tap to retry.", systemImage: "arrow.clockwise")
+                                    .frame(maxWidth: .infinity)
                             }
-                        } label: {
-                            Group {
-                                if store.purchaseInFlight {
-                                    ProgressView()
-                                } else if let product = store.product {
-                                    Text("Unlock for \(product.displayPrice)")
-                                } else {
-                                    Text("Unlock")
+                            .buttonStyle(.bordered)
+                            .controlSize(.large)
+                        } else {
+                            Button {
+                                Task {
+                                    if await store.purchase() { dismiss() }
                                 }
+                            } label: {
+                                Group {
+                                    if store.purchaseInFlight {
+                                        ProgressView()
+                                    } else if let product = store.product {
+                                        Text("Unlock for \(product.displayPrice)")
+                                    } else {
+                                        ProgressView()
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
                             }
-                            .frame(maxWidth: .infinity)
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.large)
+                            .disabled(store.product == nil || store.purchaseInFlight)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.large)
-                        .disabled(store.product == nil || store.purchaseInFlight)
 
                         Text("One-time purchase. No subscription.")
                             .font(.footnote)

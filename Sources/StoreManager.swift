@@ -53,10 +53,10 @@ final class StoreManager: ObservableObject {
     /// Loads the product metadata and the current entitlement state.
     func load() async {
         await refreshEntitlements()
+        productLoadFailed = false
         do {
             let products = try await Product.products(for: [Self.proProductID])
             product = products.first
-            productLoadFailed = product == nil
         } catch {
             product = nil
             productLoadFailed = true

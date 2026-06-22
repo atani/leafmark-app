@@ -6,7 +6,7 @@ import Foundation
 /// - Third distinct book opened
 /// - First Markdown export completed
 enum ReviewRequester {
-    private static let bookOpenCountKey = "reviewRequester.bookOpenCount"
+    private static let openedBookIDsKey = "reviewRequester.openedBookIDs"
     private static let hasExportedKey = "reviewRequester.hasExported"
     private static let hasRequestedKey = "reviewRequester.hasRequested"
 
@@ -16,11 +16,14 @@ enum ReviewRequester {
 
     /// Call when a book is opened. Returns `true` when the review prompt
     /// should be shown (third distinct book, first time only).
-    static func recordBookOpen() -> Bool {
+    static func recordBookOpen(bookID: String) -> Bool {
         guard shouldRequest else { return false }
-        let count = UserDefaults.standard.integer(forKey: bookOpenCountKey) + 1
-        UserDefaults.standard.set(count, forKey: bookOpenCountKey)
-        return count >= 3
+        var ids = UserDefaults.standard.stringArray(forKey: openedBookIDsKey) ?? []
+        if !ids.contains(bookID) {
+            ids.append(bookID)
+            UserDefaults.standard.set(ids, forKey: openedBookIDsKey)
+        }
+        return ids.count >= 3
     }
 
     /// Call after a successful Markdown export. Returns `true` when the

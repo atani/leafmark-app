@@ -150,10 +150,9 @@ struct ReaderScreen: View {
             // The navigator is created in the same render pass; defer one
             // turn of the run loop so decorations land on a live web view.
             DispatchQueue.main.async { refreshDecorations() }
-            if ReviewRequester.recordBookOpen() {
-                ReviewRequester.markRequested()
-                // Delay slightly so the reader is visible before the dialog.
+            if ReviewRequester.recordBookOpen(bookID: book.id) {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    ReviewRequester.markRequested()
                     requestReview()
                 }
             }
@@ -384,8 +383,9 @@ private struct HighlightsSheet: View {
                             .tint(.primary)
                         }
                         .onDelete { offsets in
-                            for offset in offsets {
-                                store.remove(items[offset].id)
+                            let idsToRemove = offsets.map { items[$0].id }
+                            for id in idsToRemove {
+                                store.remove(id)
                             }
                         }
                     }

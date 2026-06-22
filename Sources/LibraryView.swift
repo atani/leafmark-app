@@ -4,6 +4,7 @@ import ReadiumShared
 /// The home screen: a grid of imported books.
 struct LibraryView: View {
     @ObservedObject var library: LibraryStore
+    @EnvironmentObject private var highlights: HighlightStore
     @EnvironmentObject private var stats: StatsStore
     @EnvironmentObject private var store: StoreManager
     @State private var showImporter = false
@@ -43,6 +44,8 @@ struct LibraryView: View {
                                 .buttonStyle(.plain)
                                 .contextMenu {
                                     Button(role: .destructive) {
+                                        highlights.removeAll(for: book.id)
+                                        stats.removeAll(for: book.id)
                                         library.delete(book)
                                     } label: {
                                         Label("Delete", systemImage: "trash")

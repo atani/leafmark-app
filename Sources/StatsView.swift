@@ -39,69 +39,81 @@ struct StatsView: View {
                     systemImage: "chart.bar",
                     description: Text("Statistics appear once you start reading.")
                 )
+            } else if isPro {
+                realStatsContent
             } else {
-                List {
-                    Section {
-                        HStack(spacing: 12) {
-                            if isPro {
-                                StatCard(title: "Today", value: StatsStore.format(stats.todayTime))
-                                StatCard(title: "This Week", value: StatsStore.format(stats.thisWeekTime))
-                                StatCard(title: "All Time", value: StatsStore.format(stats.totalTime()))
-                            } else {
-                                StatCard(title: "Today", value: "12m")
-                                StatCard(title: "This Week", value: "3h")
-                                StatCard(title: "All Time", value: "48h")
-                            }
-                        }
-                        .listRowInsets(EdgeInsets())
-                        .listRowBackground(Color.clear)
-                    }
+                sampleStatsContent
+                    .blur(radius: 6)
+                    .allowsHitTesting(false)
+            }
+        }
+    }
 
-                    Section {
-                        HStack {
-                            Label("Reading Streak", systemImage: "flame.fill")
-                                .foregroundStyle(.orange)
-                            Spacer()
-                            if isPro {
-                                Text("\(stats.streakDays) day\(stats.streakDays == 1 ? "" : "s")")
-                                    .fontWeight(.semibold)
-                            } else {
-                                Text("7 days")
-                                    .fontWeight(.semibold)
-                            }
-                        }
-                    }
-
-                    if isPro {
-                        Section("By Book") {
-                            ForEach(stats.timePerBook(), id: \.bookID) { entry in
-                                HStack {
-                                    Text(bookTitle(entry.bookID))
-                                        .lineLimit(1)
-                                    Spacer()
-                                    Text(StatsStore.format(entry.time))
-                                        .foregroundStyle(.secondary)
-                                        .monospacedDigit()
-                                }
-                            }
-                        }
-                    } else {
-                        Section("By Book") {
-                            HStack {
-                                Text("Peter and Wendy")
-                                Spacer()
-                                Text("2h 15m").foregroundStyle(.secondary).monospacedDigit()
-                            }
-                            HStack {
-                                Text("Pride and Prejudice")
-                                Spacer()
-                                Text("5h 42m").foregroundStyle(.secondary).monospacedDigit()
-                            }
-                        }
+    private var realStatsContent: some View {
+        List {
+            Section {
+                HStack(spacing: 12) {
+                    StatCard(title: "Today", value: StatsStore.format(stats.todayTime))
+                    StatCard(title: "This Week", value: StatsStore.format(stats.thisWeekTime))
+                    StatCard(title: "All Time", value: StatsStore.format(stats.totalTime()))
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+            }
+            Section {
+                HStack {
+                    Label("Reading Streak", systemImage: "flame.fill")
+                        .foregroundStyle(.orange)
+                    Spacer()
+                    Text("\(stats.streakDays) day\(stats.streakDays == 1 ? "" : "s")")
+                        .fontWeight(.semibold)
+                }
+            }
+            Section("By Book") {
+                ForEach(stats.timePerBook(), id: \.bookID) { entry in
+                    HStack {
+                        Text(bookTitle(entry.bookID))
+                            .lineLimit(1)
+                        Spacer()
+                        Text(StatsStore.format(entry.time))
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
                     }
                 }
-                .blur(radius: isPro ? 0 : 6)
-                .allowsHitTesting(isPro)
+            }
+        }
+    }
+
+    private var sampleStatsContent: some View {
+        List {
+            Section {
+                HStack(spacing: 12) {
+                    StatCard(title: "Today", value: "12m")
+                    StatCard(title: "This Week", value: "3h")
+                    StatCard(title: "All Time", value: "48h")
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+            }
+            Section {
+                HStack {
+                    Label("Reading Streak", systemImage: "flame.fill")
+                        .foregroundStyle(.orange)
+                    Spacer()
+                    Text("7 days").fontWeight(.semibold)
+                }
+            }
+            Section("By Book") {
+                HStack {
+                    Text("Peter and Wendy")
+                    Spacer()
+                    Text("2h 15m").foregroundStyle(.secondary).monospacedDigit()
+                }
+                HStack {
+                    Text("Pride and Prejudice")
+                    Spacer()
+                    Text("5h 42m").foregroundStyle(.secondary).monospacedDigit()
+                }
             }
         }
     }

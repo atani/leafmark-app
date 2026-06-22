@@ -37,6 +37,11 @@ final class StatsStore: ObservableObject {
     /// Sessions shorter than this are noise (opened by accident), not reading.
     static let minimumSessionDuration: TimeInterval = 5
 
+    func removeAll(for bookID: String) {
+        sessions.removeAll { $0.bookID == bookID }
+        save()
+    }
+
     func recordSession(bookID: String, startedAt: Date, endedAt: Date) {
         let duration = endedAt.timeIntervalSince(startedAt)
         guard duration >= Self.minimumSessionDuration else { return }

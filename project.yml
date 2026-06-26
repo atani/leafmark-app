@@ -26,6 +26,8 @@ targets:
     sources:
       - path: Sources
         name: Sources
+      - path: Resources
+        buildPhase: resources
     dependencies:
       - package: Readium
         products:
@@ -64,7 +66,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.atani.inkwell
         MARKETING_VERSION: "1.0"
-        CURRENT_PROJECT_VERSION: "3"
+        CURRENT_PROJECT_VERSION: "4"
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon

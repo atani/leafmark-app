@@ -107,6 +107,7 @@ struct LibraryView: View {
             }
         }
         .task {
+            await library.installBundledSampleIfNeeded()
             await library.scanInbox()
         }
     }

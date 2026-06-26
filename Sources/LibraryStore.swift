@@ -97,6 +97,28 @@ final class LibraryStore: ObservableObject {
         await finishImport(id: id, destination: destination, originalName: url.lastPathComponent)
     }
 
+    /// Copies the bundled sample EPUB on first launch so the reviewer (and new
+    /// users) see a book immediately.
+    func installBundledSampleIfNeeded() async {
+        let installedKey = "library.bundledSampleInstalled"
+        guard !UserDefaults.standard.bool(forKey: installedKey) else { return }
+        UserDefaults.standard.set(true, forKey: installedKey)
+
+        guard let sampleURL = Bundle.main.url(
+            forResource: "sample-peter-pan",
+            withExtension: "epub"
+        ) else { return }
+
+        let id = UUID().uuidString
+        let destination = booksDir.appendingPathComponent("\(id).epub")
+        do {
+            try fileManager.copyItem(at: sampleURL, to: destination)
+        } catch {
+            return
+        }
+        await finishImport(id: id, destination: destination, originalName: "sample-peter-pan.epub")
+    }
+
     /// Imports loose EPUB files dropped into Documents (file sharing / "Save to Files").
     func scanInbox() async {
         let candidates = (try? fileManager.contentsOfDirectory(

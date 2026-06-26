@@ -33,6 +33,7 @@
 		D44514729F897AB8B63F5973 /* HighlightStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B140FE56D3E2B3C9F07D0250 /* HighlightStore.swift */; };
 		D59FD4FFC23C1EFFDD2A2EBC /* StatsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAC5403A01A72F0CDED402DA /* StatsStore.swift */; };
 		F74D05E77022F94D16885701 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 925A2A78DBBD0A77BACFE447 /* LibraryView.swift */; };
+		F8CF2204F8EF315B9C9D3D1A /* sample-peter-pan.epub in Resources */ = {isa = PBXBuildFile; fileRef = A4D8D6419353E2B7C8C2926D /* sample-peter-pan.epub */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +59,7 @@
 		82EF1BB1CEDAB8D36C409CA7 /* StorePurchaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorePurchaseTests.swift; sourceTree = "<group>"; };
 		8E51CFEF70D104A3CDC04B79 /* AppearanceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceStore.swift; sourceTree = "<group>"; };
 		925A2A78DBBD0A77BACFE447 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		A4D8D6419353E2B7C8C2926D /* sample-peter-pan.epub */ = {isa = PBXFileReference; path = "sample-peter-pan.epub"; sourceTree = "<group>"; };
 		ABE697D651677D282980C7AA /* HighlightStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightStoreTests.swift; sourceTree = "<group>"; };
 		B140FE56D3E2B3C9F07D0250 /* HighlightStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightStore.swift; sourceTree = "<group>"; };
 		B94DAD4E01F7765FBEC117E7 /* ReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderView.swift; sourceTree = "<group>"; };
@@ -98,10 +100,19 @@
 			isa = PBXGroup;
 			children = (
 				55351BB145ECA98AD7A1B82E /* Inkwell.storekit */,
+				8C6B2B097136D0093C67D6C1 /* Resources */,
 				AC685A4048C7199AEA78FC45 /* Sources */,
 				94B578E9D9BE4DEB3192B4FE /* Tests */,
 				C63BBB90BC918F1125C5ED9D /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		8C6B2B097136D0093C67D6C1 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A4D8D6419353E2B7C8C2926D /* sample-peter-pan.epub */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		94B578E9D9BE4DEB3192B4FE /* Tests */ = {
@@ -243,6 +254,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				395FDD8E28BFA05480824ACA /* Assets.xcassets in Resources */,
+				F8CF2204F8EF315B9C9D3D1A /* sample-peter-pan.epub in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -468,7 +480,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -488,7 +500,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

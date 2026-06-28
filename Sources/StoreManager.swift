@@ -56,7 +56,15 @@ final class StoreManager: ObservableObject {
         productLoadFailed = false
         do {
             let products = try await Product.products(for: [Self.proProductID])
-            product = products.first
+            // An empty array (no throw) means the product ID is unknown in this
+            // environment — treat it the same as a network failure so the
+            // PaywallView shows the retry button instead of an endless spinner.
+            if let found = products.first {
+                product = found
+            } else {
+                product = nil
+                productLoadFailed = true
+            }
         } catch {
             product = nil
             productLoadFailed = true

@@ -15,6 +15,7 @@
 		34DD080615EA355B310ADC68 /* LibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9C01DCB88DDB194257061A8 /* LibraryStore.swift */; };
 		360133DDF5985AD99BF4A4F5 /* Book.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A64A8F464ED20E4588B914 /* Book.swift */; };
 		395FDD8E28BFA05480824ACA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC576BF61FC0E6B89F918E89 /* Assets.xcassets */; };
+		6272304A2036708B7E39A28C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 30EAD98BF201D0714E04B5E7 /* PrivacyInfo.xcprivacy */; };
 		698A2BF24A170CD35B14B274 /* InkwellApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E4B6E8AE2C336AEDFEDBFB /* InkwellApp.swift */; };
 		75243D76F2FACBC83390DCF9 /* ReviewRequester.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1465CD313593A7B1F5E190 /* ReviewRequester.swift */; };
 		7B24A3C4807BADEAC18B9720 /* ReadiumNavigator in Frameworks */ = {isa = PBXBuildFile; productRef = E0E76CF82A47B15F1EFD5332 /* ReadiumNavigator */; };
@@ -49,6 +50,7 @@
 /* Begin PBXFileReference section */
 		02E4B6E8AE2C336AEDFEDBFB /* InkwellApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkwellApp.swift; sourceTree = "<group>"; };
 		26A5A86D94E2F0B6EBA77B76 /* Inkwell.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Inkwell.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		30EAD98BF201D0714E04B5E7 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		55351BB145ECA98AD7A1B82E /* Inkwell.storekit */ = {isa = PBXFileReference; path = Inkwell.storekit; sourceTree = "<group>"; };
 		55A64A8F464ED20E4588B914 /* Book.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Book.swift; sourceTree = "<group>"; };
 		6EFFA9A253D22B75CDD20234 /* InkwellTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InkwellTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -138,6 +140,7 @@
 				C9C01DCB88DDB194257061A8 /* LibraryStore.swift */,
 				925A2A78DBBD0A77BACFE447 /* LibraryView.swift */,
 				75F00B55B730599AFB881896 /* PaywallView.swift */,
+				30EAD98BF201D0714E04B5E7 /* PrivacyInfo.xcprivacy */,
 				E0A3B41ED0E31CFFAF28DAB7 /* ReaderScreen.swift */,
 				B94DAD4E01F7765FBEC117E7 /* ReaderView.swift */,
 				DFFF9A93266A355C62CAD77C /* ReadiumContext.swift */,
@@ -254,6 +257,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				395FDD8E28BFA05480824ACA /* Assets.xcassets in Resources */,
+				6272304A2036708B7E39A28C /* PrivacyInfo.xcprivacy in Resources */,
 				F8CF2204F8EF315B9C9D3D1A /* sample-peter-pan.epub in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

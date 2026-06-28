@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA11BB22CC33DD44EE55FF66 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = FF66EE55DD44CC33BB22AA11 /* PrivacyInfo.xcprivacy */; };
 		0121E7A778A5601EBA8CCD15 /* Highlight.swift in Sources */ = {isa = PBXBuildFile; fileRef = C79DFA3247AA03F7A64DC762 /* Highlight.swift */; };
 		04F6FEA10A0D1DD91E0CD6FD /* StorePurchaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82EF1BB1CEDAB8D36C409CA7 /* StorePurchaseTests.swift */; };
 		0A47D8B97E1B8A752550EA0C /* ReadiumContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFFF9A93266A355C62CAD77C /* ReadiumContext.swift */; };
@@ -47,6 +48,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FF66EE55DD44CC33BB22AA11 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		02E4B6E8AE2C336AEDFEDBFB /* InkwellApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InkwellApp.swift; sourceTree = "<group>"; };
 		26A5A86D94E2F0B6EBA77B76 /* Inkwell.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Inkwell.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		55351BB145ECA98AD7A1B82E /* Inkwell.storekit */ = {isa = PBXFileReference; path = Inkwell.storekit; sourceTree = "<group>"; };
@@ -146,6 +148,7 @@
 				BAC5403A01A72F0CDED402DA /* StatsStore.swift */,
 				D61990AE4EAD8D2C81AC80E8 /* StatsView.swift */,
 				74FEC4652079B406D32F67AD /* StoreManager.swift */,
+				FF66EE55DD44CC33BB22AA11 /* PrivacyInfo.xcprivacy */,
 			);
 			name = Sources;
 			path = Sources;
@@ -255,6 +258,7 @@
 			files = (
 				395FDD8E28BFA05480824ACA /* Assets.xcassets in Resources */,
 				F8CF2204F8EF315B9C9D3D1A /* sample-peter-pan.epub in Resources */,
+				AA11BB22CC33DD44EE55FF66 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

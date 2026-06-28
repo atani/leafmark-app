@@ -151,8 +151,10 @@ struct ReaderScreen: View {
             // turn of the run loop so decorations land on a live web view.
             DispatchQueue.main.async { refreshDecorations() }
             if ReviewRequester.recordBookOpen(bookID: book.id) {
+                // Mark immediately so a second book-open within the 2-second
+                // delay cannot trigger a duplicate review request.
+                ReviewRequester.markRequested()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    ReviewRequester.markRequested()
                     requestReview()
                 }
             }

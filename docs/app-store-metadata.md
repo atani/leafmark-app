@@ -68,14 +68,11 @@ GOOD TO KNOW
 ## キーワード(最大 100 字・カンマ区切り・スペース無し)
 
 ```
-epub,reader,ebook,highlight,annotation,markdown,obsidian,notion,reading,notes,export,marvin,pkm,text
+epub,reader,ebook,highlight,annotation,markdown,obsidian,notion,reading,notes,export,book,ipad,vault
 ```
 
-- 100 字チェック: 上記はちょうど 100 字。
-- `pkm` (Personal Knowledge Management) と `text` (plain text export) を追加。
-  ターゲットの PKM ユーザーと「text reader」検索への露出を増やす。
-- `marvin` は ASO で indexed demand を取る狙い(go-to-market.md §1)。ただし他社名・商標を
-  キーワードに入れるとリジェクト/削除されるリスクがある。残すかは申請前に判断する。
+- 100 字ちょうど。v1.1 で `book,ipad,vault` を追加（iPad ユーザー + PKM vault 検索への露出）。
+  `marvin` は商標リスクで削除。`pkm,text` は文字数超過で削除。
 
 ## カテゴリ
 

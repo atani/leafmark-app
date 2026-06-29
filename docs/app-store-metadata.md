@@ -68,11 +68,11 @@ GOOD TO KNOW
 ## キーワード(最大 100 字・カンマ区切り・スペース無し)
 
 ```
-epub,reader,ebook,highlight,annotation,markdown,obsidian,notion,reading,notes,export,book,ipad,vault
+ebook,annotation,markdown,obsidian,notion,reading,notes,export,book,ipad,vault,calibre,library,sepia
 ```
 
-- 100 字ちょうど。v1.1 で `book,ipad,vault` を追加（iPad ユーザー + PKM vault 検索への露出）。
-  `marvin` は商標リスクで削除。`pkm,text` は文字数超過で削除。
+- 100 字ちょうど。タイトル・サブタイトルと重複する `epub,reader,highlight` を削除し
+  `calibre,library,sepia` を追加。Apple はタイトル+サブタイトル+キーワードを自動結合するため重複は無駄。
 
 ## カテゴリ
 

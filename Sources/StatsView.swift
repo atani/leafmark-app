@@ -26,7 +26,7 @@ struct StatsView: View {
                 }
             }
             .sheet(isPresented: $showPaywall) {
-                PaywallView(store: store)
+                PaywallView(store: store, context: .statistics)
             }
         }
     }

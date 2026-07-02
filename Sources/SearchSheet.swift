@@ -77,6 +77,9 @@ struct SearchSheet: View {
         searchTask?.cancel()
         results = []
         searched = false
+        // Also reset the spinner: submitting an empty query while a previous
+        // search is still running would otherwise leave it stuck on screen.
+        searching = false
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 

@@ -100,7 +100,13 @@ struct ReaderScreen: View {
                 }
             )
         }
-        .sheet(isPresented: $showPaywall) {
+        .sheet(isPresented: $showPaywall, onDismiss: {
+            // Closing the paywall without buying abandons the interrupted
+            // highlight — a later upgrade from another screen must not
+            // resurrect a selection the user has long forgotten.
+            // (On purchase, onChange(of: isPro) already applied it.)
+            pendingHighlight = nil
+        }) {
             PaywallView(store: store, context: .highlightLimit)
         }
         .sheet(isPresented: $showSettings) {

@@ -82,24 +82,22 @@ struct SearchSheet: View {
 
         searching = true
         searchTask = Task {
-            defer {
-                searching = false
-                searched = true
-            }
-            guard let iterator = try? await publication.search(query: trimmed).get() else {
-                return
-            }
-
             var found: [Locator] = []
-            // Hard cap to keep the list and memory bounded on huge books.
-            while found.count < 500, !Task.isCancelled {
-                guard case .success(let page) = await iterator.next(),
-                      let collection = page
-                else { break }
-                found.append(contentsOf: collection.locators)
+            if let iterator = try? await publication.search(query: trimmed).get() {
+                // Hard cap to keep the list and memory bounded on huge books.
+                while found.count < 500, !Task.isCancelled {
+                    guard case .success(let page) = await iterator.next(),
+                          let collection = page
+                    else { break }
+                    found.append(contentsOf: collection.locators)
+                }
             }
+            // A cancelled (superseded) task must not touch the state a newer
+            // search now owns — no defer, so stale tasks exit silently.
             guard !Task.isCancelled else { return }
             results = found
+            searching = false
+            searched = true
         }
     }
 }

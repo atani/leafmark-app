@@ -102,18 +102,25 @@ final class LibraryStore: ObservableObject {
     func installBundledSampleIfNeeded() async {
         let installedKey = "library.bundledSampleInstalled"
         guard !UserDefaults.standard.bool(forKey: installedKey) else { return }
+        // Claim the flag up front so a re-entrant call (the .task modifier can
+        // fire more than once) cannot install the sample twice; roll it back
+        // on failure so the next launch retries.
         UserDefaults.standard.set(true, forKey: installedKey)
 
         guard let sampleURL = Bundle.main.url(
             forResource: "sample-peter-pan",
             withExtension: "epub"
-        ) else { return }
+        ) else {
+            UserDefaults.standard.set(false, forKey: installedKey)
+            return
+        }
 
         let id = UUID().uuidString
         let destination = booksDir.appendingPathComponent("\(id).epub")
         do {
             try fileManager.copyItem(at: sampleURL, to: destination)
         } catch {
+            UserDefaults.standard.set(false, forKey: installedKey)
             return
         }
         await finishImport(id: id, destination: destination, originalName: "sample-peter-pan.epub")

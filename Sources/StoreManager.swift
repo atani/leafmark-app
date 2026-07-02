@@ -11,7 +11,7 @@ final class StoreManager: ObservableObject {
 
     /// Free tier allows a few highlights per book so the feature can be
     /// tried before buying. Pro removes the cap.
-    static let freeHighlightLimit = 3
+    nonisolated static let freeHighlightLimit = 3
 
     @Published private(set) var isPro = false
     @Published private(set) var product: Product?

@@ -1,10 +1,33 @@
 import SwiftUI
 import StoreKit
 
+/// Why the paywall is being shown. Drives the subtitle so the user sees the
+/// value of Pro in the context of what they just tried to do.
+enum PaywallContext {
+    case general
+    case highlightLimit
+    case export
+    case statistics
+
+    var subtitle: String {
+        switch self {
+        case .general:
+            return "Your highlights are yours."
+        case .highlightLimit:
+            return "You've used all \(StoreManager.freeHighlightLimit) free highlights in this book."
+        case .export:
+            return "Take your highlights with you — export them all as Markdown."
+        case .statistics:
+            return "See how much you read — today, this week, and all time."
+        }
+    }
+}
+
 /// Upgrade screen for the one-time "Leafmark Pro" purchase (ADR-0005).
 /// Sells ownership, not a subscription: "Your highlights are yours."
 struct PaywallView: View {
     @ObservedObject var store: StoreManager
+    var context: PaywallContext = .general
     @Environment(\.dismiss) private var dismiss
 
     private let perks: [(icon: String, title: String, detail: String)] = [
@@ -23,9 +46,10 @@ struct PaywallView: View {
                             .foregroundStyle(.tint)
                         Text("Leafmark Pro")
                             .font(.largeTitle.bold())
-                        Text("Your highlights are yours.")
+                        Text(context.subtitle)
                             .font(.headline)
                             .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
                     }
                     .padding(.top, 24)
 

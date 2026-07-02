@@ -52,6 +52,21 @@ final class StatsStoreTests: XCTestCase {
         XCTAssertEqual(reloaded.sessions.count, 1)
     }
 
+    func testRemoveAllForBookRemovesOnlyThatBook() {
+        let start = Date()
+        store.recordSession(bookID: "a", startedAt: start, endedAt: start.addingTimeInterval(600))
+        store.recordSession(bookID: "a", startedAt: start, endedAt: start.addingTimeInterval(300))
+        store.recordSession(bookID: "b", startedAt: start, endedAt: start.addingTimeInterval(120))
+
+        store.removeAll(for: "a")
+
+        XCTAssertTrue(store.sessions.allSatisfy { $0.bookID == "b" }, "対象の本のセッションは全削除、他は残る")
+        XCTAssertEqual(store.sessions.count, 1)
+
+        let reloaded = StatsStore(storeURL: tempURL)
+        XCTAssertEqual(reloaded.sessions.count, 1, "削除が永続化される")
+    }
+
     // MARK: - aggregations
 
     func testTotalTimeSumsDurations() {

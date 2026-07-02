@@ -106,6 +106,23 @@ final class HighlightStoreTests: XCTestCase {
         XCTAssertTrue(md.contains("> line one\n> line two"), "改行ごとに引用記号を付ける")
     }
 
+    func testRemoveAllForBookRemovesOnlyThatBook() {
+        let store = seed([
+            highlight(id: "a1", bookID: "book-a", text: "one", progression: 0.1),
+            highlight(id: "a2", bookID: "book-a", text: "two", progression: 0.2),
+            highlight(id: "b1", bookID: "book-b", text: "keep", progression: 0.3),
+        ])
+
+        store.removeAll(for: "book-a")
+
+        XCTAssertTrue(store.highlights(for: "book-a").isEmpty, "対象の本のハイライトは全削除")
+        XCTAssertEqual(store.highlights(for: "book-b").map(\.id), ["b1"], "他の本は残る")
+
+        let reloaded = HighlightStore(storeURL: tempURL)
+        XCTAssertTrue(reloaded.highlights(for: "book-a").isEmpty, "削除が永続化される")
+        XCTAssertEqual(reloaded.highlights(for: "book-b").count, 1)
+    }
+
     func testAddAndRemoveMutateInMemoryAndPersist() throws {
         let store = HighlightStore(storeURL: tempURL)
         let json = """

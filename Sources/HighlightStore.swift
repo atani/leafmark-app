@@ -70,6 +70,11 @@ final class HighlightStore: ObservableObject {
         save()
     }
 
+    func removeAll(for bookID: String) {
+        highlights.removeAll { $0.bookID == bookID }
+        save()
+    }
+
     func locator(of highlight: Highlight) -> Locator? {
         guard let value = try? JSONValue(jsonString: highlight.locatorJSON) else { return nil }
         return try? Locator(json: value, warnings: nil)

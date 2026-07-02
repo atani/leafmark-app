@@ -30,6 +30,9 @@ struct ReaderScreen: View {
     @State private var noteTarget: Highlight?
     /// Highlight whose actions dialog (color/note/delete) is shown.
     @State private var actionTarget: Highlight?
+    /// Highlight the user tried to make when the free limit stopped them.
+    /// Applied automatically if they upgrade from the paywall.
+    @State private var pendingHighlight: (locator: Locator, withNote: Bool)?
 
     @AppStorage("highlight.color") private var highlightColorRaw = HighlightColor.yellow.rawValue
 
@@ -97,8 +100,14 @@ struct ReaderScreen: View {
                 }
             )
         }
-        .sheet(isPresented: $showPaywall) {
-            PaywallView(store: store)
+        .sheet(isPresented: $showPaywall, onDismiss: {
+            // Closing the paywall without buying abandons the interrupted
+            // highlight — a later upgrade from another screen must not
+            // resurrect a selection the user has long forgotten.
+            // (On purchase, onChange(of: isPro) already applied it.)
+            pendingHighlight = nil
+        }) {
+            PaywallView(store: store, context: .highlightLimit)
         }
         .sheet(isPresented: $showSettings) {
             AppearanceSheet()
@@ -137,6 +146,13 @@ struct ReaderScreen: View {
             }
         }
         .onReceive(highlightStore.$highlights) { _ in refreshDecorations() }
+        .onChange(of: store.isPro) { _, isPro in
+            // The user upgraded mid-flow: finish the highlight they were
+            // making when the free limit interrupted them.
+            guard isPro, let pending = pendingHighlight else { return }
+            pendingHighlight = nil
+            addHighlight(at: pending.locator, withNote: pending.withNote)
+        }
         .onChange(of: appearance.themeRaw) { bridge.submit(appearance.preferences) }
         .onChange(of: appearance.fontRaw) { bridge.submit(appearance.preferences) }
         .onChange(of: appearance.fontSize) { bridge.submit(appearance.preferences) }
@@ -150,9 +166,10 @@ struct ReaderScreen: View {
             // The navigator is created in the same render pass; defer one
             // turn of the run loop so decorations land on a live web view.
             DispatchQueue.main.async { refreshDecorations() }
-            if ReviewRequester.recordBookOpen() {
+            if ReviewRequester.recordBookOpen(bookID: book.id) {
+                // Mark immediately so a second book-open within the 2-second
+                // delay cannot trigger a duplicate review request.
                 ReviewRequester.markRequested()
-                // Delay slightly so the reader is visible before the dialog.
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                     requestReview()
                 }
@@ -167,15 +184,21 @@ struct ReaderScreen: View {
 
     private func makeHighlight(withNote: Bool) {
         guard let locator = bridge.selectionLocator else { return }
+        bridge.clearSelection()
         guard StoreManager.canAddHighlight(
             isPro: store.isPro,
             currentCount: highlightStore.highlights(for: book.id).count
         ) else {
-            bridge.clearSelection()
+            // Remember what the user wanted so an upgrade from the paywall
+            // completes it instead of making them reselect the text.
+            pendingHighlight = (locator, withNote)
             showPaywall = true
             return
         }
-        bridge.clearSelection()
+        addHighlight(at: locator, withNote: withNote)
+    }
+
+    private func addHighlight(at locator: Locator, withNote: Bool) {
         let highlight = highlightStore.add(
             bookID: book.id,
             locator: locator,
@@ -258,13 +281,18 @@ struct ReaderScreen: View {
             Spacer()
 
             if let progression {
-                Text("\(Int((progression * 100).rounded()))%")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(.bar, in: Capsule())
-                    .padding(.bottom, 12)
+                VStack(spacing: 4) {
+                    ProgressView(value: progression)
+                        .tint(.secondary)
+                    Text("\(Int((progression * 100).rounded()))%")
+                        .font(.caption2.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 8)
+                .background(.bar, in: RoundedRectangle(cornerRadius: 8))
+                .padding(.horizontal, 16)
+                .padding(.bottom, 12)
             }
         }
         .transition(.opacity)
@@ -339,6 +367,7 @@ private struct HighlightsSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.requestReview) private var requestReview
     @State private var showPaywall = false
+    @State private var paywallContext: PaywallContext = .export
 
     private var items: [Highlight] {
         store.highlights(for: book.id)
@@ -379,8 +408,9 @@ private struct HighlightsSheet: View {
                             .tint(.primary)
                         }
                         .onDelete { offsets in
-                            for offset in offsets {
-                                store.remove(items[offset].id)
+                            let idsToRemove = offsets.map { items[$0].id }
+                            for id in idsToRemove {
+                                store.remove(id)
                             }
                         }
                     }
@@ -410,6 +440,7 @@ private struct HighlightsSheet: View {
                             })
                         } else {
                             Button {
+                                paywallContext = .export
                                 showPaywall = true
                             } label: {
                                 Image(systemName: "square.and.arrow.up")
@@ -422,10 +453,34 @@ private struct HighlightsSheet: View {
                     Button("Done") { dismiss() }
                 }
             }
+            .safeAreaInset(edge: .bottom) {
+                if !purchases.isPro {
+                    freePlanFooter
+                }
+            }
             .sheet(isPresented: $showPaywall) {
-                PaywallView(store: purchases)
+                PaywallView(store: purchases, context: paywallContext)
             }
         }
+    }
+
+    /// Keeps the free quota visible so the paywall never feels like an
+    /// ambush: the user always knows how many highlights they have left.
+    private var freePlanFooter: some View {
+        HStack(spacing: 12) {
+            Text("Free plan: \(min(items.count, StoreManager.freeHighlightLimit)) of \(StoreManager.freeHighlightLimit) highlights in this book")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Button("Upgrade") {
+                paywallContext = .highlightLimit
+                showPaywall = true
+            }
+            .font(.footnote.weight(.semibold))
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 10)
+        .background(.bar)
     }
 }
 

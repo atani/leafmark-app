@@ -11,11 +11,12 @@ final class StoreManager: ObservableObject {
 
     /// Free tier allows a few highlights per book so the feature can be
     /// tried before buying. Pro removes the cap.
-    static let freeHighlightLimit = 3
+    nonisolated static let freeHighlightLimit = 3
 
     @Published private(set) var isPro = false
     @Published private(set) var product: Product?
     @Published private(set) var purchaseInFlight = false
+    @Published private(set) var productLoadFailed = false
 
     private var updatesTask: Task<Void, Never>?
 
@@ -52,11 +53,21 @@ final class StoreManager: ObservableObject {
     /// Loads the product metadata and the current entitlement state.
     func load() async {
         await refreshEntitlements()
+        productLoadFailed = false
         do {
             let products = try await Product.products(for: [Self.proProductID])
-            product = products.first
+            // An empty array (no throw) means the product ID is unknown in this
+            // environment — treat it the same as a network failure so the
+            // PaywallView shows the retry button instead of an endless spinner.
+            if let found = products.first {
+                product = found
+            } else {
+                product = nil
+                productLoadFailed = true
+            }
         } catch {
             product = nil
+            productLoadFailed = true
         }
     }
 

@@ -4,11 +4,11 @@ import ReadiumShared
 /// The home screen: a grid of imported books.
 struct LibraryView: View {
     @ObservedObject var library: LibraryStore
+    @EnvironmentObject private var highlights: HighlightStore
     @EnvironmentObject private var stats: StatsStore
     @EnvironmentObject private var store: StoreManager
     @State private var showImporter = false
     @State private var showStats = false
-    @State private var showPaywall = false
     @State private var openedBook: Book?
 
     private let columns = [GridItem(.adaptive(minimum: 110, maximum: 160), spacing: 16)]
@@ -24,6 +24,13 @@ struct LibraryView: View {
                     } actions: {
                         Button("Import Books") { showImporter = true }
                             .buttonStyle(.borderedProminent)
+
+                        Link(
+                            "Browse free books on Standard Ebooks",
+                            destination: URL(string: "https://standardebooks.org/ebooks")!
+                        )
+                        .font(.footnote)
+                        .padding(.top, 4)
                     }
                 } else {
                     ScrollView {
@@ -37,6 +44,8 @@ struct LibraryView: View {
                                 .buttonStyle(.plain)
                                 .contextMenu {
                                     Button(role: .destructive) {
+                                        highlights.removeAll(for: book.id)
+                                        stats.removeAll(for: book.id)
                                         library.delete(book)
                                     } label: {
                                         Label("Delete", systemImage: "trash")
@@ -52,15 +61,11 @@ struct LibraryView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
-                        if store.isPro {
-                            showStats = true
-                        } else {
-                            showPaywall = true
-                        }
+                        showStats = true
                     } label: {
                         Image(systemName: "chart.bar")
                     }
-                    .accessibilityLabel("Statistics")
+                    .accessibilityLabel("Reading Statistics")
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -73,9 +78,6 @@ struct LibraryView: View {
             }
             .sheet(isPresented: $showStats) {
                 StatsView(stats: stats, library: library)
-            }
-            .sheet(isPresented: $showPaywall) {
-                PaywallView(store: store)
             }
             .fileImporter(
                 isPresented: $showImporter,
@@ -105,6 +107,7 @@ struct LibraryView: View {
             }
         }
         .task {
+            await library.installBundledSampleIfNeeded()
             await library.scanInbox()
         }
     }

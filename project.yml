@@ -38,6 +38,12 @@ targets:
       path: Info.plist
       properties:
         CFBundleDisplayName: Leafmark
+        # Keep versions pointed at build settings — without these keys
+        # xcodegen regenerates Info.plist with hardcoded 1.0/1, which
+        # breaks App Store uploads ("CFBundleShortVersionString must be
+        # higher") whenever the project is regenerated.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         # No non-exempt encryption (HTTPS + Apple-standard crypto only).
         # Pre-answers the export-compliance question on every build upload.
         ITSAppUsesNonExemptEncryption: false

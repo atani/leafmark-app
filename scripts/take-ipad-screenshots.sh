@@ -4,7 +4,7 @@
 # Prerequisites:
 #   - Xcode with iPad Pro 13-inch simulator installed
 #   - App built for simulator (xcodegen generate && xcodebuild ... -destination 'platform=iOS Simulator')
-#   - Peter and Wendy EPUB in repo root for demo content
+#   - A public-domain EPUB in repo root for demo content
 #
 # Usage:
 #   ./scripts/take-ipad-screenshots.sh [scheme]

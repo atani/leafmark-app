@@ -28,7 +28,8 @@
 - [ ] 両端揃え・文字間の設定追加
 - [ ] 蔵書のコレクション・タグ整理(Marvin のスマートコレクション相当)
 - [ ] オンボーディング・App Store スクリーンショット素材(英語)
-  - 撮影用の書籍は**パブリックドメイン**(Standard Ebooks / Project Gutenberg)を使う。
+  - 撮影用の書籍はパブリックドメインの作品を使う。
+    入手先はPublic Domain LibraryまたはStandard Ebooksとする。
     手元の `Docker入門.epub` は技術評論社の著作物なので表紙・本文を申請素材に使わない
   - サイズは 6.9"(1320×2868)を基準に。iPhone 17 Pro Max Simulator で撮る
   - `xcrun simctl status_bar override --time "9:41"` でステータスバーを整える

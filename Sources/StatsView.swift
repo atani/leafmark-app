@@ -105,7 +105,7 @@ struct StatsView: View {
             }
             Section("By Book") {
                 HStack {
-                    Text("Peter and Wendy")
+                    Text("Frankenstein")
                     Spacer()
                     Text("2h 15m").foregroundStyle(.secondary).monospacedDigit()
                 }

@@ -62,7 +62,7 @@ Reading is always free. Import your library, render any book and try the feel be
 GOOD TO KNOW
 • Import EPUBs straight from Files — iCloud Drive, Google Drive, Dropbox, or right off your device.
 • Works with DRM-free EPUB files. DRM-protected books and PDF are not supported.
-• Public-domain EPUBs are available from Standard Ebooks and Project Gutenberg.
+• Public-domain EPUBs are available from Public Domain Library and Standard Ebooks.
 ```
 
 ## キーワード(最大 100 字・カンマ区切り・スペース無し)
@@ -90,7 +90,9 @@ First release. A buy-once EPUB reader with highlights, Markdown export, reading 
 ```
 - No account or login is required; all data stays on device.
 - In-app purchase "Leafmark Pro" (com.atani.inkwell.pro) is a single non-consumable, one-time unlock — not a subscription. It unlocks unlimited highlights, Markdown export and reading statistics. Restore is available on the Leafmark Pro screen.
-- The app reads DRM-free EPUB files supplied by the user. A public-domain sample (Peter and Wendy, J. M. Barrie) is available from Standard Ebooks: https://standardebooks.org/
+- The app reads DRM-free EPUB files supplied by the user.
+- Three public-domain samples from Standard Ebooks are included.
+  The titles are Frankenstein, Meditations, and The Autobiography of Benjamin Franklin.
 ```
 
 ## 文字数チェック(申請前に再確認)

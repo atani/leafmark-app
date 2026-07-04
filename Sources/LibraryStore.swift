@@ -15,6 +15,14 @@ final class LibraryStore: ObservableObject {
 
     private let fileManager = FileManager.default
 
+    /// Installed in reverse order so the first item below appears first in
+    /// the library, whose default sort is newest-first.
+    private static let bundledSamples: [(resourceName: String, fileName: String)] = [
+        ("sample-frankenstein", "sample-frankenstein.epub"),
+        ("sample-meditations", "sample-meditations.epub"),
+        ("sample-benjamin-franklin", "sample-benjamin-franklin.epub"),
+    ]
+
     private var documentsDir: URL {
         fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
     }
@@ -97,9 +105,9 @@ final class LibraryStore: ObservableObject {
         await finishImport(id: id, destination: destination, originalName: url.lastPathComponent)
     }
 
-    /// Copies the bundled sample EPUB on first launch so the reviewer (and new
-    /// users) see a book immediately.
-    func installBundledSampleIfNeeded() async {
+    /// Copies the bundled sample EPUBs on first launch so the reviewer and new
+    /// users can start reading immediately.
+    func installBundledSamplesIfNeeded() async {
         let installedKey = "library.bundledSampleInstalled"
         guard !UserDefaults.standard.bool(forKey: installedKey) else { return }
         // Claim the flag up front so a re-entrant call (the .task modifier can
@@ -107,23 +115,45 @@ final class LibraryStore: ObservableObject {
         // on failure so the next launch retries.
         UserDefaults.standard.set(true, forKey: installedKey)
 
-        guard let sampleURL = Bundle.main.url(
-            forResource: "sample-peter-pan",
-            withExtension: "epub"
-        ) else {
+        let samples = Self.bundledSamples.compactMap { sample -> (URL, String)? in
+            guard let url = Bundle.main.url(
+                forResource: sample.resourceName,
+                withExtension: "epub"
+            ) else { return nil }
+            return (url, sample.fileName)
+        }
+        guard samples.count == Self.bundledSamples.count else {
             UserDefaults.standard.set(false, forKey: installedKey)
             return
         }
 
-        let id = UUID().uuidString
-        let destination = booksDir.appendingPathComponent("\(id).epub")
+        let pending = samples.reversed().map { sample in
+            let id = UUID().uuidString
+            return (
+                source: sample.0,
+                fileName: sample.1,
+                id: id,
+                destination: booksDir.appendingPathComponent("\(id).epub")
+            )
+        }
         do {
-            try fileManager.copyItem(at: sampleURL, to: destination)
+            for sample in pending {
+                try fileManager.copyItem(at: sample.source, to: sample.destination)
+            }
         } catch {
+            for sample in pending {
+                try? fileManager.removeItem(at: sample.destination)
+            }
             UserDefaults.standard.set(false, forKey: installedKey)
             return
         }
-        await finishImport(id: id, destination: destination, originalName: "sample-peter-pan.epub")
+        for sample in pending {
+            await finishImport(
+                id: sample.id,
+                destination: sample.destination,
+                originalName: sample.fileName
+            )
+        }
     }
 
     /// Imports loose EPUB files dropped into Documents (file sharing / "Save to Files").

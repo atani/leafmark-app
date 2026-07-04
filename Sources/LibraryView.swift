@@ -26,8 +26,8 @@ struct LibraryView: View {
                             .buttonStyle(.borderedProminent)
 
                         Link(
-                            "Browse free books on Standard Ebooks",
-                            destination: URL(string: "https://standardebooks.org/ebooks")!
+                            "Browse free books on Public Domain Library",
+                            destination: URL(string: "https://publicdomainlibrary.org/en/")!
                         )
                         .font(.footnote)
                         .padding(.top, 4)
@@ -107,7 +107,7 @@ struct LibraryView: View {
             }
         }
         .task {
-            await library.installBundledSampleIfNeeded()
+            await library.installBundledSamplesIfNeeded()
             await library.scanInbox()
         }
     }

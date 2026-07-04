@@ -44,7 +44,8 @@ App Store Connect への転記は Developer Program 承認後。
 - [x] スクリーンショット(英語、6.9 インチ = 1320×2868 基準)
       — iPhone 17 Pro Max で 7 枚を `docs/screenshots/6.9-inch/` に用意済み
       (ライブラリ/表紙/本文/設定/ハイライト/統計/Pro)。iPad ランドスケープ版は手動で追加撮影
-  - 撮影用の書籍は**パブリックドメイン**(Standard Ebooks / Project Gutenberg)を使う。
+  - 撮影用の書籍はパブリックドメインの作品を使う。
+    入手先はPublic Domain LibraryまたはStandard Ebooksとする。
     技術評論社の `Docker入門.epub` など著作物は申請素材に使わない
   - `xcrun simctl status_bar override` の `--time 9:41` 指定でステータスバーを整える
 - [x] サポート URL: <https://atani.github.io/leafmark-app/support.html>

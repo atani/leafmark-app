@@ -24,8 +24,8 @@ Program 登録済み(承認待ち)。承認が下りたら上から順に潰し�
       ヘッドレス `xcodebuild test` ではスキップ(Xcode 実行時に検証)
 - [x] リリースビルド(Release 構成)でクラッシュ・警告がないこと
       — Release ビルド成功・警告 0(iPad 全方向対応で orientation 警告も解消)
-- [x] バージョン番号・ビルド番号を設定(初回は 1.0 / 1)
-      — `MARKETING_VERSION: 1.0` / `CURRENT_PROJECT_VERSION: 1`(project.yml)
+- [x] バージョン番号・ビルド番号を1.4 / 8に設定する。
+      — `MARKETING_VERSION: 1.4` / `CURRENT_PROJECT_VERSION: 8`(project.yml)
 - [x] 最低 OS バージョンが iOS 17.0 で間違いないこと(`IPHONEOS_DEPLOYMENT_TARGET: 17.0`)
 
 ## 2. App Store Connect のメタデータ

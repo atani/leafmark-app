@@ -79,10 +79,12 @@ ebook,annotation,markdown,obsidian,notion,reading,notes,export,book,ipad,vault,c
 - 主: Books
 - 副: Productivity(Markdown エクスポート × PKM 層の訴求。go-to-market.md チャネル 5)
 
-## What's New(v1.0)
+## What's New(v1.4)
 
 ```
-First release. A buy-once EPUB reader with highlights, Markdown export, reading statistics, and a privacy-first, on-device design.
+New installations now include three public-domain classics.
+The titles are Frankenstein, Meditations, and The Autobiography of Benjamin Franklin.
+The empty library also links to Public Domain Library, making it easier to find more free EPUBs.
 ```
 
 ## 審査メモ(App Review への補足)

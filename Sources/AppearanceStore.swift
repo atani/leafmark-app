@@ -66,6 +66,8 @@ final class AppearanceStore: ObservableObject {
     @AppStorage("reader.theme") var themeRaw: String = ReaderTheme.light.rawValue
     @AppStorage("reader.fontSize") var fontSize: Double = 1.0
     @AppStorage("reader.font") var fontRaw: String = ReaderFont.publisher.rawValue
+    // 1.0 keeps the publisher's weight (sent as nil so publisher CSS wins).
+    @AppStorage("reader.fontWeight") var fontWeight: Double = 1.0
     @AppStorage("reader.columns") var columnsRaw: String = ReaderColumns.auto.rawValue
     @AppStorage("reader.scroll") var scrollEnabled: Bool = false
     /// 0 keeps the publisher's line height; otherwise 1.0...2.0.
@@ -87,6 +89,18 @@ final class AppearanceStore: ObservableObject {
         set { fontRaw = newValue.rawValue; objectWillChange.send() }
     }
 
+    /// Picker tag prefix for user-imported fonts (FontStore). The rest of
+    /// the tag is the font's family name, used directly as the CSS family.
+    static let customFontPrefix = "custom:"
+
+    /// Resolves the selected font, whether built-in or user-imported.
+    var selectedFontFamily: FontFamily? {
+        if fontRaw.hasPrefix(Self.customFontPrefix) {
+            return FontFamily(rawValue: String(fontRaw.dropFirst(Self.customFontPrefix.count)))
+        }
+        return font.fontFamily
+    }
+
     static let fontSizeRange: ClosedRange<Double> = 0.7 ... 2.0
     static let fontSizeStep: Double = 0.1
 
@@ -99,12 +113,18 @@ final class AppearanceStore: ObservableObject {
     static let lineHeightStep: Double = 0.1
     static let pageMarginsRange: ClosedRange<Double> = 0.5 ... 2.0
     static let pageMarginsStep: Double = 0.25
+    // Readium supports 0.0–2.5 (1.0 = publisher weight); below 0.5 is
+    // illegibly thin, so the UI stops there.
+    static let fontWeightRange: ClosedRange<Double> = 0.5 ... 2.5
+    static let fontWeightStep: Double = 0.25
 
     var preferences: EPUBPreferences {
         EPUBPreferences(
             columnCount: columns.columnCount,
-            fontFamily: font.fontFamily,
+            fontFamily: selectedFontFamily,
             fontSize: fontSize,
+            // nil keeps the publisher's font weight untouched.
+            fontWeight: fontWeight != 1.0 ? fontWeight : nil,
             // Readium only honors lineHeight when publisher styles are off.
             lineHeight: lineHeight > 0 ? lineHeight : nil,
             pageMargins: pageMargins,

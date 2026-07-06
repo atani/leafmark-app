@@ -1,5 +1,6 @@
 import SwiftUI
 import StoreKit
+import UniformTypeIdentifiers
 import ReadiumShared
 import ReadiumNavigator
 
@@ -13,6 +14,7 @@ struct ReaderScreen: View {
     @EnvironmentObject private var highlightStore: HighlightStore
     @EnvironmentObject private var stats: StatsStore
     @EnvironmentObject private var store: StoreManager
+    @EnvironmentObject private var fontStore: FontStore
     @Environment(\.dismiss) private var dismiss
     @Environment(\.requestReview) private var requestReview
 
@@ -54,6 +56,7 @@ struct ReaderScreen: View {
                 publication: publication,
                 initialLocation: initialLocator,
                 preferences: appearance.preferences,
+                fontFamilyDeclarations: fontStore.fontFamilyDeclarations,
                 bridge: bridge,
                 onLocatorChange: { locator in
                     progression = locator.locations.totalProgression
@@ -155,6 +158,7 @@ struct ReaderScreen: View {
         }
         .onChange(of: appearance.themeRaw) { bridge.submit(appearance.preferences) }
         .onChange(of: appearance.fontRaw) { bridge.submit(appearance.preferences) }
+        .onChange(of: appearance.fontWeight) { bridge.submit(appearance.preferences) }
         .onChange(of: appearance.fontSize) { bridge.submit(appearance.preferences) }
         .onChange(of: appearance.columnsRaw) { bridge.submit(appearance.preferences) }
         .onChange(of: appearance.scrollEnabled) { bridge.submit(appearance.preferences) }
@@ -532,7 +536,14 @@ private struct NoteEditorSheet: View {
 /// Theme / font family / font size controls.
 private struct AppearanceSheet: View {
     @EnvironmentObject private var appearance: AppearanceStore
+    @EnvironmentObject private var fontStore: FontStore
     @Environment(\.dismiss) private var dismiss
+    @State private var showFontImporter = false
+
+    private static let fontTypes: [UTType] = [
+        UTType(filenameExtension: "ttf"),
+        UTType(filenameExtension: "otf"),
+    ].compactMap { $0 }
 
     var body: some View {
         NavigationStack {
@@ -546,10 +557,14 @@ private struct AppearanceSheet: View {
                     .pickerStyle(.segmented)
                 }
 
-                Section("Font") {
+                Section {
                     Picker("Font", selection: $appearance.fontRaw) {
                         ForEach(AppearanceStore.ReaderFont.allCases) { font in
                             Text(font.rawValue).tag(font.rawValue)
+                        }
+                        ForEach(fontStore.fonts) { font in
+                            Text(font.familyName)
+                                .tag(AppearanceStore.customFontPrefix + font.familyName)
                         }
                     }
 
@@ -573,6 +588,52 @@ private struct AppearanceSheet: View {
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.bordered)
+                    }
+
+                    Stepper(
+                        value: $appearance.fontWeight,
+                        in: AppearanceStore.fontWeightRange,
+                        step: AppearanceStore.fontWeightStep
+                    ) {
+                        HStack {
+                            Text("Boldness")
+                            Spacer()
+                            Text(appearance.fontWeight == 1.0
+                                ? "Default"
+                                : "\(Int((appearance.fontWeight * 100).rounded()))%")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    Button {
+                        showFontImporter = true
+                    } label: {
+                        Label("Import Font…", systemImage: "plus")
+                    }
+                } header: {
+                    Text("Font")
+                } footer: {
+                    if !fontStore.fonts.isEmpty {
+                        Text("Imported fonts are embedded when a book is opened. Reopen this book to use a font you just imported.")
+                    }
+                }
+
+                if !fontStore.fonts.isEmpty {
+                    Section("Imported Fonts") {
+                        ForEach(fontStore.fonts) { font in
+                            Text(font.familyName)
+                        }
+                        .onDelete { offsets in
+                            for index in offsets {
+                                let font = fontStore.fonts[index]
+                                // Removing the selected font falls back to
+                                // the publisher default.
+                                if appearance.fontRaw == AppearanceStore.customFontPrefix + font.familyName {
+                                    appearance.fontRaw = AppearanceStore.ReaderFont.publisher.rawValue
+                                }
+                                fontStore.remove(font)
+                            }
+                        }
                     }
                 }
 
@@ -626,6 +687,20 @@ private struct AppearanceSheet: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
+                }
+            }
+            .fileImporter(
+                isPresented: $showFontImporter,
+                allowedContentTypes: Self.fontTypes,
+                allowsMultipleSelection: true
+            ) { result in
+                guard case .success(let urls) = result else { return }
+                var lastImported: CustomFont?
+                for url in urls {
+                    lastImported = fontStore.importFont(from: url) ?? lastImported
+                }
+                if let imported = lastImported {
+                    appearance.fontRaw = AppearanceStore.customFontPrefix + imported.familyName
                 }
             }
         }

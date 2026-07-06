@@ -1,7 +1,9 @@
-# MobileRead リリース告知スレッド草稿
+# MobileRead リリース告知スレッド（投稿済み）
+
+**投稿済み: 2026-07-06** — <https://www.mobileread.com/forums/showthread.php?t=374295>
 
 投稿先: MobileRead Forums → Apple Devices <https://www.mobileread.com/forums/forumdisplay.php?f=170>
-タイトル案: `Leafmark — I built an EPUB reader because I never got over Marvin`
+タイトル: `Leafmark — I built an EPUB reader because I never got over Marvin`
 
 ---
 

@@ -82,15 +82,29 @@ final class FontStore: ObservableObject {
     /// CSS @font-face declarations for every imported font, grouped by
     /// family so multi-face families (separate regular/bold files sharing
     /// one family name) form a single declaration.
+    ///
+    /// The font bytes are embedded as data: URIs instead of served URLs.
+    /// Readium 3.8+ serves font files from a different origin than the
+    /// book's pages (readium://assets vs readium://{uuid}) without CORS
+    /// headers, and font fetches — unlike stylesheets or images — are
+    /// CORS-gated by WebKit, so a URL-based @font-face never loads
+    /// (readium/swift-toolkit#802). Embedding the bytes avoids the
+    /// cross-origin fetch entirely.
     var fontFamilyDeclarations: [AnyHTMLFontFamilyDeclaration] {
         Dictionary(grouping: fonts, by: \.familyName)
-            .map { family, fonts in
-                CSSFontFamilyDeclaration(
+            .compactMap { family, fonts in
+                let faces = fonts.compactMap { font -> DataURIFontFamilyDeclaration.Face? in
+                    guard let data = try? Data(contentsOf: fileURL(for: font)) else { return nil }
+                    let format = font.fileName.lowercased().hasSuffix(".otf") ? "font/otf" : "font/ttf"
+                    return DataURIFontFamilyDeclaration.Face(
+                        base64: data.base64EncodedString(),
+                        format: format
+                    )
+                }
+                guard !faces.isEmpty else { return nil }
+                return DataURIFontFamilyDeclaration(
                     fontFamily: FontFamily(rawValue: family),
-                    fontFaces: fonts.compactMap { font in
-                        guard let file = FileURL(url: fileURL(for: font)) else { return nil }
-                        return CSSFontFace(file: file, preload: true)
-                    }
+                    faces: faces
                 )
                 .eraseToAnyHTMLFontFamilyDeclaration()
             }
@@ -117,5 +131,33 @@ final class FontStore: ObservableObject {
     private func save() {
         guard let data = try? JSONEncoder().encode(fonts) else { return }
         try? data.write(to: catalogURL, options: .atomic)
+    }
+}
+
+/// Declares a font family by embedding the font files as data: URIs in a
+/// <style> tag (see FontStore.fontFamilyDeclarations for why).
+struct DataURIFontFamilyDeclaration: HTMLFontFamilyDeclaration {
+    struct Face {
+        let base64: String
+        /// IANA media type of the font file ("font/ttf" or "font/otf").
+        let format: String
+    }
+
+    let fontFamily: FontFamily
+    let alternates: [FontFamily] = []
+    let faces: [Face]
+
+    func inject(in html: String, servingFile: (FileURL) throws -> any AbsoluteURL) throws -> String {
+        guard let head = html.range(of: "</head>", options: [.caseInsensitive]) else {
+            return html
+        }
+        let css = faces
+            .map {
+                "@font-face { font-family: \"\(fontFamily.rawValue)\"; src: url(\"data:\($0.format);base64,\($0.base64)\"); }"
+            }
+            .joined(separator: "\n")
+        var html = html
+        html.insert(contentsOf: "<style type=\"text/css\">\(css)</style>", at: head.lowerBound)
+        return html
     }
 }

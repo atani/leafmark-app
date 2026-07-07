@@ -15,6 +15,7 @@ struct ReaderScreen: View {
     @EnvironmentObject private var stats: StatsStore
     @EnvironmentObject private var store: StoreManager
     @EnvironmentObject private var fontStore: FontStore
+    @EnvironmentObject private var bookmarkStore: BookmarkStore
     @Environment(\.dismiss) private var dismiss
     @Environment(\.requestReview) private var requestReview
 
@@ -26,6 +27,8 @@ struct ReaderScreen: View {
     @State private var showSearch = false
     @State private var showPaywall = false
     @State private var progression: Double?
+    /// The current reading position, used to add/toggle bookmarks.
+    @State private var currentLocator: Locator?
     @State private var sessionStart = Date()
 
     /// Highlight being edited in the note sheet.
@@ -68,6 +71,7 @@ struct ReaderScreen: View {
                 bridge: bridge,
                 onLocatorChange: { locator in
                     progression = locator.locations.totalProgression
+                    currentLocator = locator
                     library.saveProgress(
                         bookID: book.id,
                         locatorJSON: try? locator.jsonString(),
@@ -93,10 +97,19 @@ struct ReaderScreen: View {
         }
         .statusBarHidden(!chromeVisible)
         .sheet(isPresented: $showContents) {
-            ContentsSheet(publication: publication) { link in
-                showContents = false
-                bridge.go(to: link)
-            }
+            NavigationSheet(
+                publication: publication,
+                book: book,
+                bookmarks: bookmarkStore,
+                onSelectLink: { link in
+                    showContents = false
+                    bridge.go(to: link)
+                },
+                onSelectLocator: { locator in
+                    showContents = false
+                    bridge.go(to: locator)
+                }
+            )
         }
         .sheet(isPresented: $showHighlights) {
             HighlightsSheet(
@@ -235,6 +248,21 @@ struct ReaderScreen: View {
         )
     }
 
+    // MARK: - Bookmarks
+
+    private var isCurrentPageBookmarked: Bool {
+        guard let currentLocator else { return false }
+        return bookmarkStore.isBookmarked(bookID: book.id, at: currentLocator)
+    }
+
+    private func toggleBookmark() {
+        guard let currentLocator else { return }
+        // Store the chapter title when the locator has one; otherwise leave
+        // it nil and let the list fall back to "Bookmark" — the row shows
+        // the progression separately, so a "42% … 42%" duplicate is avoided.
+        bookmarkStore.toggle(bookID: book.id, locator: currentLocator, title: currentLocator.title)
+    }
+
     // MARK: - Chrome
 
     private var chrome: some View {
@@ -264,6 +292,14 @@ struct ReaderScreen: View {
                     }
                     .accessibilityLabel("Search")
                 }
+
+                Button {
+                    toggleBookmark()
+                } label: {
+                    Image(systemName: isCurrentPageBookmarked ? "bookmark.fill" : "bookmark")
+                }
+                .disabled(currentLocator == nil)
+                .accessibilityLabel(isCurrentPageBookmarked ? "Remove Bookmark" : "Add Bookmark")
 
                 Button {
                     showSettings = true
@@ -311,43 +347,42 @@ struct ReaderScreen: View {
     }
 }
 
-/// Table of contents.
-private struct ContentsSheet: View {
+/// Table of contents and the book's bookmarks, on two tabs.
+private struct NavigationSheet: View {
     let publication: Publication
-    let onSelect: (ReadiumShared.Link) -> Void
+    let book: Book
+    @ObservedObject var bookmarks: BookmarkStore
+    let onSelectLink: (ReadiumShared.Link) -> Void
+    let onSelectLocator: (Locator) -> Void
+
+    private enum Tab: Hashable { case contents, bookmarks }
 
     @Environment(\.dismiss) private var dismiss
     @State private var links: [ReadiumShared.Link] = []
     @State private var loaded = false
+    @State private var tab: Tab = .contents
+
+    private var bookBookmarks: [Bookmark] { bookmarks.bookmarks(for: book.id) }
 
     var body: some View {
         NavigationStack {
             Group {
-                if !loaded {
-                    ProgressView()
-                } else if links.isEmpty {
-                    ContentUnavailableView(
-                        "No Contents",
-                        systemImage: "list.bullet",
-                        description: Text("This book does not provide a table of contents.")
-                    )
-                } else {
-                    List(flatten(links, level: 0), id: \.item.href) { entry in
-                        Button {
-                            onSelect(entry.item)
-                        } label: {
-                            Text(entry.item.title ?? entry.item.href.description)
-                                .lineLimit(2)
-                                .padding(.leading, CGFloat(entry.level) * 16)
-                        }
-                        .tint(.primary)
-                    }
-                    .listStyle(.plain)
+                switch tab {
+                case .contents: contentsList
+                case .bookmarks: bookmarksList
                 }
             }
-            .navigationTitle("Contents")
+            .navigationTitle(tab == .contents ? "Contents" : "Bookmarks")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Picker("View", selection: $tab) {
+                        Text("Contents").tag(Tab.contents)
+                        Text("Bookmarks").tag(Tab.bookmarks)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(maxWidth: 240)
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
                 }
@@ -356,6 +391,70 @@ private struct ContentsSheet: View {
         .task {
             links = (try? await publication.tableOfContents().get()) ?? []
             loaded = true
+        }
+    }
+
+    @ViewBuilder
+    private var contentsList: some View {
+        if !loaded {
+            ProgressView()
+        } else if links.isEmpty {
+            ContentUnavailableView(
+                "No Contents",
+                systemImage: "list.bullet",
+                description: Text("This book does not provide a table of contents.")
+            )
+        } else {
+            List(flatten(links, level: 0), id: \.item.href) { entry in
+                Button {
+                    onSelectLink(entry.item)
+                } label: {
+                    Text(entry.item.title ?? entry.item.href.description)
+                        .lineLimit(2)
+                        .padding(.leading, CGFloat(entry.level) * 16)
+                }
+                .tint(.primary)
+            }
+            .listStyle(.plain)
+        }
+    }
+
+    @ViewBuilder
+    private var bookmarksList: some View {
+        if bookBookmarks.isEmpty {
+            ContentUnavailableView(
+                "No Bookmarks",
+                systemImage: "bookmark",
+                description: Text("Tap the bookmark button while reading to save a page here.")
+            )
+        } else {
+            List {
+                ForEach(bookBookmarks) { bookmark in
+                    Button {
+                        if let locator = bookmarks.locator(of: bookmark) {
+                            onSelectLocator(locator)
+                        }
+                    } label: {
+                        HStack {
+                            Text(bookmark.title ?? "Bookmark")
+                                .lineLimit(1)
+                            Spacer()
+                            if let progression = bookmarks.progression(of: bookmark) {
+                                Text(BookmarkStore.progressionLabel(progression))
+                                    .font(.caption.monospacedDigit())
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    .tint(.primary)
+                }
+                .onDelete { offsets in
+                    for bookmark in offsets.map({ bookBookmarks[$0] }) {
+                        bookmarks.remove(bookmark.id)
+                    }
+                }
+            }
+            .listStyle(.plain)
         }
     }
 

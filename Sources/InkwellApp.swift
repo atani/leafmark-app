@@ -8,6 +8,7 @@ struct InkwellApp: App {
     @StateObject private var stats = StatsStore()
     @StateObject private var store = StoreManager()
     @StateObject private var fonts = FontStore()
+    @StateObject private var bookmarks = BookmarkStore()
 
     var body: some Scene {
         WindowGroup {
@@ -17,6 +18,7 @@ struct InkwellApp: App {
                 .environmentObject(stats)
                 .environmentObject(store)
                 .environmentObject(fonts)
+                .environmentObject(bookmarks)
                 .task { await store.load() }
                 .onOpenURL { url in
                     Task { await library.importEPUB(from: url) }

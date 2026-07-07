@@ -27,6 +27,14 @@
       `fontFamilyDeclarations` で技術的に実現可能なことは確認済み
 - [ ] フォント weight（太さ）調整 — 出所: 同上。Readium が可変フォントの weight を
       公開しているか要調査。持ち込みフォント対応とセットで検討
+- [ ] ブックマーク（複数ページに印を付けて一覧からジャンプ）— 出所: MobileRead t=374295
+      (2026-07-07、Leafmark を試した好意的レビューで要望)。現状は読書位置の自動保存のみで
+      明示ブックマークは無い。Marvin にあった定番機能。HighlightStore と同型の BookmarkStore +
+      ツールバー導線 + 一覧シートで実現見込み。v1.6 の有力候補
+- [ ] 画像の全画面表示・ピンチズーム — 出所: 同上（「graphics display nicely but no way to
+      enlarge the graphic to full page」）。現状は画像タップ非対応（`didTapAt` は chrome トグルのみ）。
+      実装には JS で elementFromPoint による画像ヒットテスト + src 取得 → ズーム可能ビューア提示が必要。
+      挿絵の多い EPUB で効く
 
 ## v0.4 候補
 

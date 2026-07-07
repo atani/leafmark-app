@@ -7,6 +7,7 @@ struct LibraryView: View {
     @EnvironmentObject private var highlights: HighlightStore
     @EnvironmentObject private var stats: StatsStore
     @EnvironmentObject private var store: StoreManager
+    @EnvironmentObject private var bookmarks: BookmarkStore
     @State private var showImporter = false
     @State private var showStats = false
     @State private var openedBook: Book?
@@ -46,6 +47,7 @@ struct LibraryView: View {
                                     Button(role: .destructive) {
                                         highlights.removeAll(for: book.id)
                                         stats.removeAll(for: book.id)
+                                        bookmarks.removeAll(for: book.id)
                                         library.delete(book)
                                     } label: {
                                         Label("Delete", systemImage: "trash")

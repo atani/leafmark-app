@@ -97,7 +97,7 @@ struct ReaderScreen: View {
         }
         .statusBarHidden(!chromeVisible)
         .sheet(isPresented: $showContents) {
-            ContentsSheet(
+            NavigationSheet(
                 publication: publication,
                 book: book,
                 bookmarks: bookmarkStore,
@@ -257,11 +257,10 @@ struct ReaderScreen: View {
 
     private func toggleBookmark() {
         guard let currentLocator else { return }
-        // Prefer the chapter title, then the section title in the locator,
-        // then the progression, so the list row is always meaningful.
-        let title = currentLocator.title
-            ?? progression.map { "\(Int(($0 * 100).rounded()))%" }
-        bookmarkStore.toggle(bookID: book.id, locator: currentLocator, title: title)
+        // Store the chapter title when the locator has one; otherwise leave
+        // it nil and let the list fall back to "Bookmark" — the row shows
+        // the progression separately, so a "42% … 42%" duplicate is avoided.
+        bookmarkStore.toggle(bookID: book.id, locator: currentLocator, title: currentLocator.title)
     }
 
     // MARK: - Chrome
@@ -349,7 +348,7 @@ struct ReaderScreen: View {
 }
 
 /// Table of contents and the book's bookmarks, on two tabs.
-private struct ContentsSheet: View {
+private struct NavigationSheet: View {
     let publication: Publication
     let book: Book
     @ObservedObject var bookmarks: BookmarkStore
@@ -441,7 +440,7 @@ private struct ContentsSheet: View {
                                 .lineLimit(1)
                             Spacer()
                             if let progression = bookmarks.progression(of: bookmark) {
-                                Text("\(Int((progression * 100).rounded()))%")
+                                Text(BookmarkStore.progressionLabel(progression))
                                     .font(.caption.monospacedDigit())
                                     .foregroundStyle(.secondary)
                             }

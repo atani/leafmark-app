@@ -9,6 +9,12 @@ final class BookmarkStore: ObservableObject {
 
     private let storeURL: URL
 
+    /// Parsed Locators keyed by bookmark id. The toolbar's "is this page
+    /// bookmarked?" check and the list's sort run on every page turn and
+    /// every render, so the JSON is parsed once here on load/mutation
+    /// instead of on each read.
+    private var locatorCache: [String: Locator] = [:]
+
     /// Two positions in the same resource are treated as the same page when
     /// their progressions are within this margin, so the toolbar toggle can
     /// tell whether the current page is already bookmarked.
@@ -26,11 +32,25 @@ final class BookmarkStore: ObservableObject {
               let decoded = try? JSONDecoder().decode([Bookmark].self, from: data)
         else { return }
         bookmarks = decoded
+        rebuildCache()
     }
 
     private func save() {
         guard let data = try? JSONEncoder().encode(bookmarks) else { return }
         try? data.write(to: storeURL, options: .atomic)
+    }
+
+    private func rebuildCache() {
+        locatorCache = Dictionary(
+            uniqueKeysWithValues: bookmarks.compactMap { bookmark in
+                Self.parseLocator(bookmark.locatorJSON).map { (bookmark.id, $0) }
+            }
+        )
+    }
+
+    private static func parseLocator(_ json: String) -> Locator? {
+        guard let value = try? JSONValue(jsonString: json) else { return nil }
+        return try? Locator(json: value, warnings: nil)
     }
 
     /// Bookmarks of a book, ordered by reading position.
@@ -45,23 +65,30 @@ final class BookmarkStore: ObservableObject {
     }
 
     func locator(of bookmark: Bookmark) -> Locator? {
-        guard let value = try? JSONValue(jsonString: bookmark.locatorJSON) else { return nil }
-        return try? Locator(json: value, warnings: nil)
+        locatorCache[bookmark.id]
     }
 
     /// The bookmark at the given position, if any (same resource and
-    /// near-identical progression).
+    /// near-identical position).
     func bookmark(for bookID: String, at locator: Locator) -> Bookmark? {
         bookmarks.first { bookmark in
             guard bookmark.bookID == bookID,
                   let stored = self.locator(of: bookmark),
                   stored.href.isEquivalentTo(locator.href)
             else { return false }
-            let a = stored.locations.totalProgression
-            let b = locator.locations.totalProgression
-            // Same resource with no progression info counts as the same page.
-            guard let a, let b else { return a == nil && b == nil }
-            return abs(a - b) < Self.sameProgressionEpsilon
+            if let storedProgression = stored.locations.totalProgression,
+               let currentProgression = locator.locations.totalProgression {
+                return abs(storedProgression - currentProgression) < Self.sameProgressionEpsilon
+            }
+            // No total progression (e.g. positions not yet computed): fall
+            // back to the resource-relative position. When neither is known,
+            // treat the positions as different so toggling a new bookmark
+            // never silently deletes one elsewhere in the same resource.
+            if let storedPosition = stored.locations.position,
+               let currentPosition = locator.locations.position {
+                return storedPosition == currentPosition
+            }
+            return false
         }
     }
 
@@ -79,6 +106,7 @@ final class BookmarkStore: ObservableObject {
             createdAt: Date()
         )
         bookmarks.append(bookmark)
+        locatorCache[bookmark.id] = locator
         save()
         return bookmark
     }
@@ -97,15 +125,26 @@ final class BookmarkStore: ObservableObject {
 
     func remove(_ id: String) {
         bookmarks.removeAll { $0.id == id }
+        locatorCache[id] = nil
         save()
     }
 
     func removeAll(for bookID: String) {
+        let removed = bookmarks.filter { $0.bookID == bookID }
         bookmarks.removeAll { $0.bookID == bookID }
+        for bookmark in removed { locatorCache[bookmark.id] = nil }
         save()
     }
 
     func progression(of bookmark: Bookmark) -> Double? {
         locator(of: bookmark)?.locations.totalProgression
+    }
+
+    // MARK: - Labels
+
+    /// A percentage label for a reading progression, clamped to 0–100 so a
+    /// corrupt/out-of-range value can't trap `Int(_:)`.
+    static func progressionLabel(_ progression: Double) -> String {
+        "\(Int((min(max(progression, 0), 1) * 100).rounded()))%"
     }
 }

@@ -128,6 +128,25 @@ final class FontStoreTests: XCTestCase {
         XCTAssertTrue(FontStore(directory: tempDir).fonts.isEmpty)
     }
 
+    func testLoadDropsTamperedCatalogEntries() throws {
+        // Files アプリ等でカタログを改竄し、familyName に注入ペイロード、
+        // fileName にパストラバーサルを仕込んだ状況を再現する。実ファイルは
+        // 用意して「存在チェックだけでは弾けない」ことを担保する。
+        let fontsDir = tempDir.appendingPathComponent("Fonts", isDirectory: true)
+        try FileManager.default.createDirectory(at: fontsDir, withIntermediateDirectories: true)
+        try Data("bytes".utf8).write(to: fontsDir.appendingPathComponent("evil.ttf"))
+        let tampered = """
+        [
+          {"id":"a","fileName":"evil.ttf","familyName":"Foo</style><script>alert(1)</script>","cssWeight":null,"italic":null},
+          {"id":"b","fileName":"../evil.ttf","familyName":"Foo","cssWeight":null,"italic":null}
+        ]
+        """
+        try Data(tampered.utf8).write(to: fontsDir.appendingPathComponent("fonts.json"))
+
+        let store = FontStore(directory: tempDir)
+        XCTAssertTrue(store.fonts.isEmpty, "注入 familyName とパストラバーサルの両方が破棄される")
+    }
+
     // MARK: - Sanitization
 
     func testSanitizedFamilyNameStripsUnsafeCharacters() {
@@ -231,5 +250,18 @@ final class FontStoreTests: XCTestCase {
             throw URLError(.badURL)
         }
         XCTAssertTrue(html.contains(#"font-family: "Fam\"ily";"#), "引用符はエスケープされ CSS が壊れない")
+    }
+
+    func testInjectNeutralizesAngleBracketsInFamilyName() throws {
+        // 直接構築された悪意ある familyName でも <style> を閉じられない。
+        let declaration = DataURIFontFamilyDeclaration(
+            fontFamily: .init(rawValue: "Foo</style><script>alert(1)</script>"),
+            faces: [.init(base64: "QUJD", format: "font/ttf", cssWeight: nil, italic: nil)]
+        )
+        let html = try declaration.inject(in: "<html><head></head><body></body></html>") { _ in
+            throw URLError(.badURL)
+        }
+        XCTAssertFalse(html.contains("</style><script>"), "角括弧が無害化され style を抜け出せない")
+        XCTAssertFalse(html.contains("<script>"), "スクリプトタグが生成されない")
     }
 }

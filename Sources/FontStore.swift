@@ -209,13 +209,16 @@ final class FontStore: ObservableObject {
         guard let data = try? Data(contentsOf: catalogURL),
               let decoded = try? JSONDecoder().decode([CustomFont].self, from: data)
         else { return }
-        // Drop entries whose file vanished (e.g. a partial restore) and
-        // entries whose file name is not a plain base name — the catalog
-        // lives in a user-writable directory (Files app), so a tampered
-        // fileName must not escape the Fonts directory.
+        // The catalog lives in a user-writable directory (Files app), so a
+        // tampered entry must not (a) escape the Fonts directory via its
+        // fileName, or (b) smuggle CSS/HTML-breaking characters through its
+        // familyName, which is injected into a <style> tag. Both fields are
+        // re-validated here to match what importFont enforces. Also drops
+        // entries whose file vanished (e.g. a partial restore).
         fonts = decoded.filter {
             !$0.fileName.contains("/")
                 && !$0.fileName.contains("..")
+                && Self.sanitizedFamilyName($0.familyName) == $0.familyName
                 && fileManager.fileExists(atPath: fontsDir.appendingPathComponent($0.fileName).path)
         }
         if fonts.count != decoded.count {
@@ -250,9 +253,13 @@ struct DataURIFontFamilyDeclaration: HTMLFontFamilyDeclaration {
         guard let head = html.range(of: "</head>", options: [.caseInsensitive]) else {
             return html
         }
-        // The family name is sanitized at import time; escaping here is
-        // defense in depth for callers constructing declarations directly.
+        // The family name is sanitized at import and at load; escaping here
+        // is defense in depth for callers constructing declarations
+        // directly. Drop the characters that could break out of the CSS
+        // string or the surrounding <style> element, then escape the rest.
         let family = fontFamily.rawValue
+            .components(separatedBy: CharacterSet(charactersIn: "<>"))
+            .joined()
             .replacingOccurrences(of: "\\", with: "\\\\")
             .replacingOccurrences(of: "\"", with: "\\\"")
         let css = faces

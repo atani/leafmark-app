@@ -167,7 +167,9 @@ final class BookmarkStoreTests: XCTestCase {
         XCTAssertEqual(BookmarkStore.progressionLabel(0.5), "50%")
         // 改竄データ由来の範囲外値でも Int(_:) がトラップせずクランプされる。
         XCTAssertEqual(BookmarkStore.progressionLabel(1e300), "100%")
+        XCTAssertEqual(BookmarkStore.progressionLabel(.infinity), "100%")
         XCTAssertEqual(BookmarkStore.progressionLabel(-5), "0%")
+        XCTAssertEqual(BookmarkStore.progressionLabel(.nan), "0%", "NaN でもトラップしない")
     }
 
     func testRemoveAllForBook() throws {

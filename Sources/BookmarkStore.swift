@@ -41,10 +41,13 @@ final class BookmarkStore: ObservableObject {
     }
 
     private func rebuildCache() {
+        // uniquingKeysWith (not uniqueKeysWithValues) so a corrupt catalog
+        // with duplicate ids can't trap at launch.
         locatorCache = Dictionary(
-            uniqueKeysWithValues: bookmarks.compactMap { bookmark in
+            bookmarks.compactMap { bookmark in
                 Self.parseLocator(bookmark.locatorJSON).map { (bookmark.id, $0) }
-            }
+            },
+            uniquingKeysWith: { current, _ in current }
         )
     }
 
@@ -143,8 +146,11 @@ final class BookmarkStore: ObservableObject {
     // MARK: - Labels
 
     /// A percentage label for a reading progression, clamped to 0–100 so a
-    /// corrupt/out-of-range value can't trap `Int(_:)`.
+    /// corrupt/out-of-range value can't trap `Int(_:)`. The constant-first
+    /// order matters: `max(0, .nan)` returns 0 (the comparison is false), so
+    /// NaN clamps to 0 instead of flowing into a trapping `Int(.nan)`.
     static func progressionLabel(_ progression: Double) -> String {
-        "\(Int((min(max(progression, 0), 1) * 100).rounded()))%"
+        let clamped = min(1, max(0, progression))
+        return "\(Int((clamped * 100).rounded()))%"
     }
 }

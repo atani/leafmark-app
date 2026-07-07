@@ -42,6 +42,12 @@ struct ReaderScreen: View {
         HighlightColor(rawValue: highlightColorRaw) ?? .yellow
     }
 
+    /// Family name of the selected user-imported font, or nil for built-ins.
+    private var selectedCustomFamily: String? {
+        guard appearance.fontRaw.hasPrefix(AppearanceStore.customFontPrefix) else { return nil }
+        return String(appearance.fontRaw.dropFirst(AppearanceStore.customFontPrefix.count))
+    }
+
     private var initialLocator: Locator? {
         guard let json = book.locatorJSON,
               let value = try? JSONValue(jsonString: json),
@@ -56,7 +62,9 @@ struct ReaderScreen: View {
                 publication: publication,
                 initialLocation: initialLocator,
                 preferences: appearance.preferences,
-                fontFamilyDeclarations: fontStore.fontFamilyDeclarations,
+                makeFontFamilyDeclarations: {
+                    fontStore.fontFamilyDeclarations(for: selectedCustomFamily)
+                },
                 bridge: bridge,
                 onLocatorChange: { locator in
                     progression = locator.locations.totalProgression
@@ -545,6 +553,28 @@ private struct AppearanceSheet: View {
         UTType(filenameExtension: "otf"),
     ].compactMap { $0 }
 
+    /// Unique imported family names, in a stable order for the picker.
+    private var importedFamilies: [String] {
+        var seen = Set<String>()
+        return fontStore.fonts.compactMap { font in
+            seen.insert(font.familyName).inserted ? font.familyName : nil
+        }
+    }
+
+    /// Distinguishes faces of the same family in the management list.
+    private func faceLabel(for font: CustomFont) -> String {
+        var qualifiers: [String] = []
+        if let weight = font.cssWeight, weight != 400 {
+            qualifiers.append(weight >= 600 ? "Bold \(weight)" : "Weight \(weight)")
+        }
+        if font.italic == true {
+            qualifiers.append("Italic")
+        }
+        return qualifiers.isEmpty
+            ? font.familyName
+            : "\(font.familyName) (\(qualifiers.joined(separator: ", ")))"
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -562,9 +592,11 @@ private struct AppearanceSheet: View {
                         ForEach(AppearanceStore.ReaderFont.allCases) { font in
                             Text(font.rawValue).tag(font.rawValue)
                         }
-                        ForEach(fontStore.fonts) { font in
-                            Text(font.familyName)
-                                .tag(AppearanceStore.customFontPrefix + font.familyName)
+                        // One entry per family: multiple faces (regular /
+                        // bold files) share a picker row and a tag.
+                        ForEach(importedFamilies, id: \.self) { family in
+                            Text(family)
+                                .tag(AppearanceStore.customFontPrefix + family)
                         }
                     }
 
@@ -621,17 +653,21 @@ private struct AppearanceSheet: View {
                 if !fontStore.fonts.isEmpty {
                     Section("Imported Fonts") {
                         ForEach(fontStore.fonts) { font in
-                            Text(font.familyName)
+                            Text(faceLabel(for: font))
                         }
                         .onDelete { offsets in
-                            for index in offsets {
-                                let font = fontStore.fonts[index]
-                                // Removing the selected font falls back to
-                                // the publisher default.
-                                if appearance.fontRaw == AppearanceStore.customFontPrefix + font.familyName {
+                            // Resolve targets before mutating: removing
+                            // shifts the indices in `fonts`.
+                            let removed = offsets.map { fontStore.fonts[$0] }
+                            for font in removed {
+                                fontStore.remove(font)
+                                // Fall back to the publisher default only
+                                // when no other face of the family remains.
+                                let familyGone = !fontStore.fonts.contains { $0.familyName == font.familyName }
+                                if familyGone,
+                                   appearance.fontRaw == AppearanceStore.customFontPrefix + font.familyName {
                                     appearance.fontRaw = AppearanceStore.ReaderFont.publisher.rawValue
                                 }
-                                fontStore.remove(font)
                             }
                         }
                     }

@@ -48,10 +48,13 @@ struct ReaderView: UIViewControllerRepresentable {
     let publication: Publication
     let initialLocation: Locator?
     let preferences: EPUBPreferences
-    /// @font-face declarations for user-imported fonts (FontStore). Fixed
-    /// for the lifetime of the navigator — fonts imported while a book is
-    /// open apply the next time a book is opened.
-    let fontFamilyDeclarations: [AnyHTMLFontFamilyDeclaration]
+    /// Builds the @font-face declarations for user-imported fonts
+    /// (FontStore). Called once when the navigator is created — reading
+    /// and base64-encoding font files is too expensive to run on every
+    /// SwiftUI body evaluation. Fixed for the lifetime of the navigator:
+    /// fonts imported while a book is open apply the next time a book is
+    /// opened.
+    let makeFontFamilyDeclarations: () -> [AnyHTMLFontFamilyDeclaration]
     let bridge: NavigatorBridge
     let onLocatorChange: (Locator) -> Void
     let onTap: () -> Void
@@ -70,7 +73,7 @@ struct ReaderView: UIViewControllerRepresentable {
         do {
             var config = EPUBNavigatorViewController.Configuration()
             config.preferences = preferences
-            config.fontFamilyDeclarations += fontFamilyDeclarations
+            config.fontFamilyDeclarations += makeFontFamilyDeclarations()
             config.editingActions = EditingAction.defaultActions + [
                 EditingAction(
                     title: "Highlight",

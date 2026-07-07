@@ -1,7 +1,10 @@
 import SwiftUI
 import UIKit
 import ReadiumShared
-import ReadiumNavigator
+// ExperimentalTargetElement は Readium 3.9 が公開する SPI。タップされた要素
+// （画像など）を `PointerEvent.targetElement` として受け取るために必要で、
+// 公式 TestApp と同じ利用方法（フォーク不要）。
+@_spi(ExperimentalTargetElement) import ReadiumNavigator
 
 /// Bridges Readium's EPUB navigator into SwiftUI and exposes it to the
 /// surrounding chrome through `NavigatorBridge`.
@@ -58,6 +61,10 @@ struct ReaderView: UIViewControllerRepresentable {
     let bridge: NavigatorBridge
     let onLocatorChange: (Locator) -> Void
     let onTap: () -> Void
+    /// Called when the user taps a content image (`<img>` / `<svg>`), so the
+    /// host can present a full-screen zoomable viewer. A plain tap that is not
+    /// on an image falls through to `onTap` (chrome toggle) instead.
+    let onImageTap: (ImageContentElement) -> Void
     /// Called when the user picks "Highlight" in the selection menu.
     let onHighlightSelection: () -> Void
     /// Called when the user picks "Add Note" in the selection menu.
@@ -66,7 +73,7 @@ struct ReaderView: UIViewControllerRepresentable {
     let onHighlightActivated: (Decoration.Id) -> Void
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(onLocatorChange: onLocatorChange, onTap: onTap)
+        Coordinator(onLocatorChange: onLocatorChange)
     }
 
     func makeUIViewController(context: Context) -> UIViewController {
@@ -96,6 +103,40 @@ struct ReaderView: UIViewControllerRepresentable {
                 onHighlightActivated(event.decoration.id)
             }
 
+            // Tap handling runs through Readium's InputObservable pipeline so
+            // that a tap on a content image can be told apart from a tap on
+            // plain text. Observers are consulted in registration order and the
+            // first one that returns `true` consumes the event.
+            let handleImageTap = onImageTap
+            let handleTap = onTap
+            // 1. Content image → open the zoom viewer and consume the tap.
+            _ = navigator.addObserver(.activate { event in
+                #if DEBUG
+                NSLog("[ImageZoom] activate: targetElement=%@ content=%@",
+                      String(describing: event.targetElement),
+                      String(describing: event.targetElement?.content))
+                #endif
+                guard
+                    let target = event.targetElement,
+                    let image = target.content as? ImageContentElement
+                else {
+                    return false
+                }
+                #if DEBUG
+                NSLog("[ImageZoom] IMAGE href=%@", image.embeddedLink.href)
+                #endif
+                handleImageTap(image)
+                return true
+            })
+            // 2. Otherwise toggle the reading chrome (previous behaviour).
+            _ = navigator.addObserver(.activate { _ in
+                #if DEBUG
+                NSLog("[ImageZoom] toggling chrome")
+                #endif
+                handleTap()
+                return true
+            })
+
             let container = ReaderContainerViewController(navigator: navigator)
             container.onHighlight = onHighlightSelection
             container.onNote = onNoteSelection
@@ -113,11 +154,9 @@ struct ReaderView: UIViewControllerRepresentable {
     @MainActor
     final class Coordinator: NSObject, EPUBNavigatorDelegate {
         let onLocatorChange: (Locator) -> Void
-        let onTap: () -> Void
 
-        init(onLocatorChange: @escaping (Locator) -> Void, onTap: @escaping () -> Void) {
+        init(onLocatorChange: @escaping (Locator) -> Void) {
             self.onLocatorChange = onLocatorChange
-            self.onTap = onTap
         }
 
         func navigator(_ navigator: Navigator, locationDidChange locator: Locator) {
@@ -128,9 +167,9 @@ struct ReaderView: UIViewControllerRepresentable {
             // Surfaced through the reading view itself; nothing actionable here.
         }
 
-        func navigator(_ navigator: VisualNavigator, didTapAt point: CGPoint) {
-            onTap()
-        }
+        // Note: tap handling (chrome toggle / image zoom) is wired through the
+        // navigator's InputObservable observers in `makeUIViewController`, not
+        // `didTapAt`, because that pipeline also exposes the tapped element.
     }
 }
 

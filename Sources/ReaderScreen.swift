@@ -39,6 +39,9 @@ struct ReaderScreen: View {
     /// Applied automatically if they upgrade from the paywall.
     @State private var pendingHighlight: (locator: Locator, withNote: Bool)?
 
+    /// Content image the user tapped, presented full-screen for zoom/pan.
+    @State private var zoomImageTarget: ZoomImageTarget?
+
     @AppStorage("highlight.color") private var highlightColorRaw = HighlightColor.yellow.rawValue
 
     private var highlightColor: HighlightColor {
@@ -82,6 +85,9 @@ struct ReaderScreen: View {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         chromeVisible.toggle()
                     }
+                },
+                onImageTap: { image in
+                    zoomImageTarget = ZoomImageTarget(image: image)
                 },
                 onHighlightSelection: { makeHighlight(withNote: false) },
                 onNoteSelection: { makeHighlight(withNote: true) },
@@ -145,6 +151,9 @@ struct ReaderScreen: View {
         }
         .sheet(item: $noteTarget) { highlight in
             NoteEditorSheet(highlight: highlight, store: highlightStore)
+        }
+        .fullScreenCover(item: $zoomImageTarget) { target in
+            ZoomableImageView(publication: publication, image: target.image)
         }
         .confirmationDialog(
             "Highlight",
@@ -345,6 +354,13 @@ struct ReaderScreen: View {
         }
         .transition(.opacity)
     }
+}
+
+/// Identifiable wrapper so a tapped content image can drive `fullScreenCover`.
+/// A fresh `id` per tap lets the user reopen the same image after dismissing.
+private struct ZoomImageTarget: Identifiable {
+    let id = UUID()
+    let image: ImageContentElement
 }
 
 /// Table of contents and the book's bookmarks, on two tabs.

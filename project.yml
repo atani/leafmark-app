@@ -89,6 +89,7 @@ targets:
       - package: Readium
         products:
           - ReadiumShared
+          - ReadiumNavigator
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.atani.inkwellTests

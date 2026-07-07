@@ -17,6 +17,7 @@
 		360133DDF5985AD99BF4A4F5 /* Book.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A64A8F464ED20E4588B914 /* Book.swift */; };
 		395FDD8E28BFA05480824ACA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC576BF61FC0E6B89F918E89 /* Assets.xcassets */; };
 		3ABC25DBEF076F567F4E5C27 /* sample-frankenstein.epub in Resources */ = {isa = PBXBuildFile; fileRef = 9C7C9B0CA6AD7582D30096A5 /* sample-frankenstein.epub */; };
+		3B6B42A974EADE746691AAAF /* ImageZoomMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94D2C27A0F1DE44E7CC731A8 /* ImageZoomMathTests.swift */; };
 		3EA393575D68ABA02D957B86 /* BookmarkStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBD2D1FF7863C8948250BCDE /* BookmarkStore.swift */; };
 		4A41100C261A9E073BA88C82 /* AppearanceStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 236CE31AE6CC4238F93CC092 /* AppearanceStoreTests.swift */; };
 		4D728291D65E87957B54364B /* BookmarkStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D597135F33B3839C91C34BAE /* BookmarkStoreTests.swift */; };
@@ -43,6 +44,7 @@
 		D0CA990F026EEDE8DE7626CD /* SearchSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF2BB9401046C30A6D2130F0 /* SearchSheet.swift */; };
 		D44514729F897AB8B63F5973 /* HighlightStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B140FE56D3E2B3C9F07D0250 /* HighlightStore.swift */; };
 		D59FD4FFC23C1EFFDD2A2EBC /* StatsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAC5403A01A72F0CDED402DA /* StatsStore.swift */; };
+		D87CD3CB2C3D8662750EE0EA /* ZoomableImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8013ED573BF333C208F1A2A1 /* ZoomableImageView.swift */; };
 		F74D05E77022F94D16885701 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 925A2A78DBBD0A77BACFE447 /* LibraryView.swift */; };
 /* End PBXBuildFile section */
 
@@ -69,9 +71,11 @@
 		74FEC4652079B406D32F67AD /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
 		75F00B55B730599AFB881896 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		7C02E5C2A47C859473CBF56D /* StoreManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManagerTests.swift; sourceTree = "<group>"; };
+		8013ED573BF333C208F1A2A1 /* ZoomableImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableImageView.swift; sourceTree = "<group>"; };
 		82EF1BB1CEDAB8D36C409CA7 /* StorePurchaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorePurchaseTests.swift; sourceTree = "<group>"; };
 		8E51CFEF70D104A3CDC04B79 /* AppearanceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceStore.swift; sourceTree = "<group>"; };
 		925A2A78DBBD0A77BACFE447 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		94D2C27A0F1DE44E7CC731A8 /* ImageZoomMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageZoomMathTests.swift; sourceTree = "<group>"; };
 		9C7C9B0CA6AD7582D30096A5 /* sample-frankenstein.epub */ = {isa = PBXFileReference; path = "sample-frankenstein.epub"; sourceTree = "<group>"; };
 		ABE697D651677D282980C7AA /* HighlightStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightStoreTests.swift; sourceTree = "<group>"; };
 		B140FE56D3E2B3C9F07D0250 /* HighlightStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightStore.swift; sourceTree = "<group>"; };
@@ -144,6 +148,7 @@
 				D597135F33B3839C91C34BAE /* BookmarkStoreTests.swift */,
 				B931E958602C0882AB2CE37E /* FontStoreTests.swift */,
 				ABE697D651677D282980C7AA /* HighlightStoreTests.swift */,
+				94D2C27A0F1DE44E7CC731A8 /* ImageZoomMathTests.swift */,
 				C09754C48F4001FA03EFB97A /* StatsStoreTests.swift */,
 				7C02E5C2A47C859473CBF56D /* StoreManagerTests.swift */,
 				82EF1BB1CEDAB8D36C409CA7 /* StorePurchaseTests.swift */,
@@ -175,6 +180,7 @@
 				BAC5403A01A72F0CDED402DA /* StatsStore.swift */,
 				D61990AE4EAD8D2C81AC80E8 /* StatsView.swift */,
 				74FEC4652079B406D32F67AD /* StoreManager.swift */,
+				8013ED573BF333C208F1A2A1 /* ZoomableImageView.swift */,
 			);
 			name = Sources;
 			path = Sources;
@@ -325,6 +331,7 @@
 				D59FD4FFC23C1EFFDD2A2EBC /* StatsStore.swift in Sources */,
 				1A15004C16346F708E8E712D /* StatsView.swift in Sources */,
 				3047D842DBAB838B1DA2D686 /* StoreManager.swift in Sources */,
+				D87CD3CB2C3D8662750EE0EA /* ZoomableImageView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -336,6 +343,7 @@
 				4D728291D65E87957B54364B /* BookmarkStoreTests.swift in Sources */,
 				7CE001FB6616796ACB81DBA6 /* FontStoreTests.swift in Sources */,
 				902B002C5D910B73C9B41652 /* HighlightStoreTests.swift in Sources */,
+				3B6B42A974EADE746691AAAF /* ImageZoomMathTests.swift in Sources */,
 				885BC9CC5C8A48D4A7AC4799 /* StatsStoreTests.swift in Sources */,
 				CC648FEC557B486C959B5553 /* StoreManagerTests.swift in Sources */,
 				04F6FEA10A0D1DD91E0CD6FD /* StorePurchaseTests.swift in Sources */,

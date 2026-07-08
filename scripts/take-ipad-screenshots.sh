@@ -13,7 +13,7 @@
 
 set -euo pipefail
 
-SCHEME="${1:-Inkwell}"
+SCHEME="${1:-Leafmark}"
 SS_DIR="docs/screenshots/ipad-13"
 BUNDLE_ID="com.atani.inkwell"
 EPUB_FILE="$(ls *.epub 2>/dev/null | head -1)"

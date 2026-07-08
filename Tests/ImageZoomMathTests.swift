@@ -1,6 +1,6 @@
 import XCTest
 import UIKit
-@testable import Inkwell
+@testable import Leafmark
 
 /// ImageZoomMath は UIScrollView に依存しない純粋なレイアウト計算なので、
 /// 倍率と中央寄せ inset の境界条件をここで固定する。

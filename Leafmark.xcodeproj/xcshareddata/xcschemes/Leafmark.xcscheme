@@ -15,10 +15,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "43FA894527ECF67699BDD019"
-               BuildableName = "Inkwell.app"
-               BlueprintName = "Inkwell"
-               ReferencedContainer = "container:Inkwell.xcodeproj">
+               BlueprintIdentifier = "2299CB11FF1F95AFAEE0B6D0"
+               BuildableName = "Leafmark.app"
+               BlueprintName = "Leafmark"
+               ReferencedContainer = "container:Leafmark.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,10 +32,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "43FA894527ECF67699BDD019"
-            BuildableName = "Inkwell.app"
-            BlueprintName = "Inkwell"
-            ReferencedContainer = "container:Inkwell.xcodeproj">
+            BlueprintIdentifier = "2299CB11FF1F95AFAEE0B6D0"
+            BuildableName = "Leafmark.app"
+            BlueprintName = "Leafmark"
+            ReferencedContainer = "container:Leafmark.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
@@ -44,10 +44,10 @@
             parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "CC63611B660A1269957AAEAC"
-               BuildableName = "InkwellTests.xctest"
-               BlueprintName = "InkwellTests"
-               ReferencedContainer = "container:Inkwell.xcodeproj">
+               BlueprintIdentifier = "A943209CC711757B73BD75ED"
+               BuildableName = "LeafmarkTests.xctest"
+               BlueprintName = "LeafmarkTests"
+               ReferencedContainer = "container:Leafmark.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -68,16 +68,16 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "43FA894527ECF67699BDD019"
-            BuildableName = "Inkwell.app"
-            BlueprintName = "Inkwell"
-            ReferencedContainer = "container:Inkwell.xcodeproj">
+            BlueprintIdentifier = "2299CB11FF1F95AFAEE0B6D0"
+            BuildableName = "Leafmark.app"
+            BlueprintName = "Leafmark"
+            ReferencedContainer = "container:Leafmark.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
       </CommandLineArguments>
       <StoreKitConfigurationFileReference
-         identifier = "../../Inkwell.storekit">
+         identifier = "../../Leafmark.storekit">
       </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
@@ -90,10 +90,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "43FA894527ECF67699BDD019"
-            BuildableName = "Inkwell.app"
-            BlueprintName = "Inkwell"
-            ReferencedContainer = "container:Inkwell.xcodeproj">
+            BlueprintIdentifier = "2299CB11FF1F95AFAEE0B6D0"
+            BuildableName = "Leafmark.app"
+            BlueprintName = "Leafmark"
+            ReferencedContainer = "container:Leafmark.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

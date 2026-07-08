@@ -1,7 +1,7 @@
 import XCTest
 import ReadiumNavigator
 import ReadiumShared
-@testable import Inkwell
+@testable import Leafmark
 
 @MainActor
 final class FontStoreTests: XCTestCase {

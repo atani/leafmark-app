@@ -22,11 +22,11 @@ final class StoreManager: ObservableObject {
 
 #if DEBUG
     /// Forces the Pro entitlement for App Store screenshot capture, enabled
-    /// only by the `-inkwellForcePro` launch argument in DEBUG builds. The
+    /// only by the `-leafmarkForcePro` launch argument in DEBUG builds. The
     /// simulator does not serve the bundled StoreKit configuration to apps
     /// launched outside Xcode, so this is the only way to render the Pro-only
     /// screens (statistics, export) for screenshots. Never compiled into release.
-    private let forcePro = ProcessInfo.processInfo.arguments.contains("-inkwellForcePro")
+    private let forcePro = ProcessInfo.processInfo.arguments.contains("-leafmarkForcePro")
 #endif
 
     init() {
@@ -71,7 +71,7 @@ final class StoreManager: ObservableObject {
         }
     }
 
-    /// Buys Inkwell Pro. Returns true when the purchase completed and unlocked.
+    /// Buys Leafmark Pro. Returns true when the purchase completed and unlocked.
     @discardableResult
     func purchase() async -> Bool {
         guard let product else { return false }

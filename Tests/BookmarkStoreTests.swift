@@ -1,6 +1,6 @@
 import XCTest
 import ReadiumShared
-@testable import Inkwell
+@testable import Leafmark
 
 @MainActor
 final class BookmarkStoreTests: XCTestCase {

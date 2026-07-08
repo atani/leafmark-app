@@ -1,5 +1,5 @@
 import XCTest
-@testable import Inkwell
+@testable import Leafmark
 
 /// AppearanceStore is backed by @AppStorage (UserDefaults.standard), so
 /// every test saves and restores the touched keys to avoid leaking state

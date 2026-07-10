@@ -36,6 +36,33 @@
       実装には JS で elementFromPoint による画像ヒットテスト + src 取得 → ズーム可能ビューア提示が必要。
       挿絵の多い EPUB で効く
 
+## upstream 待ち（readium/swift-toolkit#854 マージ後に実施）
+
+[readium/swift-toolkit#854](https://github.com/readium/swift-toolkit/pull/854)（opt-in の
+`fontWeightSynthesis`。issue [#853](https://github.com/readium/swift-toolkit/issues/853)）が
+マージ・リリースされたら、アプリ内の合成ウェイト実装（PR
+[#26](https://github.com/atani/epub-reader-ios/pull/26)）を upstream 設定に置き換える。
+
+- [ ] Readium 依存を #854 入りのタグ（3.11 以降）へ更新する
+  - `project.yml` の `revision: 8811f0e...` を `from: "3.11.0"` 相当へ戻す
+    （コメントに記載済みの issue #18 の後始末と同時に完了する）
+  - `Leafmark.xcodeproj/project.pbxproj` の `kind = revision` も `upToNextMajorVersion` に戻す
+- [ ] アプリ内ワークアラウンドを削除する
+  - `Sources/SyntheticWeight.swift` と `Tests/SyntheticWeightTests.swift` を削除
+  - sentinel ファミリー `-leafmark-synthetic-weight` の注入配線
+    （`FontStore` / `ReaderScreen` 側）を削除
+  - `project.pbxproj` から両ファイルのエントリを削除
+- [ ] `AppearanceStore.preferences` で `fontWeightSynthesis: true` を設定する
+  （>1.0 の判定と em スケーリングは upstream 側が行う）
+- [ ] 「ストローク変更は本を開き直すと反映」の注記コメント・挙動を撤去する
+  （upstream 経路は `readium.setCSSProperties` によるライブ更新のため、開き直し不要になる）
+- [ ] 検証: インポートフォント（単一フェイス）で weight 100/150/250% がライブに変わること、
+  Georgia の実 Bold フェイス切替が壊れていないこと、ダークテーマでストローク色が文字色に
+  追従すること（currentColor）
+- [ ] 検証手法メモ: シミュレータの設定書き換えはアプリコンテナ内 plist を
+  シミュレータ shutdown 中に plistlib で編集 → boot（`simctl spawn defaults write` は
+  グローバル設定に書いてしまい、アプリには届かない）
+
 ## v0.4 候補
 
 - [x] クラウド取り込み(Google Drive 等): 専用 SDK は持たず標準 Files プロバイダ経由に決定(ADR-0006)。

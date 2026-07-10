@@ -1,4 +1,4 @@
-name: Inkwell
+name: Leafmark
 options:
   bundleIdPrefix: com.atani
   deploymentTarget:
@@ -20,7 +20,7 @@ settings:
     ENABLE_USER_SCRIPT_SANDBOXING: NO
 
 targets:
-  Inkwell:
+  Leafmark:
     type: application
     platform: iOS
     sources:
@@ -77,15 +77,15 @@ targets:
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
 
-  InkwellTests:
+  LeafmarkTests:
     type: bundle.unit-test
     platform: iOS
     sources:
       - path: Tests
-      - path: Inkwell.storekit
+      - path: Leafmark.storekit
         buildPhase: resources
     dependencies:
-      - target: Inkwell
+      - target: Leafmark
       - package: Readium
         products:
           - ReadiumShared
@@ -96,13 +96,13 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
 
 schemes:
-  Inkwell:
+  Leafmark:
     build:
       targets:
-        Inkwell: all
+        Leafmark: all
     test:
       targets:
-        - InkwellTests
+        - LeafmarkTests
     run:
       config: Debug
-      storeKitConfiguration: Inkwell.storekit
+      storeKitConfiguration: Leafmark.storekit

@@ -1,5 +1,5 @@
 import XCTest
-@testable import Inkwell
+@testable import Leafmark
 
 @MainActor
 final class StoreManagerTests: XCTestCase {

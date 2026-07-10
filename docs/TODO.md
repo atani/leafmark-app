@@ -31,8 +31,8 @@
       (2026-07-07、Leafmark を試した好意的レビューで要望)。現状は読書位置の自動保存のみで
       明示ブックマークは無い。Marvin にあった定番機能。HighlightStore と同型の BookmarkStore +
       ツールバー導線 + 一覧シートで実現見込み。v1.6 の有力候補
-- [ ] 画像の全画面表示・ピンチズーム — 出所: 同上（「graphics display nicely but no way to
-      enlarge the graphic to full page」）。現状は画像タップ非対応（`didTapAt` は chrome トグルのみ）。
+- [ ] 画像の全画面表示・ピンチズーム — 出所: 同上。
+      要望は画像を全画面まで拡大したいという内容。現状は画像タップ非対応（`didTapAt` は chrome トグルのみ）。
       実装には JS で elementFromPoint による画像ヒットテスト + src 取得 → ズーム可能ビューア提示が必要。
       挿絵の多い EPUB で効く
 
@@ -49,8 +49,8 @@
 - [ ] オンボーディング・App Store スクリーンショット素材(英語)
   - 撮影用の書籍はパブリックドメインの作品を使う。
     入手先はPublic Domain LibraryまたはStandard Ebooksとする。
-    手元の `Docker入門.epub` は技術評論社の著作物なので表紙・本文を申請素材に使わない
-  - サイズは 6.9"(1320×2868)を基準に。iPhone 17 Pro Max Simulator で撮る
+    手元の `Docker入門.epub` は技術評論社の著作物なので、表紙・本文を申請素材に使わない
+  - サイズは 6.9 inch(1320×2868)を基準に。iPhone 17 Pro Max Simulator で撮る
   - `xcrun simctl status_bar override --time "9:41"` でステータスバーを整える
 
 ## v1.0 リリース準備
@@ -59,15 +59,22 @@
 - [ ] OPDS カタログ / Calibre 連携
 - [ ] アクセシビリティ監査(VoiceOver / Dynamic Type)
 - [x] 価格モデル決定(ADR-0005: 無料 DL + 非消費型 IAP「Leafmark Pro」$9.99。サブスクなし)
-- [x] StoreKit 2 課金実装(`StoreManager`・Paywall・Pro 機能ゲーティング・購入復元。ADR-0005 の境界線。`Inkwell.storekit` を scheme Run に紐付け)
-  - XcodeBuildMCP でゲーティング動線(無料枠超過・統計・エクスポートで `PaywallView` 提示)と Pro 画面(統計・ハイライト・エクスポート)を確認・撮影
-  - 実購入の目視確認は未実施。XcodeBuildMCP / `simctl launch` で起動したアプリには StoreKit 設定の商品が配信されず購入ボタンが非活性。Xcode の Run か App Store Connect への IAP 登録後に検証する
-  - Pro 画面の撮影は DEBUG 限定の `-inkwellForcePro` launch 引数(`StoreManager`)で解放。リリースには非搭載
+- [x] StoreKit 2 課金実装。
+      `StoreManager`・Paywall・Pro 機能ゲーティング・購入復元を実装。
+      ADR-0005 の境界線。`Leafmark.storekit` を scheme Run に紐付け
+  - XcodeBuildMCP でゲーティング動線と Pro 画面を確認・撮影。
+    無料枠超過・統計・エクスポートで `PaywallView` を提示する
+  - 実購入の目視確認は未実施。
+    XcodeBuildMCP / `simctl launch` では StoreKit 設定の商品が配信されず、購入ボタンが非活性。
+    Xcode の Run か App Store Connect への IAP 登録後に検証する
+  - Pro 画面の撮影は DEBUG 限定の `-leafmarkForcePro` launch 引数(`StoreManager`)で解放。リリースには非搭載
   - 購入フローの自動テストは headless `xcodebuild test` では SKTestSession が config の商品を配信しないためスキップ(Xcode 実行時は有効)
 - [ ] App Store 申請。「買い切り・ロックインなし・エクスポート自由」を訴求文の軸に(P2 × P8)
 
 ## 技術的負債
 
 - [ ] `locationDidChange` ごとのカタログ全書き込みをデバウンス(ADR-0003)
-- [x] ユニットテスト導入(HighlightStore / StatsStore のロジック。Tests/ + InkwellTests ターゲット。LibraryStore は Readium パース依存のため別途)
+- [x] ユニットテスト導入。
+      HighlightStore / StatsStore のロジックを Tests/ + LeafmarkTests ターゲットで検証。
+      LibraryStore は Readium パース依存のため別途
 - [ ] 蔵書が増えた場合の SQLite 移行判断(ADR-0002 の見直し条件)

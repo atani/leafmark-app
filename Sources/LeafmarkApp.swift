@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct InkwellApp: App {
+struct LeafmarkApp: App {
     @StateObject private var library = LibraryStore()
     @StateObject private var appearance = AppearanceStore()
     @StateObject private var highlights = HighlightStore()

@@ -1,9 +1,9 @@
 import XCTest
 import StoreKitTest
-@testable import Inkwell
+@testable import Leafmark
 
 /// Exercises the real purchase flow against the bundled StoreKit
-/// configuration (Inkwell.storekit) — no App Store Connect required.
+/// configuration (Leafmark.storekit) — no App Store Connect required.
 ///
 /// Note: under headless `xcodebuild test` on some simulator runtimes the
 /// StoreKit test daemon does not serve the configuration's products to a
@@ -16,7 +16,7 @@ final class StorePurchaseTests: XCTestCase {
     private var session: SKTestSession!
 
     override func setUpWithError() throws {
-        session = try SKTestSession(configurationFileNamed: "Inkwell")
+        session = try SKTestSession(configurationFileNamed: "Leafmark")
         session.resetToDefaultState()
         session.clearTransactions()
         session.disableDialogs = true

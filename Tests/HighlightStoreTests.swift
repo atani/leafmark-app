@@ -1,6 +1,6 @@
 import XCTest
 import ReadiumShared
-@testable import Inkwell
+@testable import Leafmark
 
 @MainActor
 final class HighlightStoreTests: XCTestCase {
@@ -104,6 +104,30 @@ final class HighlightStoreTests: XCTestCase {
 
         let md = store.exportMarkdown(for: book)
         XCTAssertTrue(md.contains("> line one\n> line two"), "改行ごとに引用記号を付ける")
+    }
+
+    func testExportFileNameUsesBookTitleAuthorAndTxtExtension() {
+        let book = Book(
+            id: "book-a",
+            fileName: "b.epub",
+            title: #"A/B: "Test" Book"#,
+            author: "Jane Doe",
+            addedAt: Date()
+        )
+
+        XCTAssertEqual(HighlightStore.exportFileName(for: book), "A B Test Book - Jane Doe.txt")
+    }
+
+    func testExportFileNameFallsBackWhenTitleAndAuthorAreBlank() {
+        let book = Book(
+            id: "book-a",
+            fileName: "b.epub",
+            title: " / ",
+            author: nil,
+            addedAt: Date()
+        )
+
+        XCTAssertEqual(HighlightStore.exportFileName(for: book), "Highlights.txt")
     }
 
     func testRemoveAllForBookRemovesOnlyThatBook() {

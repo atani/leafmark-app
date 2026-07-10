@@ -108,4 +108,36 @@ final class HighlightStore: ObservableObject {
         }
         return lines.joined(separator: "\n")
     }
+
+    func exportFile(for book: Book) -> HighlightExport {
+        HighlightExport(
+            text: exportMarkdown(for: book),
+            fileName: Self.exportFileName(for: book)
+        )
+    }
+
+    static func exportFileName(for book: Book) -> String {
+        let baseName = [book.title, book.author]
+            .compactMap(Self.sanitizedFileNamePart)
+            .joined(separator: " - ")
+
+        return "\(baseName.isEmpty ? "Highlights" : baseName).txt"
+    }
+
+    private static func sanitizedFileNamePart(_ value: String?) -> String? {
+        guard let value else { return nil }
+
+        let invalidCharacters = CharacterSet(charactersIn: "/:\\?%*|\"<>")
+            .union(.newlines)
+            .union(.controlCharacters)
+
+        let cleanedScalars = value.unicodeScalars.map { scalar in
+            invalidCharacters.contains(scalar) ? " " : String(scalar)
+        }
+        let cleaned = cleanedScalars.joined()
+            .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+            .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: ".")))
+
+        return cleaned.isEmpty ? nil : cleaned
+    }
 }

@@ -43,13 +43,15 @@ XcodeBuildMCP(`.mcp.json`)の UI 自動化で撮影。`osascript` のピクセ�
 
 ### 撮影上の注意
 
-- ルート直下の 01〜08 は iPhone 17(1206×2622)/ iPad 13"(2064×2752)。プレビュー/構図確認用
-- **App Store 提出用の最終セットは `6.9-inch/` に用意済み**(iPhone 17 Pro Max・1320×2868・英語)。下記参照
-- 08 は iPad Pro 13"(2064×2752)。2 カラム表示の検証用。ランドスケープは MCP で回転を
-  自動化できず縦向きで撮影、ステータスバーの日付がシステムロケールの日本語表示のため、
+- ルート直下の 01〜08 は iPhone 17(1206×2622)/ iPad 13 inch(2064×2752)。プレビュー/構図確認用
+- App Store 提出用の最終セットは `6.9-inch/` に用意済み。
+  iPhone 17 Pro Max・1320×2868・英語。下記参照
+- 08 は iPad Pro 13 inch(2064×2752)。2 カラム表示の検証用。
+  ランドスケープは MCP で回転を自動化できず縦向きで撮影。
+  ステータスバーの日付がシステムロケールの日本語表示のため、
   英語版の最終 iPad スクショは手動で撮り直す(回転 + 英語ロケール)
-- 05/06/07 は Pro 限定画面。MCP / `simctl launch` で起動したアプリには StoreKit 設定の商品が
-  配信されない(購入ボタンが非活性)ため、DEBUG 限定の `-inkwellForcePro` launch 引数(`StoreManager`)で
+- 05/06/07 は Pro 限定画面。MCP / `simctl launch` では StoreKit 設定の商品が
+  配信されない。そのため、DEBUG 限定の `-leafmarkForcePro` launch 引数(`StoreManager`)で
   エンタイトルメントを解放して撮影した。リリースビルドには非搭載
 - 06/07 のデータ(ハイライト 4 件・5 日分の読書セッション)はコンテナの `highlights.json` /
   `reading-sessions.json` にシードした。文面は J. M. Barrie の原文(パブリックドメイン)
@@ -58,7 +60,7 @@ XcodeBuildMCP(`.mcp.json`)の UI 自動化で撮影。`osascript` のピクセ�
 
 ## App Store 提出用セット(`6.9-inch/`)
 
-iPhone 17 Pro Max(1320×2868 = 6.9" スロット・英語・9:41 ステータスバー)で撮影した提出用。
+iPhone 17 Pro Max(1320×2868 = 6.9 inch スロット・英語・9:41 ステータスバー)で撮影した提出用。
 そのまま App Store Connect にアップロードできる。
 
 | ファイル | 内容 |
@@ -71,10 +73,10 @@ iPhone 17 Pro Max(1320×2868 = 6.9" スロット・英語・9:41 ステータス
 | `06-statistics.png` | 読書統計 |
 | `07-paywall.png` | Leafmark Pro(買い切り) |
 
-- 05/06 は `-inkwellForcePro` で Pro 解放、07 は非 Pro 起動で撮影(上の注意参照)。
+- 05/06 は `-leafmarkForcePro` で Pro 解放、07 は非 Pro 起動で撮影(上の注意参照)。
 - iPad ランドスケープ 2 カラムの提出用は未取得(MCP で回転を自動化できず)。手動で撮り直す。
 
 ## サイズ
 
-最終的に App Store は 6.9"(1320×2868)基準。`6.9-inch/` がそのまま使える。
+最終的に App Store は 6.9 inch(1320×2868)基準。`6.9-inch/` がそのまま使える。
 ルート直下の 01〜08(iPhone 17 = 1206×2622 / iPad = 2064×2752)はプレビュー/構図確認用。

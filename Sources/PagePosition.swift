@@ -36,7 +36,9 @@ struct PagePositionInfo: Equatable {
         // Positions are grouped by reading-order resource and laid out in
         // order, so a chapter is the contiguous run sharing one href.
         let chapterHref = positions[index].href
-        let chapterIndices = positions.indices.filter { positions[$0].href == chapterHref }
+        let chapterIndices = positions.indices.filter {
+            positions[$0].href.isEquivalentTo(chapterHref)
+        }
         let offset = chapterIndices.firstIndex(of: index) ?? 0
         pagesLeftInChapter = max(0, chapterIndices.count - offset - 1)
     }

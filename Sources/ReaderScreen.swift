@@ -243,26 +243,31 @@ struct ReaderScreen: View {
     private func pageOverlay(_ info: PagePositionInfo) -> some View {
         VStack {
             if appearance.showPageHeader {
-                Text(info.chapterHeaderText)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity)
+                pageLabel(info.chapterHeaderText)
                     .padding(.top, 6)
             }
 
             Spacer()
 
             if appearance.showPageFooter {
-                Text(info.footerText)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity)
+                pageLabel(info.footerText)
                     .padding(.bottom, 6)
             }
         }
         .padding(.horizontal)
         .allowsHitTesting(false)
         .transition(.opacity)
+    }
+
+    /// Capsule-backed caption so the label stays legible even when book
+    /// content (a heading, an image) runs underneath it.
+    private func pageLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 3)
+            .background(.thinMaterial, in: Capsule())
     }
 
     // MARK: - Highlights

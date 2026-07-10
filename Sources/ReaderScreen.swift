@@ -1,5 +1,6 @@
 import SwiftUI
 import StoreKit
+import UIKit
 import UniformTypeIdentifiers
 import ReadiumShared
 import ReadiumNavigator
@@ -213,6 +214,7 @@ struct ReaderScreen: View {
             stats.recordSession(bookID: book.id, startedAt: sessionStart, endedAt: Date())
         }
     }
+}
 
     // MARK: - Highlights
 
@@ -354,7 +356,6 @@ struct ReaderScreen: View {
         }
         .transition(.opacity)
     }
-}
 
 /// Identifiable wrapper so a tapped content image can drive `fullScreenCover`.
 /// A fresh `id` per tap lets the user reopen the same image after dismissing.
@@ -473,6 +474,7 @@ private struct NavigationSheet: View {
             .listStyle(.plain)
         }
     }
+}
 
     private func flatten(
         _ links: [ReadiumShared.Link],
@@ -551,7 +553,7 @@ private struct HighlightsSheet: View {
                     if !items.isEmpty {
                         if purchases.isPro {
                             ShareLink(
-                                item: store.exportMarkdown(for: book),
+                                item: store.exportFile(for: book),
                                 preview: SharePreview("\(book.title) — Highlights")
                             ) {
                                 Image(systemName: "square.and.arrow.up")
@@ -676,6 +678,10 @@ private struct AppearanceSheet: View {
         }
     }
 
+    private var systemFamilies: [String] {
+        UIFont.familyNames.sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+    }
+
     /// Distinguishes faces of the same family in the management list.
     private func faceLabel(for font: CustomFont) -> String {
         var qualifiers: [String] = []
@@ -707,11 +713,21 @@ private struct AppearanceSheet: View {
                         ForEach(AppearanceStore.ReaderFont.allCases) { font in
                             Text(font.rawValue).tag(font.rawValue)
                         }
+                        Section("System Fonts") {
+                            ForEach(systemFamilies, id: \.self) { family in
+                                Text(family)
+                                    .tag(AppearanceStore.systemFontPrefix + family)
+                            }
+                        }
                         // One entry per family: multiple faces (regular /
                         // bold files) share a picker row and a tag.
-                        ForEach(importedFamilies, id: \.self) { family in
-                            Text(family)
-                                .tag(AppearanceStore.customFontPrefix + family)
+                        if !importedFamilies.isEmpty {
+                            Section("Imported Fonts") {
+                                ForEach(importedFamilies, id: \.self) { family in
+                                    Text(family)
+                                        .tag(AppearanceStore.customFontPrefix + family)
+                                }
+                            }
                         }
                     }
 
@@ -743,7 +759,7 @@ private struct AppearanceSheet: View {
                         step: AppearanceStore.fontWeightStep
                     ) {
                         HStack {
-                            Text("Boldness")
+                            Text("Font Weight")
                             Spacer()
                             Text(appearance.fontWeight == 1.0
                                 ? "Default"
@@ -761,7 +777,9 @@ private struct AppearanceSheet: View {
                     Text("Font")
                 } footer: {
                     if !fontStore.fonts.isEmpty {
-                        Text("Imported fonts are embedded when a book is opened. Reopen this book to use a font you just imported.")
+                        Text("Import one or more .ttf or .otf files. ZIP files are not supported. Reopen this book to use a font you just imported.")
+                    } else {
+                        Text("Import one or more .ttf or .otf files. ZIP files are not supported.")
                     }
                 }
 
@@ -807,7 +825,7 @@ private struct AppearanceSheet: View {
                             Text("Line Height")
                             Spacer()
                             Text(appearance.lineHeight > 0
-                                ? String(format: "%.1f", appearance.lineHeight)
+                                ? String(format: "%.2f", appearance.lineHeight)
                                 : "Default")
                                 .foregroundStyle(.secondary)
                         }
@@ -856,4 +874,3 @@ private struct AppearanceSheet: View {
             }
         }
     }
-}

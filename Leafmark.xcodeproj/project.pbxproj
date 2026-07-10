@@ -38,6 +38,7 @@
 		CEA01EDCD91D46D8B68D480E /* ReadiumShared in Frameworks */ = {isa = PBXBuildFile; productRef = 7AA755DB1BAD8D2B49EF8DCB /* ReadiumShared */; };
 		D4A1D5D765048F0A00BB0BE8 /* StatsStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3E808A04A3AC068983F4E5 /* StatsStoreTests.swift */; };
 		E05C707EE8AE01A8E8256EB5 /* sample-meditations.epub in Resources */ = {isa = PBXBuildFile; fileRef = 3EA085ED00D1998E1475ED9C /* sample-meditations.epub */; };
+		E080376F80D4C019B378FBE4 /* HighlightExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20D3AB2EA403C50910EB6F0 /* HighlightExport.swift */; };
 		E6216E645805F87D2F26B8CA /* Bookmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A8B97727D2023C958873B8 /* Bookmark.swift */; };
 		EC87FBC0987850F663211B73 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339FC371BAB356EF20643E29 /* LibraryView.swift */; };
 		EC956E48ABDA346997C11C99 /* HighlightStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A31328B3686C1015E722EC5 /* HighlightStoreTests.swift */; };
@@ -92,6 +93,7 @@
 		CAAF403AFC257885411DC2B1 /* HighlightStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightStore.swift; sourceTree = "<group>"; };
 		CC30C446D1140BD0B7F8135E /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
 		D3D3F52B1BEA61BBAFAEF273 /* ZoomableImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableImageView.swift; sourceTree = "<group>"; };
+		E20D3AB2EA403C50910EB6F0 /* HighlightExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightExport.swift; sourceTree = "<group>"; };
 		E677C3E878FF72BDF5B15D05 /* LeafmarkTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LeafmarkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFAE2035D735F8B6C68B704D /* StoreManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManagerTests.swift; sourceTree = "<group>"; };
 		FE3E808A04A3AC068983F4E5 /* StatsStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsStoreTests.swift; sourceTree = "<group>"; };
@@ -130,6 +132,7 @@
 				68E127622541F806E6B7F690 /* BookmarkStore.swift */,
 				A0BEB06CC916B4E991FBACE7 /* FontStore.swift */,
 				778133C64BE5B786C5EC7543 /* Highlight.swift */,
+				E20D3AB2EA403C50910EB6F0 /* HighlightExport.swift */,
 				CAAF403AFC257885411DC2B1 /* HighlightStore.swift */,
 				551CFFE042036591367053D1 /* LeafmarkApp.swift */,
 				BD49E33A178C8BD553C56736 /* LibraryStore.swift */,
@@ -333,6 +336,7 @@
 				5988C9CC5F351A0B59EAA225 /* BookmarkStore.swift in Sources */,
 				EFB80E54DF7C465BE88D034D /* FontStore.swift in Sources */,
 				5FA94B77E270AD1C14B0E7BD /* Highlight.swift in Sources */,
+				E080376F80D4C019B378FBE4 /* HighlightExport.swift in Sources */,
 				2E635D7E7CD5B13158DDA76C /* HighlightStore.swift in Sources */,
 				FB1956C437B673BF9D35C393 /* LeafmarkApp.swift in Sources */,
 				7BD54B6FDBF30FFF970B511C /* LibraryStore.swift in Sources */,

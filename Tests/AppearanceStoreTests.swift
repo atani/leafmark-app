@@ -6,7 +6,7 @@ import XCTest
 /// into other tests or the host app.
 @MainActor
 final class AppearanceStoreTests: XCTestCase {
-    private let touchedKeys = ["reader.font", "reader.fontWeight"]
+    private let touchedKeys = ["reader.font", "reader.fontWeight", "reader.lineHeight", "reader.pageMargins"]
     private var savedValues: [String: Any] = [:]
 
     override func setUp() {
@@ -33,6 +33,12 @@ final class AppearanceStoreTests: XCTestCase {
         let store = AppearanceStore()
         store.fontRaw = AppearanceStore.customFontPrefix + "My Font"
         XCTAssertEqual(store.selectedFontFamily?.rawValue, "My Font")
+    }
+
+    func testSelectedFontFamilyResolvesSystemPrefix() {
+        let store = AppearanceStore()
+        store.fontRaw = AppearanceStore.systemFontPrefix + "Avenir Next"
+        XCTAssertEqual(store.selectedFontFamily?.rawValue, "Avenir Next")
     }
 
     func testSelectedFontFamilyForBuiltins() {
@@ -70,5 +76,13 @@ final class AppearanceStoreTests: XCTestCase {
 
         store.fontWeight = AppearanceStore.fontWeightRange.upperBound
         XCTAssertEqual(store.preferences.fontWeight, 2.5, "上限も送信される")
+    }
+
+    func testReaderAdjustmentRangesAllowFineControl() {
+        XCTAssertEqual(AppearanceStore.fontWeightStep, 0.05)
+        XCTAssertEqual(AppearanceStore.lineHeightRange.lowerBound, 0.8)
+        XCTAssertEqual(AppearanceStore.lineHeightStep, 0.05)
+        XCTAssertEqual(AppearanceStore.pageMarginsRange.lowerBound, 0.0)
+        XCTAssertEqual(AppearanceStore.pageMarginsStep, 0.05)
     }
 }

@@ -92,11 +92,15 @@ final class AppearanceStore: ObservableObject {
     /// Picker tag prefix for user-imported fonts (FontStore). The rest of
     /// the tag is the font's family name, used directly as the CSS family.
     static let customFontPrefix = "custom:"
+    static let systemFontPrefix = "system:"
 
     /// Resolves the selected font, whether built-in or user-imported.
     var selectedFontFamily: FontFamily? {
         if fontRaw.hasPrefix(Self.customFontPrefix) {
             return FontFamily(rawValue: String(fontRaw.dropFirst(Self.customFontPrefix.count)))
+        }
+        if fontRaw.hasPrefix(Self.systemFontPrefix) {
+            return FontFamily(rawValue: String(fontRaw.dropFirst(Self.systemFontPrefix.count)))
         }
         return font.fontFamily
     }
@@ -109,14 +113,14 @@ final class AppearanceStore: ObservableObject {
         objectWillChange.send()
     }
 
-    static let lineHeightRange: ClosedRange<Double> = 1.0 ... 2.0
-    static let lineHeightStep: Double = 0.1
-    static let pageMarginsRange: ClosedRange<Double> = 0.5 ... 2.0
-    static let pageMarginsStep: Double = 0.25
+    static let lineHeightRange: ClosedRange<Double> = 0.8 ... 2.0
+    static let lineHeightStep: Double = 0.05
+    static let pageMarginsRange: ClosedRange<Double> = 0.0 ... 2.0
+    static let pageMarginsStep: Double = 0.05
     // Readium supports 0.0–2.5 (1.0 = publisher weight); below 0.5 is
     // illegibly thin, so the UI stops there.
     static let fontWeightRange: ClosedRange<Double> = 0.5 ... 2.5
-    static let fontWeightStep: Double = 0.25
+    static let fontWeightStep: Double = 0.05
 
     var preferences: EPUBPreferences {
         EPUBPreferences(

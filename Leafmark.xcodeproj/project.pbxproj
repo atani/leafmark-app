@@ -39,6 +39,8 @@
 		D4A1D5D765048F0A00BB0BE8 /* StatsStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3E808A04A3AC068983F4E5 /* StatsStoreTests.swift */; };
 		E05C707EE8AE01A8E8256EB5 /* sample-meditations.epub in Resources */ = {isa = PBXBuildFile; fileRef = 3EA085ED00D1998E1475ED9C /* sample-meditations.epub */; };
 		E080376F80D4C019B378FBE4 /* HighlightExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20D3AB2EA403C50910EB6F0 /* HighlightExport.swift */; };
+		AA01BB02CC03DD04EE05FF07 /* PagePosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01BB02CC03DD04EE05FF06 /* PagePosition.swift */; };
+		AA01BB02CC03DD04EE05FF09 /* PagePositionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA01BB02CC03DD04EE05FF08 /* PagePositionTests.swift */; };
 		E6216E645805F87D2F26B8CA /* Bookmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A8B97727D2023C958873B8 /* Bookmark.swift */; };
 		EC87FBC0987850F663211B73 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339FC371BAB356EF20643E29 /* LibraryView.swift */; };
 		EC956E48ABDA346997C11C99 /* HighlightStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A31328B3686C1015E722EC5 /* HighlightStoreTests.swift */; };
@@ -65,6 +67,8 @@
 		0A31328B3686C1015E722EC5 /* HighlightStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightStoreTests.swift; sourceTree = "<group>"; };
 		1EC81A329420F362D3525267 /* ImageZoomMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageZoomMathTests.swift; sourceTree = "<group>"; };
 		2258232CB78FF8A65B94B388 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		AA01BB02CC03DD04EE05FF06 /* PagePosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagePosition.swift; sourceTree = "<group>"; };
+		AA01BB02CC03DD04EE05FF08 /* PagePositionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagePositionTests.swift; sourceTree = "<group>"; };
 		23C1B97E352C50C8C2297FFE /* SearchSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSheet.swift; sourceTree = "<group>"; };
 		2CC668075B2480DE3A89A190 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		2FD8F22F199BCC99E005D45D /* Book.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Book.swift; sourceTree = "<group>"; };
@@ -137,6 +141,7 @@
 				551CFFE042036591367053D1 /* LeafmarkApp.swift */,
 				BD49E33A178C8BD553C56736 /* LibraryStore.swift */,
 				339FC371BAB356EF20643E29 /* LibraryView.swift */,
+				AA01BB02CC03DD04EE05FF06 /* PagePosition.swift */,
 				2258232CB78FF8A65B94B388 /* PaywallView.swift */,
 				2CC668075B2480DE3A89A190 /* PrivacyInfo.xcprivacy */,
 				0368DD06A432C7DDA83C6F62 /* ReaderScreen.swift */,
@@ -182,6 +187,7 @@
 				7CAEC885D8FFD62D27A742D3 /* FontStoreTests.swift */,
 				0A31328B3686C1015E722EC5 /* HighlightStoreTests.swift */,
 				1EC81A329420F362D3525267 /* ImageZoomMathTests.swift */,
+				AA01BB02CC03DD04EE05FF08 /* PagePositionTests.swift */,
 				FE3E808A04A3AC068983F4E5 /* StatsStoreTests.swift */,
 				EFAE2035D735F8B6C68B704D /* StoreManagerTests.swift */,
 				A381A098CBBB8F4E778E488B /* StorePurchaseTests.swift */,
@@ -320,6 +326,7 @@
 				B2FFFD72D766F10B9F22B90E /* FontStoreTests.swift in Sources */,
 				EC956E48ABDA346997C11C99 /* HighlightStoreTests.swift in Sources */,
 				F7B22EEC42C1CA857C017CD1 /* ImageZoomMathTests.swift in Sources */,
+				AA01BB02CC03DD04EE05FF09 /* PagePositionTests.swift in Sources */,
 				D4A1D5D765048F0A00BB0BE8 /* StatsStoreTests.swift in Sources */,
 				7C190C62145AFD3E3D201F29 /* StoreManagerTests.swift in Sources */,
 				916E67A6402068EC16401933 /* StorePurchaseTests.swift in Sources */,
@@ -341,6 +348,7 @@
 				FB1956C437B673BF9D35C393 /* LeafmarkApp.swift in Sources */,
 				7BD54B6FDBF30FFF970B511C /* LibraryStore.swift in Sources */,
 				EC87FBC0987850F663211B73 /* LibraryView.swift in Sources */,
+				AA01BB02CC03DD04EE05FF07 /* PagePosition.swift in Sources */,
 				8DBFD20E212BF0DAB704441B /* PaywallView.swift in Sources */,
 				A723F471D725A3C7392C19FF /* ReaderScreen.swift in Sources */,
 				B8BB795248E6163F8799157C /* ReaderView.swift in Sources */,

@@ -74,6 +74,12 @@ final class AppearanceStore: ObservableObject {
     @AppStorage("reader.lineHeight") var lineHeight: Double = 0
     /// Page margins factor, 0.5...2.0.
     @AppStorage("reader.pageMargins") var pageMargins: Double = 1.0
+    /// Shows a header with the pages left in the current chapter. Off by
+    /// default to keep the reading view calm.
+    @AppStorage("reader.pageHeader") var showPageHeader: Bool = false
+    /// Shows a footer with the current page number and the book's total
+    /// (synthetic ADE-style page numbers). Off by default.
+    @AppStorage("reader.pageFooter") var showPageFooter: Bool = false
 
     var columns: ReaderColumns {
         ReaderColumns(rawValue: columnsRaw) ?? .auto

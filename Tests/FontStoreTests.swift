@@ -162,33 +162,32 @@ final class FontStoreTests: XCTestCase {
 
     // MARK: - Declarations
 
-    /// Applies every declaration to an empty document and returns the
-    /// resulting HTML, for content-level assertions.
+    /// Applies every declaration to an empty document, serving file URLs
+    /// as-is, and returns the resulting HTML for content-level assertions.
     private func injectAll(
         _ declarations: [AnyHTMLFontFamilyDeclaration],
         into html: String = "<html><head></head><body></body></html>"
     ) throws -> String {
         var result = html
         for declaration in declarations {
-            result = try declaration.inject(in: result) { _ in
-                throw URLError(.badURL) // data URI 実装は servingFile を呼ばない
-            }
+            result = try declaration.inject(in: result) { file in file }
         }
         return result
     }
 
     func testDeclarationsOnlyCoverRequestedFamily() throws {
         let store = FontStore(directory: tempDir)
-        store.importFont(from: try makeFile(named: "Alpha.ttf", contents: "alpha-bytes"))
+        let alpha = try XCTUnwrap(store.importFont(from: try makeFile(named: "Alpha.ttf", contents: "alpha-bytes")))
         store.importFont(from: try makeFile(named: "Beta.otf", contents: "beta-bytes"))
 
         XCTAssertEqual(store.fontFamilyDeclarations(for: "Alpha").count, 1)
-        XCTAssertTrue(store.fontFamilyDeclarations(for: nil).isEmpty, "未選択なら埋め込まない")
+        XCTAssertTrue(store.fontFamilyDeclarations(for: nil).isEmpty, "未選択なら宣言しない")
         XCTAssertTrue(store.fontFamilyDeclarations(for: "Gamma").isEmpty)
 
         let html = try injectAll(store.fontFamilyDeclarations(for: "Alpha"))
-        XCTAssertTrue(html.contains("data:font/ttf;base64,\(Data("alpha-bytes".utf8).base64EncodedString())"))
-        XCTAssertFalse(html.contains("Beta"), "選択外ファミリーのバイト列は埋め込まれない")
+        XCTAssertTrue(html.contains(#"font-family: "Alpha";"#))
+        XCTAssertTrue(html.contains(alpha.fileName), "選択ファミリーのファイル URL が src に出る")
+        XCTAssertFalse(html.contains("Beta"), "選択外ファミリーは宣言されない")
     }
 
     func testDeclarationIncludesAllFacesOfFamily() throws {
@@ -202,66 +201,5 @@ final class FontStoreTests: XCTestCase {
 
         let html = try injectAll(store.fontFamilyDeclarations(for: "Alpha"))
         XCTAssertEqual(html.components(separatedBy: "@font-face").count - 1, 2, "face ごとに @font-face が出る")
-        XCTAssertTrue(html.contains("data:font/ttf;base64,"))
-        XCTAssertTrue(html.contains("data:font/otf;base64,"))
-    }
-
-    // MARK: - DataURIFontFamilyDeclaration.inject
-
-    func testInjectEmbedsFontFaceBeforeHeadClose() throws {
-        let declaration = DataURIFontFamilyDeclaration(
-            fontFamily: .init(rawValue: "Alpha"),
-            faces: [.init(base64: "QUJD", format: "font/otf", cssWeight: 700, italic: true)]
-        )
-        let html = try declaration.inject(in: "<html><head><title>t</title></head><body>x</body></html>") { _ in
-            throw URLError(.badURL)
-        }
-
-        XCTAssertTrue(html.contains(#"@font-face { font-family: "Alpha"; src: url("data:font/otf;base64,QUJD"); font-weight: 700; font-style: italic; }"#))
-        let styleIndex = try XCTUnwrap(html.range(of: "<style")).lowerBound
-        let headIndex = try XCTUnwrap(html.range(of: "</head>")).lowerBound
-        XCTAssertLessThan(styleIndex, headIndex, "</head> の直前に挿入される")
-    }
-
-    func testInjectHandlesUppercaseHeadAndMissingHead() throws {
-        let declaration = DataURIFontFamilyDeclaration(
-            fontFamily: .init(rawValue: "Alpha"),
-            faces: [.init(base64: "QUJD", format: "font/ttf", cssWeight: nil, italic: nil)]
-        )
-
-        let upper = try declaration.inject(in: "<HTML><HEAD></HEAD><BODY></BODY></HTML>") { _ in throw URLError(.badURL) }
-        XCTAssertTrue(upper.contains("@font-face"), "大文字 </HEAD> でも挿入される")
-
-        let headless = "<html><body>plain</body></html>"
-        XCTAssertEqual(
-            try declaration.inject(in: headless) { _ in throw URLError(.badURL) },
-            headless,
-            "</head> が無ければ原文のまま"
-        )
-    }
-
-    func testInjectEscapesQuotesInFamilyName() throws {
-        // import 時に除去されるが、直接構築への防御も固定する。
-        let declaration = DataURIFontFamilyDeclaration(
-            fontFamily: .init(rawValue: #"Fam"ily"#),
-            faces: [.init(base64: "QUJD", format: "font/ttf", cssWeight: nil, italic: nil)]
-        )
-        let html = try declaration.inject(in: "<html><head></head><body></body></html>") { _ in
-            throw URLError(.badURL)
-        }
-        XCTAssertTrue(html.contains(#"font-family: "Fam\"ily";"#), "引用符はエスケープされ CSS が壊れない")
-    }
-
-    func testInjectNeutralizesAngleBracketsInFamilyName() throws {
-        // 直接構築された悪意ある familyName でも <style> を閉じられない。
-        let declaration = DataURIFontFamilyDeclaration(
-            fontFamily: .init(rawValue: "Foo</style><script>alert(1)</script>"),
-            faces: [.init(base64: "QUJD", format: "font/ttf", cssWeight: nil, italic: nil)]
-        )
-        let html = try declaration.inject(in: "<html><head></head><body></body></html>") { _ in
-            throw URLError(.badURL)
-        }
-        XCTAssertFalse(html.contains("</style><script>"), "角括弧が無害化され style を抜け出せない")
-        XCTAssertFalse(html.contains("<script>"), "スクリプトタグが生成されない")
     }
 }

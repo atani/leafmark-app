@@ -8,7 +8,9 @@ options:
 packages:
   Readium:
     url: https://github.com/readium/swift-toolkit.git
-    from: "3.0.0"
+    # 3.10.0 + フォント CORS 修正 (#845) を含む develop 固定。3.11 タグが出たら
+    # from 指定に戻す (https://github.com/atani/epub-reader-ios/issues/18)。
+    revision: 8811f0ec6fff3562ffc4b739d22733cf259431d9
 
 settings:
   base:

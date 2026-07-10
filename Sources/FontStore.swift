@@ -36,8 +36,8 @@ final class FontStore: ObservableObject {
 
     private static let allowedExtensions: Set<String> = ["ttf", "otf"]
 
-    /// Embedding cost is paid per chapter (the face is inlined as a data:
-    /// URI), so unbounded files would exhaust memory on big CJK fonts.
+    /// Upper bound on imported files. Keeps a corrupted or mislabeled pick
+    /// from filling the backed-up Documents/Fonts directory.
     static let maxFontFileSize = 10 * 1024 * 1024
 
     /// - Parameter directory: Base directory for storage. Defaults to the
@@ -123,31 +123,31 @@ final class FontStore: ObservableObject {
     /// inlined into every chapter — embedding unselected fonts would
     /// multiply the cost for nothing.
     ///
-    /// The font bytes are embedded as data: URIs instead of served URLs.
-    /// Readium 3.8+ serves font files from a different origin than the
-    /// book's pages (readium://assets vs readium://{uuid}) without CORS
-    /// headers, and font fetches — unlike stylesheets or images — are
-    /// CORS-gated by WebKit, so a URL-based @font-face never loads
-    /// (readium/swift-toolkit#802). Embedding the bytes avoids the
-    /// cross-origin fetch entirely.
+    /// Font files are served to the web views by Readium's asset server.
+    /// This requires the CORS fix from readium/swift-toolkit#845 (font
+    /// fetches are CORS-gated by WebKit, and assets live on a different
+    /// origin than the book's pages), so the dependency is pinned to a
+    /// revision that includes it until 3.11 is tagged.
     func fontFamilyDeclarations(for familyName: String?) -> [AnyHTMLFontFamilyDeclaration] {
         guard let familyName else { return [] }
         let faces = fonts
             .filter { $0.familyName == familyName }
-            .compactMap { font -> DataURIFontFamilyDeclaration.Face? in
-                guard let data = try? Data(contentsOf: fileURL(for: font)) else { return nil }
-                return DataURIFontFamilyDeclaration.Face(
-                    base64: data.base64EncodedString(),
-                    format: font.fileName.lowercased().hasSuffix(".otf") ? "font/otf" : "font/ttf",
-                    cssWeight: font.cssWeight,
-                    italic: font.italic
+            .compactMap { font -> CSSFontFace? in
+                guard let file = FileURL(url: fileURL(for: font)) else { return nil }
+                return CSSFontFace(
+                    file: file,
+                    preload: true,
+                    style: font.italic.map { $0 ? .italic : .normal },
+                    weight: font.cssWeight
+                        .flatMap(CSSStandardFontWeight.init(rawValue:))
+                        .map(CSSFontWeight.standard)
                 )
             }
         guard !faces.isEmpty else { return [] }
         return [
-            DataURIFontFamilyDeclaration(
+            CSSFontFamilyDeclaration(
                 fontFamily: FontFamily(rawValue: familyName),
-                faces: faces
+                fontFaces: faces
             )
             .eraseToAnyHTMLFontFamilyDeclaration(),
         ]
@@ -232,50 +232,3 @@ final class FontStore: ObservableObject {
     }
 }
 
-/// Declares a font family by embedding the font files as data: URIs in a
-/// <style> tag (see FontStore.fontFamilyDeclarations(for:) for why).
-struct DataURIFontFamilyDeclaration: HTMLFontFamilyDeclaration {
-    struct Face {
-        let base64: String
-        /// IANA media type of the font file ("font/ttf" or "font/otf").
-        let format: String
-        /// CSS font-weight descriptor (100–900), when known.
-        let cssWeight: Int?
-        /// CSS font-style descriptor, when known.
-        let italic: Bool?
-    }
-
-    let fontFamily: FontFamily
-    let alternates: [FontFamily] = []
-    let faces: [Face]
-
-    func inject(in html: String, servingFile: (FileURL) throws -> any AbsoluteURL) throws -> String {
-        guard let head = html.range(of: "</head>", options: [.caseInsensitive]) else {
-            return html
-        }
-        // The family name is sanitized at import and at load; escaping here
-        // is defense in depth for callers constructing declarations
-        // directly. Drop the characters that could break out of the CSS
-        // string or the surrounding <style> element, then escape the rest.
-        let family = fontFamily.rawValue
-            .components(separatedBy: CharacterSet(charactersIn: "<>"))
-            .joined()
-            .replacingOccurrences(of: "\\", with: "\\\\")
-            .replacingOccurrences(of: "\"", with: "\\\"")
-        let css = faces
-            .map { face in
-                var descriptors = "font-family: \"\(family)\"; src: url(\"data:\(face.format);base64,\(face.base64)\");"
-                if let weight = face.cssWeight {
-                    descriptors += " font-weight: \(weight);"
-                }
-                if face.italic == true {
-                    descriptors += " font-style: italic;"
-                }
-                return "@font-face { \(descriptors) }"
-            }
-            .joined(separator: "\n")
-        var html = html
-        html.insert(contentsOf: "<style type=\"text/css\">\(css)</style>", at: head.lowerBound)
-        return html
-    }
-}

@@ -1,4 +1,5 @@
 import XCTest
+import ReadiumNavigator
 @testable import Leafmark
 
 /// AppearanceStore is backed by @AppStorage (UserDefaults.standard), so
@@ -6,7 +7,7 @@ import XCTest
 /// into other tests or the host app.
 @MainActor
 final class AppearanceStoreTests: XCTestCase {
-    private let touchedKeys = ["reader.font", "reader.fontWeight", "reader.lineHeight", "reader.pageMargins"]
+    private let touchedKeys = ["reader.font", "reader.fontWeight", "reader.lineHeight", "reader.pageMargins", "reader.columns"]
     private var savedValues: [String: Any] = [:]
 
     override func setUp() {
@@ -84,5 +85,35 @@ final class AppearanceStoreTests: XCTestCase {
         XCTAssertEqual(AppearanceStore.lineHeightStep, 0.05)
         XCTAssertEqual(AppearanceStore.pageMarginsRange.lowerBound, 0.0)
         XCTAssertEqual(AppearanceStore.pageMarginsStep, 0.05)
+    }
+
+    // MARK: - Layout (columns / margins)
+
+    func testColumnsMapToReadiumColumnCount() {
+        let store = AppearanceStore()
+
+        store.columnsRaw = AppearanceStore.ReaderColumns.auto.rawValue
+        XCTAssertEqual(store.preferences.columnCount, .auto)
+
+        store.columnsRaw = AppearanceStore.ReaderColumns.one.rawValue
+        XCTAssertEqual(store.preferences.columnCount, .one)
+
+        store.columnsRaw = AppearanceStore.ReaderColumns.two.rawValue
+        XCTAssertEqual(store.preferences.columnCount, .two)
+    }
+
+    func testColumnsFallBackToAutoForUnknownValue() {
+        let store = AppearanceStore()
+        store.columnsRaw = "bogus"
+        XCTAssertEqual(store.columns, .auto)
+        XCTAssertEqual(store.preferences.columnCount, .auto)
+    }
+
+    func testPreferencesCarryPageMargins() {
+        // The landscape L/R width is driven by this live margin factor once
+        // Readium's max-line-length cap is relaxed, so it must reach Readium.
+        let store = AppearanceStore()
+        store.pageMargins = 0.5
+        XCTAssertEqual(store.preferences.pageMargins, 0.5)
     }
 }

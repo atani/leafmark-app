@@ -142,7 +142,8 @@ struct ReaderScreen: View {
         }
         .sheet(isPresented: $showSettings) {
             AppearanceSheet()
-                .presentationDetents([.medium, .large])
+                .presentationDetents([.fraction(0.35), .medium, .large])
+                .presentationBackgroundInteraction(.enabled(upThrough: .medium))
         }
         .sheet(isPresented: $showSearch) {
             SearchSheet(publication: publication) { locator in
@@ -214,7 +215,6 @@ struct ReaderScreen: View {
             stats.recordSession(bookID: book.id, startedAt: sessionStart, endedAt: Date())
         }
     }
-}
 
     // MARK: - Highlights
 
@@ -356,6 +356,7 @@ struct ReaderScreen: View {
         }
         .transition(.opacity)
     }
+}
 
 /// Identifiable wrapper so a tapped content image can drive `fullScreenCover`.
 /// A fresh `id` per tap lets the user reopen the same image after dismissing.
@@ -474,7 +475,6 @@ private struct NavigationSheet: View {
             .listStyle(.plain)
         }
     }
-}
 
     private func flatten(
         _ links: [ReadiumShared.Link],
@@ -679,7 +679,9 @@ private struct AppearanceSheet: View {
     }
 
     private var systemFamilies: [String] {
-        UIFont.familyNames.sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+        UIFont.familyNames
+            .filter { !$0.hasPrefix(".") }
+            .sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
     }
 
     /// Distinguishes faces of the same family in the management list.
@@ -730,6 +732,7 @@ private struct AppearanceSheet: View {
                             }
                         }
                     }
+                    .pickerStyle(.navigationLink)
 
                     HStack {
                         Button {
@@ -874,3 +877,4 @@ private struct AppearanceSheet: View {
             }
         }
     }
+}

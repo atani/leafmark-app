@@ -75,7 +75,18 @@ struct ReaderScreen: View {
                 initialLocation: initialLocator,
                 preferences: appearance.preferences,
                 makeFontFamilyDeclarations: {
-                    fontStore.fontFamilyDeclarations(for: selectedCustomFamily)
+                    var declarations = fontStore.fontFamilyDeclarations(for: selectedCustomFamily)
+                    // Synthetic bolding via -webkit-text-stroke, so the Font
+                    // Weight setting also thickens single-face fonts (which
+                    // Readium's native font-weight cannot; see issue #22). Like
+                    // the imported-font declarations, this is fixed for the
+                    // navigator's lifetime, so a weight change affecting the
+                    // stroke takes effect the next time a book is opened. The
+                    // native fontWeight preference stays live and untouched.
+                    if let synthetic = SyntheticWeight.declaration(forWeight: appearance.fontWeight) {
+                        declarations.append(synthetic)
+                    }
+                    return declarations
                 },
                 bridge: bridge,
                 onLocatorChange: { locator in
@@ -810,6 +821,11 @@ private struct AppearanceSheet: View {
                         .buttonStyle(.bordered)
                     }
 
+                    // Above 100% this also applies a synthetic -webkit-text-stroke
+                    // so single-face fonts thicken too (issue #22). The native
+                    // font-weight updates live; the synthetic stroke is baked in
+                    // at book open, so its change shows the next time the book is
+                    // opened.
                     Stepper(
                         value: $appearance.fontWeight,
                         in: AppearanceStore.fontWeightRange,

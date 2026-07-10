@@ -32,6 +32,11 @@ struct ReaderScreen: View {
     @State private var currentLocator: Locator?
     @State private var sessionStart = Date()
 
+    /// Synthetic ADE-style page positions (~1024 chars each), loaded once
+    /// from Readium's positions service. Empty when the service is missing,
+    /// which hides the optional page header/footer.
+    @State private var positions: [Locator] = []
+
     /// Highlight being edited in the note sheet.
     @State private var noteTarget: Highlight?
     /// Highlight whose actions dialog (color/note/delete) is shown.
@@ -100,6 +105,15 @@ struct ReaderScreen: View {
 
             if chromeVisible {
                 chrome
+            }
+
+            // Optional page header/footer. Shown only while the chrome is
+            // hidden so they never collide with the navigation bar or the
+            // progress-bar pill, mirroring a distraction-free reader.
+            if !chromeVisible,
+               appearance.showPageHeader || appearance.showPageFooter,
+               let info = PagePositionInfo(positions: positions, current: currentLocator) {
+                pageOverlay(info)
             }
         }
         .statusBarHidden(!chromeVisible)
@@ -214,6 +228,46 @@ struct ReaderScreen: View {
         .onDisappear {
             stats.recordSession(bookID: book.id, startedAt: sessionStart, endedAt: Date())
         }
+        .task {
+            // Load the synthetic page list once. An empty result (no
+            // positions service) simply hides the header/footer.
+            positions = (try? await publication.positions().get()) ?? []
+        }
+    }
+
+    // MARK: - Page overlay
+
+    /// Unobtrusive header (pages left in chapter) and footer (page X of Y),
+    /// each gated by its Appearance toggle. Non-interactive so taps still
+    /// reach the reader to toggle the chrome.
+    private func pageOverlay(_ info: PagePositionInfo) -> some View {
+        VStack {
+            if appearance.showPageHeader {
+                pageLabel(info.chapterHeaderText)
+                    .padding(.top, 6)
+            }
+
+            Spacer()
+
+            if appearance.showPageFooter {
+                pageLabel(info.footerText)
+                    .padding(.bottom, 6)
+            }
+        }
+        .padding(.horizontal)
+        .allowsHitTesting(false)
+        .transition(.opacity)
+    }
+
+    /// Capsule-backed caption so the label stays legible even when book
+    /// content (a heading, an image) runs underneath it.
+    private func pageLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 3)
+            .background(.thinMaterial, in: Capsule())
     }
 
     // MARK: - Highlights
@@ -818,6 +872,10 @@ private struct AppearanceSheet: View {
                     .pickerStyle(.segmented)
 
                     Toggle("Scroll Mode", isOn: $appearance.scrollEnabled)
+
+                    Toggle("Chapter Pages in Header", isOn: $appearance.showPageHeader)
+
+                    Toggle("Page Numbers in Footer", isOn: $appearance.showPageFooter)
 
                     Stepper(
                         value: $appearance.lineHeight,

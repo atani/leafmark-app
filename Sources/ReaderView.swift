@@ -72,6 +72,17 @@ struct ReaderView: UIViewControllerRepresentable {
     /// Called when the user taps an existing highlight decoration.
     let onHighlightActivated: (Decoration.Id) -> Void
 
+    /// Vertical space kept above and below the page (pt). Small enough to
+    /// remove Readium's default 34/62pt bands, large enough to breathe on
+    /// edge-to-edge iPads; the device safe area still wins where it is larger.
+    static let verticalContentInset: CGFloat = 20
+    /// Text-block line-length cap (rem) fed to Readium CSS. Set high enough to
+    /// never bind on the widest iPad so Auto / 2-column layouts fill the width.
+    static let maxLineLength: Double = 120
+    /// Gap between columns in 2-column mode (px), so the columns don't touch
+    /// (Readium's default `--RS__colGap` is 0).
+    static let columnGap: Double = 30
+
     func makeCoordinator() -> Coordinator {
         Coordinator(onLocatorChange: onLocatorChange)
     }
@@ -80,6 +91,36 @@ struct ReaderView: UIViewControllerRepresentable {
         do {
             var config = EPUBNavigatorViewController.Configuration()
             config.preferences = preferences
+            // Trim the vertical space Readium reserves above and below the
+            // page. Its defaults (34pt compact / 62pt regular) exist to clear
+            // an app's own top/bottom bars, but Leafmark draws its chrome as a
+            // transient overlay and lets the web view ignore the safe area, so
+            // that reservation only shows up as dead white bands — the bottom
+            // gap in portrait and the top/bottom bands in landscape (issue
+            // #20). Readium still keeps the device safe area (notch / home
+            // indicator) because it applies `max(safeArea, inset)`, so a small
+            // inset removes the excess without letting text slip under the
+            // notch.
+            config.contentInset = [
+                .compact: (top: Self.verticalContentInset, bottom: Self.verticalContentInset),
+                .regular: (top: Self.verticalContentInset, bottom: Self.verticalContentInset),
+            ]
+            // Let the text block span the full landscape width. Readium CSS
+            // caps the body at `--RS__maxLineLength` (40rem ≈ 640pt) and
+            // centres it with `margin: 0 auto`, which is what leaves the wide
+            // white margins on the left/right of a landscape iPad. Raising the
+            // cap lets Auto / 2-column layouts fill the screen; the existing
+            // Margins setting (`--USER__pageMargins`) then controls the L/R
+            // inset live. A non-zero column gap keeps the two columns from
+            // touching in 2-column mode. These are Reading System properties,
+            // fixed for the navigator's lifetime — Readium exposes them only
+            // through `readiumCSSRSProperties`, not the per-user
+            // `EPUBPreferences` — so they are constants here, not live
+            // settings. (readium-css ReadiumCSS-after.css:84,152.)
+            config.readiumCSSRSProperties = CSSRSProperties(
+                colGap: CSSPxLength(Self.columnGap),
+                maxLineLength: CSSRemLength(Self.maxLineLength)
+            )
             config.fontFamilyDeclarations += makeFontFamilyDeclarations()
             config.editingActions = EditingAction.defaultActions + [
                 EditingAction(

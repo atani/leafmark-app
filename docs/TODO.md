@@ -36,18 +36,28 @@
       実装には JS で elementFromPoint による画像ヒットテスト + src 取得 → ズーム可能ビューア提示が必要。
       挿絵の多い EPUB で効く
 
-## upstream 待ち（readium/swift-toolkit#854 マージ後に実施）
+## upstream 待ち（合成ウェイトの置き換え）
 
-[readium/swift-toolkit#854](https://github.com/readium/swift-toolkit/pull/854)（opt-in の
-`fontWeightSynthesis`。issue [#853](https://github.com/readium/swift-toolkit/issues/853)）が
-マージ・リリースされたら、アプリ内の合成ウェイト実装（PR
-[#26](https://github.com/atani/epub-reader-ios/pull/26)）を upstream 設定に置き換える。
+アプリ内の合成ウェイト実装（PR
+[#26](https://github.com/atani/epub-reader-ios/pull/26)、`-webkit-text-stroke` 方式）を、
+将来 upstream 側の設定に置き換える。
 
-- [ ] Readium 依存を #854 入りのタグ（3.11 以降）へ更新する
+**経緯（2026-07 時点）**: swift-toolkit 向けの実装 PR
+[#854](https://github.com/readium/swift-toolkit/pull/854) はメンテナ（mickael-menu）が
+クローズ。「各ツールキット個別ではなく Readium CSS 本体に入れるべき」との方針
+（issue [#853](https://github.com/readium/swift-toolkit/issues/853) は open のまま、
+JayPanoz の設計判断待ち）。
+
+**置き換えトリガー（時期未定）**: readium-css に `fontWeightSynthesis` 相当が入る →
+swift-toolkit が取り込む → タグリリース、の順。リリースを確認してから以下を実施する。
+`from` 指定への復帰（issue #18 の後始末）は、この置き換えとは独立に、#845 を含む
+安定版タグ（3.11 以降）が出た時点で先行して進めてよい。
+
+- [ ] Readium 依存を安定版タグ（3.11 以降）へ更新する
   - `project.yml` の `revision: 8811f0e...` を `from: "3.11.0"` 相当へ戻す
     （コメントに記載済みの issue #18 の後始末と同時に完了する）
   - `Leafmark.xcodeproj/project.pbxproj` の `kind = revision` も `upToNextMajorVersion` に戻す
-- [ ] アプリ内ワークアラウンドを削除する
+- [ ] （upstream に合成ウェイトが入った後）アプリ内ワークアラウンドを削除する
   - `Sources/SyntheticWeight.swift` と `Tests/SyntheticWeightTests.swift` を削除
   - sentinel ファミリー `-leafmark-synthetic-weight` の注入配線
     （`FontStore` / `ReaderScreen` 側）を削除

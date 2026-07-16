@@ -109,7 +109,7 @@ struct ReaderScreen: View {
                 onHighlightSelection: { makeHighlight(withNote: false) },
                 onNoteSelection: { makeHighlight(withNote: true) },
                 onHighlightActivated: { id in
-                    actionTarget = highlightStore.highlights.first { $0.id == id }
+                    actionTarget = highlightStore.highlight(withID: id)
                 }
             )
             .ignoresSafeArea()

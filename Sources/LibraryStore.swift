@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 import UIKit
 import ReadiumShared
 
@@ -55,7 +56,16 @@ final class LibraryStore: ObservableObject {
         guard let data = try? Data(contentsOf: catalogURL),
               let decoded = try? JSONDecoder().decode([Book].self, from: data)
         else { return }
-        books = decoded.sorted(by: Self.librarySort)
+        var migrated = decoded
+        var didMigrate = false
+        for index in migrated.indices where migrated[index].contentKey == nil {
+            let storedURL = booksDir.appendingPathComponent(migrated[index].fileName)
+            guard let key = try? Self.contentKey(forFileAt: storedURL) else { continue }
+            migrated[index].contentKey = key
+            didMigrate = true
+        }
+        books = migrated.sorted(by: Self.librarySort)
+        if didMigrate { saveCatalog() }
     }
 
     private func saveCatalog() {
@@ -84,6 +94,14 @@ final class LibraryStore: ObservableObject {
 
     func coverImage(for book: Book) -> UIImage? {
         UIImage(contentsOfFile: coverURL(for: book).path)
+    }
+
+    nonisolated static func contentKey(for data: Data) -> String {
+        SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+    }
+
+    nonisolated static func contentKey(forFileAt url: URL) throws -> String {
+        contentKey(for: try Data(contentsOf: url, options: .mappedIfSafe))
     }
 
     // MARK: - Import
@@ -196,6 +214,7 @@ final class LibraryStore: ObservableObject {
 
         let book = Book(
             id: id,
+            contentKey: try? Self.contentKey(forFileAt: destination),
             fileName: "\(id).epub",
             title: title,
             author: author,
@@ -223,6 +242,29 @@ final class LibraryStore: ObservableObject {
         update(bookID) {
             $0.locatorJSON = locatorJSON
             if let progression { $0.progression = progression }
+            $0.positionUpdatedAt = Date()
+        }
+    }
+
+    /// The reading position of a book as a sync record, or nil if it has never
+    /// been opened. A position with no recorded timestamp falls back to
+    /// `.distantPast` so a timestamped remote position always wins.
+    func syncPosition(for book: Book) -> AnnotationSyncPosition? {
+        guard let locatorJSON = book.locatorJSON else { return nil }
+        return AnnotationSyncPosition(
+            locatorJSON: locatorJSON,
+            progression: book.progression,
+            updatedAt: book.positionUpdatedAt ?? .distantPast
+        )
+    }
+
+    func applySyncedPosition(_ position: AnnotationSyncPosition?, bookID: String) {
+        guard let position else { return }
+        update(bookID) {
+            guard position.updatedAt >= ($0.positionUpdatedAt ?? .distantPast) else { return }
+            $0.locatorJSON = position.locatorJSON
+            $0.progression = position.progression
+            $0.positionUpdatedAt = position.updatedAt
         }
     }
 

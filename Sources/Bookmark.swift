@@ -11,4 +11,10 @@ struct Bookmark: Identifiable, Codable, Equatable {
     /// so the list can be rendered without re-opening the publication.
     var title: String?
     var createdAt: Date
+    /// Optional for decoding catalogs written before annotation sync existed.
+    var updatedAt: Date? = nil
+    /// A retained deletion marker used to propagate removals to other devices.
+    var deletedAt: Date? = nil
+
+    var effectiveUpdatedAt: Date { updatedAt ?? createdAt }
 }

@@ -20,7 +20,7 @@ final class HighlightStore: ObservableObject {
         guard let data = try? Data(contentsOf: storeURL),
               let decoded = try? JSONDecoder().decode([Highlight].self, from: data)
         else { return }
-        highlights = decoded
+        highlights = Self.pruningExpiredTombstones(decoded)
     }
 
     private func save() {
@@ -28,14 +28,29 @@ final class HighlightStore: ObservableObject {
         try? data.write(to: storeURL, options: .atomic)
     }
 
+    /// Drops tombstones past the sync retention window so soft-deleted records
+    /// cannot accumulate forever in the local catalog.
+    private static func pruningExpiredTombstones(_ records: [Highlight], now: Date = Date()) -> [Highlight] {
+        records.filter { record in
+            guard let deletedAt = record.deletedAt else { return true }
+            return now.timeIntervalSince(deletedAt) < AnnotationSyncMerge.tombstoneRetention
+        }
+    }
+
     func highlights(for bookID: String) -> [Highlight] {
         highlights
-            .filter { $0.bookID == bookID }
+            .filter { $0.bookID == bookID && $0.deletedAt == nil }
             .sorted { lhs, rhs in
                 let lp = progression(of: lhs) ?? 0
                 let rp = progression(of: rhs) ?? 0
                 return lp == rp ? lhs.createdAt < rhs.createdAt : lp < rp
             }
+    }
+
+    /// The active (non-deleted) highlight with the given id, used when the
+    /// reader activates a highlight decoration.
+    func highlight(withID id: String) -> Highlight? {
+        highlights.first { $0.id == id && $0.deletedAt == nil }
     }
 
     @discardableResult
@@ -45,13 +60,15 @@ final class HighlightStore: ObservableObject {
         color: HighlightColor,
         note: String? = nil
     ) -> Highlight {
+        let now = Date()
         let highlight = Highlight(
             id: UUID().uuidString,
             bookID: bookID,
             locatorJSON: (try? locator.jsonString()) ?? "{}",
             colorRaw: color.rawValue,
             note: note,
-            createdAt: Date(),
+            createdAt: now,
+            updatedAt: now,
             text: locator.text.highlight ?? ""
         )
         highlights.append(highlight)
@@ -62,16 +79,42 @@ final class HighlightStore: ObservableObject {
     func update(_ id: String, _ mutate: (inout Highlight) -> Void) {
         guard let index = highlights.firstIndex(where: { $0.id == id }) else { return }
         mutate(&highlights[index])
+        highlights[index].updatedAt = Date()
         save()
     }
 
+    /// Soft-deletes a highlight, leaving a tombstone so the deletion syncs to
+    /// other devices. The tombstone is pruned after the retention window.
     func remove(_ id: String) {
-        highlights.removeAll { $0.id == id }
+        guard let index = highlights.firstIndex(where: { $0.id == id }) else { return }
+        let now = Date()
+        highlights[index].deletedAt = now
+        highlights[index].updatedAt = now
         save()
     }
 
+    /// Hard-deletes every highlight of a book. Used when the book itself is
+    /// removed from the library, so it must NOT leave tombstones: another
+    /// device that still holds the book keeps its annotations.
     func removeAll(for bookID: String) {
         highlights.removeAll { $0.bookID == bookID }
+        save()
+    }
+
+    // MARK: - Sync
+
+    /// All records for a book including tombstones, as sync documents carry
+    /// deletions.
+    func syncedRecords(for bookID: String) -> [SyncedHighlight] {
+        highlights.filter { $0.bookID == bookID }.map(SyncedHighlight.init)
+    }
+
+    /// Replaces a book's records with a merged set from the sync layer. Callers
+    /// guard against the resulting publisher change re-triggering a push.
+    func applyMerged(_ records: [SyncedHighlight], bookID: String) {
+        highlights.removeAll { $0.bookID == bookID }
+        highlights.append(contentsOf: records.map { $0.highlight(bookID: bookID) })
+        highlights = Self.pruningExpiredTombstones(highlights)
         save()
     }
 

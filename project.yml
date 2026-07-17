@@ -73,6 +73,10 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.atani.inkwell
+        # iCloud Documents entitlement for annotation sync (ADR-0007). The
+        # bundle id stays com.atani.inkwell; only the iCloud container is
+        # namespaced as iCloud.com.atani.inkwell.
+        CODE_SIGN_ENTITLEMENTS: Leafmark.entitlements
         MARKETING_VERSION: "1.6"
         CURRENT_PROJECT_VERSION: "11"
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES

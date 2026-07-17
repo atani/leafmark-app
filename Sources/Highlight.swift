@@ -10,9 +10,15 @@ struct Highlight: Identifiable, Codable, Equatable {
     var colorRaw: String
     var note: String?
     var createdAt: Date
+    /// Optional for decoding catalogs written before annotation sync existed.
+    var updatedAt: Date? = nil
+    /// A retained deletion marker used to propagate removals to other devices.
+    var deletedAt: Date? = nil
 
     /// The highlighted text, extracted from the locator when created.
     var text: String
+
+    var effectiveUpdatedAt: Date { updatedAt ?? createdAt }
 
     var color: HighlightColor {
         get { HighlightColor(rawValue: colorRaw) ?? .yellow }

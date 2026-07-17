@@ -31,7 +31,7 @@ final class BookmarkStore: ObservableObject {
         guard let data = try? Data(contentsOf: storeURL),
               let decoded = try? JSONDecoder().decode([Bookmark].self, from: data)
         else { return }
-        bookmarks = decoded
+        bookmarks = Self.pruningExpiredTombstones(decoded)
         rebuildCache()
     }
 
@@ -40,12 +40,23 @@ final class BookmarkStore: ObservableObject {
         try? data.write(to: storeURL, options: .atomic)
     }
 
+    /// Drops tombstones past the sync retention window so soft-deleted records
+    /// cannot accumulate forever in the local catalog.
+    private static func pruningExpiredTombstones(_ records: [Bookmark], now: Date = Date()) -> [Bookmark] {
+        records.filter { record in
+            guard let deletedAt = record.deletedAt else { return true }
+            return now.timeIntervalSince(deletedAt) < AnnotationSyncMerge.tombstoneRetention
+        }
+    }
+
     private func rebuildCache() {
         // uniquingKeysWith (not uniqueKeysWithValues) so a corrupt catalog
-        // with duplicate ids can't trap at launch.
+        // with duplicate ids can't trap at launch. Tombstones are excluded so a
+        // soft-deleted bookmark is never matched as present.
         locatorCache = Dictionary(
-            bookmarks.compactMap { bookmark in
-                Self.parseLocator(bookmark.locatorJSON).map { (bookmark.id, $0) }
+            bookmarks.compactMap { bookmark -> (String, Locator)? in
+                guard bookmark.deletedAt == nil else { return nil }
+                return Self.parseLocator(bookmark.locatorJSON).map { (bookmark.id, $0) }
             },
             uniquingKeysWith: { current, _ in current }
         )
@@ -59,7 +70,7 @@ final class BookmarkStore: ObservableObject {
     /// Bookmarks of a book, ordered by reading position.
     func bookmarks(for bookID: String) -> [Bookmark] {
         bookmarks
-            .filter { $0.bookID == bookID }
+            .filter { $0.bookID == bookID && $0.deletedAt == nil }
             .sorted { lhs, rhs in
                 let lp = progression(of: lhs) ?? 0
                 let rp = progression(of: rhs) ?? 0
@@ -76,6 +87,7 @@ final class BookmarkStore: ObservableObject {
     func bookmark(for bookID: String, at locator: Locator) -> Bookmark? {
         bookmarks.first { bookmark in
             guard bookmark.bookID == bookID,
+                  bookmark.deletedAt == nil,
                   let stored = self.locator(of: bookmark),
                   stored.href.isEquivalentTo(locator.href)
             else { return false }
@@ -101,12 +113,14 @@ final class BookmarkStore: ObservableObject {
 
     @discardableResult
     func add(bookID: String, locator: Locator, title: String?) -> Bookmark {
+        let now = Date()
         let bookmark = Bookmark(
             id: UUID().uuidString,
             bookID: bookID,
             locatorJSON: (try? locator.jsonString()) ?? "{}",
             title: title,
-            createdAt: Date()
+            createdAt: now,
+            updatedAt: now
         )
         bookmarks.append(bookmark)
         locatorCache[bookmark.id] = locator
@@ -126,16 +140,42 @@ final class BookmarkStore: ObservableObject {
         return true
     }
 
+    /// Soft-deletes a bookmark, leaving a tombstone so the deletion syncs to
+    /// other devices. The tombstone is pruned after the retention window.
     func remove(_ id: String) {
-        bookmarks.removeAll { $0.id == id }
+        guard let index = bookmarks.firstIndex(where: { $0.id == id }) else { return }
+        let now = Date()
+        bookmarks[index].deletedAt = now
+        bookmarks[index].updatedAt = now
         locatorCache[id] = nil
         save()
     }
 
+    /// Hard-deletes every bookmark of a book. Used when the book itself is
+    /// removed from the library, so it must NOT leave tombstones: another
+    /// device that still holds the book keeps its annotations.
     func removeAll(for bookID: String) {
         let removed = bookmarks.filter { $0.bookID == bookID }
         bookmarks.removeAll { $0.bookID == bookID }
         for bookmark in removed { locatorCache[bookmark.id] = nil }
+        save()
+    }
+
+    // MARK: - Sync
+
+    /// All records for a book including tombstones, as sync documents carry
+    /// deletions.
+    func syncedRecords(for bookID: String) -> [SyncedBookmark] {
+        bookmarks.filter { $0.bookID == bookID }.map(SyncedBookmark.init)
+    }
+
+    /// Replaces a book's records with a merged set from the sync layer. Callers
+    /// guard against the resulting publisher change re-triggering a push.
+    func applyMerged(_ records: [SyncedBookmark], bookID: String) {
+        bookmarks.removeAll { $0.bookID == bookID }
+        bookmarks.append(contentsOf: records.map { $0.bookmark(bookID: bookID) })
+        bookmarks = Self.pruningExpiredTombstones(bookmarks)
+        rebuildCache()
         save()
     }
 

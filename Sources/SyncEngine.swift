@@ -34,6 +34,11 @@ final class SyncEngine: ObservableObject {
     private var pushTask: Task<Void, Never>?
     private var started = false
 
+    /// Keeps the app alive long enough to flush a pending push when it moves to
+    /// the background, so a highlight made just before backgrounding still
+    /// reaches iCloud instead of waiting for the next launch.
+    private var backgroundFlushID: UIBackgroundTaskIdentifier = .invalid
+
     /// Serializes reconcile passes: the metadata query and the debounced push
     /// can both fire, so a pass in flight defers a follow-up rather than running
     /// two interleaved loops.
@@ -87,6 +92,12 @@ final class SyncEngine: ObservableObject {
             name: UIApplication.willEnterForegroundNotification,
             object: nil
         )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleBackground),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
 
         await reconcileAll()
     }
@@ -121,6 +132,28 @@ final class SyncEngine: ObservableObject {
         Task { await reconcileAll() }
     }
 
+    @objc private func handleBackground() {
+        // The 1.5s debounce may not fire before iOS suspends the app, which
+        // would strand a just-made highlight locally until the next launch.
+        // Flush now under a background-task assertion so the write completes.
+        guard isActive else { return }
+        pushTask?.cancel()
+        endBackgroundFlush()
+        backgroundFlushID = UIApplication.shared.beginBackgroundTask(withName: "AnnotationSyncFlush") { [weak self] in
+            Task { @MainActor in self?.endBackgroundFlush() }
+        }
+        Task { [weak self] in
+            await self?.reconcileAll()
+            self?.endBackgroundFlush()
+        }
+    }
+
+    private func endBackgroundFlush() {
+        guard backgroundFlushID != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(backgroundFlushID)
+        backgroundFlushID = .invalid
+    }
+
     private func startMetadataQuery() {
         guard let annotationsURL else { return }
         let query = NSMetadataQuery()
@@ -145,6 +178,10 @@ final class SyncEngine: ObservableObject {
             object: query
         )
         query.start()
+        // Without this, the query gathers once but does not keep delivering
+        // NSMetadataQueryDidUpdate as remote files change, so edits from another
+        // device would not be noticed until the next foreground reconcile.
+        query.enableUpdates()
         metadataQuery = query
     }
 

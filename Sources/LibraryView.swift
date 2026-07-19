@@ -17,7 +17,7 @@ struct LibraryView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if library.books.isEmpty {
+                if library.books.isEmpty && library.missingBooks.isEmpty {
                     ContentUnavailableView {
                         Label("Your Library Is Empty", systemImage: "books.vertical")
                     } description: {
@@ -35,27 +35,37 @@ struct LibraryView: View {
                     }
                 } else {
                     ScrollView {
-                        LazyVGrid(columns: columns, spacing: 24) {
-                            ForEach(library.books) { book in
-                                Button {
-                                    openedBook = book
-                                } label: {
-                                    BookCell(book: book, cover: library.coverImage(for: book))
-                                }
-                                .buttonStyle(.plain)
-                                .contextMenu {
-                                    Button(role: .destructive) {
-                                        highlights.removeAll(for: book.id)
-                                        stats.removeAll(for: book.id)
-                                        bookmarks.removeAll(for: book.id)
-                                        library.delete(book)
+                        if !library.books.isEmpty {
+                            LazyVGrid(columns: columns, spacing: 24) {
+                                ForEach(library.books) { book in
+                                    Button {
+                                        openedBook = book
                                     } label: {
-                                        Label("Delete", systemImage: "trash")
+                                        BookCell(book: book, cover: library.coverImage(for: book))
+                                    }
+                                    .buttonStyle(.plain)
+                                    .contextMenu {
+                                        Button(role: .destructive) {
+                                            highlights.removeAll(for: book.id)
+                                            stats.removeAll(for: book.id)
+                                            bookmarks.removeAll(for: book.id)
+                                            library.delete(book)
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
                                     }
                                 }
                             }
+                            .padding()
                         }
-                        .padding()
+
+                        // Books known from the synced catalog but whose EPUB is
+                        // not on this device (files are not synced — ADR-0007).
+                        if !library.missingBooks.isEmpty {
+                            MissingBooksSection(missingBooks: library.missingBooks) {
+                                showImporter = true
+                            }
+                        }
                     }
                 }
             }
@@ -112,6 +122,49 @@ struct LibraryView: View {
             await library.installBundledSamplesIfNeeded()
             await library.scanInbox()
         }
+    }
+}
+
+/// A quiet section listing books that live in the synced catalog but are not
+/// imported on this device. Tapping a row opens the same file importer as the
+/// toolbar "+" so the user can re-add the EPUB and recover its annotations.
+private struct MissingBooksSection: View {
+    let missingBooks: [MissingBook]
+    let onSelect: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("On your other devices")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+
+            ForEach(missingBooks) { book in
+                Button(action: onSelect) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(book.title)
+                            .font(.subheadline.weight(.medium))
+                            .lineLimit(2)
+                        if let author = book.author, !author.isEmpty {
+                            Text(author)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Re-import this EPUB to restore it")
+            }
+
+            Text("Import the EPUB again to restore its highlights and reading position.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .padding(.top, 2)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
     }
 }
 

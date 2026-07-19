@@ -14,6 +14,15 @@ final class LibraryStore: ObservableObject {
     @Published private(set) var books: [Book] = []
     @Published var importError: String?
 
+    /// Books present in the synced catalog but not on this device — restore
+    /// hints surfaced in `LibraryView` under "On your other devices"
+    /// (ADR-0007 addendum). Empty when nothing is missing.
+    @Published private(set) var missingBooks: [MissingBook] = []
+
+    /// In-memory copy of the sidecar sync catalog (see `syncedCatalogURL`):
+    /// the last merged view of remote-only records and deletion tombstones.
+    private var syncedCatalog = LibraryCatalog()
+
     private let fileManager = FileManager.default
 
     /// Installed in reverse order so the first item below appears first in
@@ -44,10 +53,19 @@ final class LibraryStore: ObservableObject {
         supportDir.appendingPathComponent("library.json")
     }
 
+    /// Sidecar holding the last merged sync catalog. Kept separate from
+    /// `library.json` so remote-only records and deletion tombstones never
+    /// pollute the list of books actually present on this device.
+    private var syncedCatalogURL: URL {
+        supportDir.appendingPathComponent("SyncedCatalog.json")
+    }
+
     init() {
         try? fileManager.createDirectory(at: booksDir, withIntermediateDirectories: true)
         try? fileManager.createDirectory(at: coversDir, withIntermediateDirectories: true)
         loadCatalog()
+        loadSyncedCatalog()
+        recomputeMissingBooks()
     }
 
     // MARK: - Catalog persistence
@@ -223,6 +241,9 @@ final class LibraryStore: ObservableObject {
         books.append(book)
         books.sort(by: Self.librarySort)
         saveCatalog()
+        // A re-imported book is now local, so drop it from the restore hints;
+        // the sync engine revives any tombstone on its next reconcile.
+        recomputeMissingBooks()
     }
 
     // MARK: - Mutations
@@ -232,6 +253,11 @@ final class LibraryStore: ObservableObject {
         try? fileManager.removeItem(at: coverURL(for: book))
         books.removeAll { $0.id == book.id }
         saveCatalog()
+        // Record a tombstone so a fresh install stops suggesting a book the
+        // user intentionally deleted. Files are local-canonical, so this never
+        // deletes anything on another device (ADR-0007).
+        markCatalogTombstone(for: book)
+        recomputeMissingBooks()
     }
 
     func markOpened(_ book: Book) {
@@ -266,6 +292,91 @@ final class LibraryStore: ObservableObject {
             $0.progression = position.progression
             $0.positionUpdatedAt = position.updatedAt
         }
+    }
+
+    // MARK: - Library catalog sync (ADR-0007)
+
+    /// The current local books as sync records, unioned with the sidecar so
+    /// deletion tombstones and books only seen on other devices ride along in
+    /// the pushed catalog. Present books use `max(addedAt, lastOpenedAt)` as
+    /// their `updatedAt` and win over a stale sidecar copy via last-writer-wins.
+    /// Books without a `contentKey` are skipped: it is the only cross-device
+    /// identity.
+    func catalogRecords() -> [CatalogRecord] {
+        let local = LibraryCatalog(books: books.compactMap(Self.record(for:)))
+        return CatalogSyncMerge.merge(local, syncedCatalog).books
+    }
+
+    /// Stores the merged catalog in the sidecar and republishes `missingBooks`.
+    /// Writes only the sidecar (never `books`), so it does not trigger the sync
+    /// engine's `library.$books` push and cannot start an echo loop.
+    func applyMergedCatalog(_ catalog: LibraryCatalog) {
+        if catalog != syncedCatalog {
+            syncedCatalog = catalog
+            saveSyncedCatalog()
+        }
+        recomputeMissingBooks()
+    }
+
+    /// Derives the restore-hint list: catalog records that are not tombstoned
+    /// and whose `contentKey` has no matching local book. Pure and static so it
+    /// is unit-testable without touching the filesystem.
+    nonisolated static func missingBooks(
+        from catalog: [CatalogRecord],
+        localContentKeys: Set<String>
+    ) -> [MissingBook] {
+        catalog
+            .filter { $0.deletedAt == nil && !localContentKeys.contains($0.id) }
+            .map { MissingBook(contentKey: $0.id, title: $0.title, author: $0.author) }
+            .sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+    }
+
+    private static func record(for book: Book) -> CatalogRecord? {
+        guard let contentKey = book.contentKey else { return nil }
+        return CatalogRecord(
+            id: contentKey,
+            title: book.title,
+            author: book.author,
+            updatedAt: max(book.addedAt, book.lastOpenedAt ?? book.addedAt),
+            deletedAt: nil
+        )
+    }
+
+    private func recomputeMissingBooks() {
+        let localKeys = Set(books.compactMap(\.contentKey))
+        missingBooks = Self.missingBooks(from: syncedCatalog.books, localContentKeys: localKeys)
+    }
+
+    private func loadSyncedCatalog() {
+        guard let data = try? Data(contentsOf: syncedCatalogURL),
+              let decoded = try? JSONDecoder().decode(LibraryCatalog.self, from: data)
+        else { return }
+        syncedCatalog = decoded
+    }
+
+    private func saveSyncedCatalog() {
+        guard let data = try? JSONEncoder().encode(syncedCatalog) else { return }
+        try? data.write(to: syncedCatalogURL, options: .atomic)
+    }
+
+    /// Records a deletion tombstone for a deliberately removed book. The
+    /// tombstone's `updatedAt == deletedAt == now` beats the book's prior live
+    /// `updatedAt` (import/open time), so the deletion wins on merge; a later
+    /// re-import revives it (updatedAt > deletedAt clears the tombstone).
+    private func markCatalogTombstone(for book: Book) {
+        guard let contentKey = book.contentKey else { return }
+        let now = Date()
+        var records = syncedCatalog.books.filter { $0.id != contentKey }
+        records.append(CatalogRecord(
+            id: contentKey,
+            title: book.title,
+            author: book.author,
+            updatedAt: now,
+            deletedAt: now
+        ))
+        // Fold through the merge so pruning and ordering match a reconcile.
+        syncedCatalog = CatalogSyncMerge.merge(LibraryCatalog(books: records), LibraryCatalog(), now: now)
+        saveSyncedCatalog()
     }
 
     private func update(_ id: String, _ mutate: (inout Book) -> Void) {

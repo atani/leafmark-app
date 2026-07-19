@@ -25,6 +25,8 @@ final class SyncEngine: ObservableObject {
 
     /// `<ubiquity>/Documents/Annotations`, resolved once the container is found.
     private var annotationsURL: URL?
+    /// `<ubiquity>/Documents/Library`, holding the shared `catalog.json`.
+    private var libraryURL: URL?
     private var metadataQuery: NSMetadataQuery?
     private var cancellables: Set<AnyCancellable> = []
 
@@ -48,6 +50,10 @@ final class SyncEngine: ObservableObject {
     /// The last document written per contentKey, so an unchanged reconcile does
     /// not rewrite the file (which would ripple to every device).
     private var lastSynced: [String: AnnotationSyncDocument] = [:]
+
+    /// The last catalog written, so an unchanged reconcile does not rewrite the
+    /// shared `catalog.json` (which would ripple to every device).
+    private var lastSyncedCatalog: LibraryCatalog?
 
     /// Debounce window for coalescing local mutations before a push.
     private let pushDebounce: Duration = .milliseconds(1500)
@@ -77,11 +83,13 @@ final class SyncEngine: ObservableObject {
             return
         }
 
-        let annotations = container
-            .appendingPathComponent("Documents", isDirectory: true)
-            .appendingPathComponent("Annotations", isDirectory: true)
+        let documents = container.appendingPathComponent("Documents", isDirectory: true)
+        let annotations = documents.appendingPathComponent("Annotations", isDirectory: true)
+        let libraryDir = documents.appendingPathComponent("Library", isDirectory: true)
         try? FileManager.default.createDirectory(at: annotations, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(at: libraryDir, withIntermediateDirectories: true)
         annotationsURL = annotations
+        libraryURL = libraryDir
         isActive = true
 
         observeLocalMutations()
@@ -155,16 +163,15 @@ final class SyncEngine: ObservableObject {
     }
 
     private func startMetadataQuery() {
-        guard let annotationsURL else { return }
+        guard let annotationsURL, let libraryURL else { return }
         let query = NSMetadataQuery()
         query.searchScopes = [NSMetadataQueryUbiquitousDocumentsScope]
-        // Scope to our Annotations subfolder so unrelated iCloud documents do
-        // not wake the engine.
-        query.predicate = NSPredicate(
-            format: "%K BEGINSWITH %@",
-            NSMetadataItemPathKey,
-            annotationsURL.path
-        )
+        // Scope to our Annotations and Library subfolders so unrelated iCloud
+        // documents do not wake the engine, but remote catalog changes do.
+        query.predicate = NSCompoundPredicate(orPredicateWithSubpredicates: [
+            NSPredicate(format: "%K BEGINSWITH %@", NSMetadataItemPathKey, annotationsURL.path),
+            NSPredicate(format: "%K BEGINSWITH %@", NSMetadataItemPathKey, libraryURL.path),
+        ])
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(metadataQueryDidUpdate),
@@ -197,7 +204,7 @@ final class SyncEngine: ObservableObject {
     /// chosen per key so duplicate imports of the same EPUB do not fight over
     /// the same document.
     private func reconcileAll() async {
-        guard isActive, let annotationsURL else { return }
+        guard isActive, let annotationsURL, let libraryURL else { return }
         // Coalesce: if a pass is already running, ask it to run once more when
         // it finishes instead of interleaving a second loop.
         guard !isReconciling else {
@@ -213,7 +220,33 @@ final class SyncEngine: ObservableObject {
                 guard let contentKey = book.contentKey else { continue }
                 await reconcile(book: book, contentKey: contentKey, in: annotationsURL)
             }
+            // Catalog metadata (which books exist), not the files themselves,
+            // rides the same reconcile pass and triggers as the annotations.
+            await reconcileCatalog(in: libraryURL)
         } while reconcilePending
+    }
+
+    /// Reconciles the shared library catalog: reads `Library/catalog.json`,
+    /// merges it with the local snapshot (which carries deletion tombstones),
+    /// surfaces the result to `LibraryStore`, and writes back only when changed.
+    private func reconcileCatalog(in directory: URL) async {
+        let url = directory.appendingPathComponent("catalog.json")
+        let local = LibraryCatalog(books: library.catalogRecords())
+
+        let remote = await Self.readCatalog(at: url)
+        let merged = CatalogSyncMerge.merge([local, remote])
+
+        // Apply merged records back into the store without echoing a push.
+        // `applyMergedCatalog` writes only the sidecar, never `books`, so this
+        // guard is belt-and-suspenders with that invariant.
+        isApplyingRemote = true
+        library.applyMergedCatalog(merged)
+        isApplyingRemote = false
+
+        if merged != remote || lastSyncedCatalog != merged {
+            await Self.writeCatalog(merged, to: url)
+            lastSyncedCatalog = merged
+        }
     }
 
     private func canonicalBooksByContentKey() -> [Book] {
@@ -307,6 +340,53 @@ final class SyncEngine: ObservableObject {
     private nonisolated static func decode(at url: URL) -> AnnotationSyncDocument? {
         guard let data = try? Data(contentsOf: url) else { return nil }
         return try? JSONDecoder().decode(AnnotationSyncDocument.self, from: data)
+    }
+
+    /// Catalog counterparts of `readDocument` / `writeDocument`: same
+    /// NSFileCoordinator + NSFileVersion conflict-union handling, folding every
+    /// unresolved conflict copy into one via the idempotent catalog merge.
+    private nonisolated static func readCatalog(at url: URL) async -> LibraryCatalog {
+        await Task.detached {
+            var catalogs: [LibraryCatalog] = []
+            var coordinationError: NSError?
+            NSFileCoordinator().coordinate(readingItemAt: url, options: [], error: &coordinationError) { readURL in
+                if let catalog = decodeCatalog(at: readURL) {
+                    catalogs.append(catalog)
+                }
+                let conflicts = NSFileVersion.unresolvedConflictVersionsOfItem(at: readURL) ?? []
+                for version in conflicts {
+                    if let catalog = decodeCatalog(at: version.url) {
+                        catalogs.append(catalog)
+                    }
+                }
+            }
+            let merged = CatalogSyncMerge.merge(catalogs)
+            resolveConflicts(at: url)
+            return merged
+        }.value
+    }
+
+    private nonisolated static func writeCatalog(_ catalog: LibraryCatalog, to url: URL) async {
+        await Task.detached {
+            guard let data = try? JSONEncoder().encode(catalog) else { return }
+            var coordinationError: NSError?
+            NSFileCoordinator().coordinate(
+                writingItemAt: url,
+                options: .forReplacing,
+                error: &coordinationError
+            ) { writeURL in
+                try? FileManager.default.createDirectory(
+                    at: writeURL.deletingLastPathComponent(),
+                    withIntermediateDirectories: true
+                )
+                try? data.write(to: writeURL, options: .atomic)
+            }
+        }.value
+    }
+
+    private nonisolated static func decodeCatalog(at url: URL) -> LibraryCatalog? {
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        return try? JSONDecoder().decode(LibraryCatalog.self, from: data)
     }
 
     /// Merge is idempotent and commutative, so once every version is folded in

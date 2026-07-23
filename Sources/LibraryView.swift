@@ -133,35 +133,37 @@ private struct MissingBooksSection: View {
     let onSelect: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("On your other devices")
                 .font(.headline)
+
+            Text("Re-import these EPUB files to restore their highlights and reading positions.")
+                .font(.footnote)
                 .foregroundStyle(.secondary)
 
-            ForEach(missingBooks) { book in
-                Button(action: onSelect) {
+            Button(action: onSelect) {
+                Label("Restore from EPUB Files", systemImage: "doc.badge.plus")
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: 44)
+            }
+            .buttonStyle(.borderedProminent)
+            .accessibilityHint("Choose one or more EPUB files to restore these books")
+
+            VStack(alignment: .leading, spacing: 12) {
+                ForEach(missingBooks) { book in
                     VStack(alignment: .leading, spacing: 2) {
                         Text(book.title)
                             .font(.subheadline.weight(.medium))
-                            .lineLimit(2)
                         if let author = book.author, !author.isEmpty {
                             Text(author)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
-                                .lineLimit(1)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(Rectangle())
+                    .accessibilityElement(children: .combine)
                 }
-                .buttonStyle(.plain)
-                .accessibilityHint("Re-import this EPUB to restore it")
             }
-
-            Text("Import the EPUB again to restore its highlights and reading position.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .padding(.top, 2)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()

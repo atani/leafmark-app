@@ -1,0 +1,4 @@
+interface:
+  display_name: "Improve Leafmark UI"
+  short_description: "Design, implement, and audit Leafmark UI changes"
+  default_prompt: "Use $improve-leafmark-ui to improve this Leafmark screen and verify accessibility."

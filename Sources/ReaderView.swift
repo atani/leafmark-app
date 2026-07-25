@@ -72,10 +72,18 @@ struct ReaderView: UIViewControllerRepresentable {
     /// Called when the user taps an existing highlight decoration.
     let onHighlightActivated: (Decoration.Id) -> Void
 
-    /// Vertical space kept above and below the page (pt). Small enough to
-    /// remove Readium's default 34/62pt bands, large enough to breathe on
-    /// edge-to-edge iPads; the device safe area still wins where it is larger.
-    static let verticalContentInset: CGFloat = 20
+    /// Vertical space kept above and below the page (pt).
+    ///
+    /// These are Readium's own defaults. Do not shrink them: the reservation
+    /// is what makes a paginated column end cleanly at the page boundary.
+    /// Cutting it to 20pt (for the landscape bands in issue #20) left the
+    /// column taller than the space the pagination accounts for, so the next
+    /// page's first line bled in under the current one — the "split page"
+    /// report on MobileRead and the 1-star App Store review that called the
+    /// app unusable. The effect scales with font size, which is why it looked
+    /// intermittent. Landscape white space has to be solved another way.
+    static let verticalContentInsetCompact: CGFloat = 34
+    static let verticalContentInsetRegular: CGFloat = 62
     /// Text-block line-length cap (rem) fed to Readium CSS. Set high enough to
     /// never bind on the widest iPad so Auto / 2-column layouts fill the width.
     static let maxLineLength: Double = 120
@@ -91,19 +99,18 @@ struct ReaderView: UIViewControllerRepresentable {
         do {
             var config = EPUBNavigatorViewController.Configuration()
             config.preferences = preferences
-            // Trim the vertical space Readium reserves above and below the
-            // page. Its defaults (34pt compact / 62pt regular) exist to clear
-            // an app's own top/bottom bars, but Leafmark draws its chrome as a
-            // transient overlay and lets the web view ignore the safe area, so
-            // that reservation only shows up as dead white bands — the bottom
-            // gap in portrait and the top/bottom bands in landscape (issue
-            // #20). Readium still keeps the device safe area (notch / home
-            // indicator) because it applies `max(safeArea, inset)`, so a small
-            // inset removes the excess without letting text slip under the
-            // notch.
+            // Keep Readium's default vertical reservation. See the constants
+            // above: shrinking it to reclaim the landscape bands (issue #20)
+            // broke pagination, so correctness wins over the white space.
             config.contentInset = [
-                .compact: (top: Self.verticalContentInset, bottom: Self.verticalContentInset),
-                .regular: (top: Self.verticalContentInset, bottom: Self.verticalContentInset),
+                .compact: (
+                    top: Self.verticalContentInsetCompact,
+                    bottom: Self.verticalContentInsetCompact
+                ),
+                .regular: (
+                    top: Self.verticalContentInsetRegular,
+                    bottom: Self.verticalContentInsetRegular
+                ),
             ]
             // Let the text block span the full landscape width. Readium CSS
             // caps the body at `--RS__maxLineLength` (40rem ≈ 640pt) and

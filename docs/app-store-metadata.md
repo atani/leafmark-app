@@ -41,6 +41,7 @@ Buy it once. No subscription, no account, no cloud lock-in. Your library is plai
 
 READ THE WAY YOU LIKE
 • Reflowable EPUB rendering with light, sepia and dark themes
+• Vertical Japanese text (tategaki) renders as the book declares it
 • Adjustable font, size, line height and margins
 • One or two columns, plus a scrolling mode — great on iPad in landscape
 • Full-text search, table of contents and a built-in dictionary lookup
@@ -57,7 +58,7 @@ PRIVACY BY DESIGN
 • Everything stays on your device
 
 LEAFMARK PRO
-Reading is always free. Import your library, render any book and try the feel before you decide. A single one-time purchase, Leafmark Pro, unlocks the full annotation workflow: unlimited highlights (the free tier keeps up to three per book), Markdown export, and reading statistics. Restore your purchase any time.
+Reading is always free. Import your library, render any book and try the feel before you decide. You also get one free Markdown export, so you can see exactly what lands in your notes before paying. A single one-time purchase, Leafmark Pro, unlocks the full annotation workflow: unlimited highlights (the free tier keeps up to three per book), unlimited Markdown export, and reading statistics. Restore your purchase any time.
 
 GOOD TO KNOW
 • Import EPUBs straight from Files — iCloud Drive, Google Drive, Dropbox, or right off your device.
@@ -67,12 +68,112 @@ GOOD TO KNOW
 
 ## キーワード(最大 100 字・カンマ区切り・スペース無し)
 
+### en-US(99 字 / 14 語)
+
 ```
-ebook,annotation,markdown,obsidian,notion,reading,notes,export,book,ipad,vault,calibre,library,sepia
+markdown,obsidian,annotate,notes,export,ebook,calibre,vault,offline,drmfree,notion,logseq,anki,sync
 ```
 
-- 100 字ちょうど。タイトル・サブタイトルと重複する `epub,reader,highlight` を削除し
-  `calibre,library,sepia` を追加。Apple はタイトル+サブタイトル+キーワードを自動結合するため重複は無駄。
+### ja(93 字 / 20 語)
+
+```
+電子書籍,ハイライト,注釈,読書,読書メモ,読書記録,マークダウン,オブシディアン,書き出し,蔵書,統計,買い切り,サブスクなし,広告なし,縦書き,青空文庫,全文検索,しおり,目次,同期
+```
+
+### 改訂の根拠(2026-07-25 実測)
+
+iTunes Search API で対象検索語の上位を実測した結果は次のとおり。
+
+| ストア | 検索語 | Leafmark の順位 |
+|---|---|---|
+| US | epub reader | 圏外(上位は評価 1 万件級) |
+| US | epub highlights export | 圏外 |
+| US | annotate ebook | 圏外 |
+| JP | epub リーダー | 圏外 |
+| JP | 電子書籍 ハイライト | 圏外 |
+| JP | epub 注釈 | **3 位** |
+
+評価 1 件の新規アプリが `epub reader` のような head term で評価数千件の既存アプリに勝つ見込みは無い。
+獲得可能性のある long-tail(ツール名・買い切り・DRM フリー)へ寄せる。
+
+改訂点は次の 3 つ。
+
+1. **ja の枠を 43 字から 93 字へ**。従来は 57 字が未使用で、さらに `リーダー` `ノート` が
+   アプリ名と重複していた。Apple はアプリ名 + サブタイトル + キーワードを自動結合するため重複は純粋な無駄
+2. **勝てない広域語を外す**(`book` `library` `reading` `ipad` `sepia`)。`sepia` は検索意図が存在しない
+3. **同じ読者層が使うツール名を追加**(`logseq` `anki`)。`obsidian` `notion` と同じ PKM 層を狙う
+
+### 縦書きの検証結果(2026-07-25)
+
+`縦書き` `青空文庫` は当初、対応コードが見当たらなかったため保留にしていた。
+実機検証したところ **縦組みは正しく描画される**ことを確認したので採用する。
+
+検証方法は次のとおり。
+
+1. `writing-mode: vertical-rl` と `page-progression-direction="rtl"` を指定した
+   最小の EPUB 3 を生成する(日本語の縦組み書籍および青空文庫の EPUB 変換と同じ宣言)
+2. 初期化済みシミュレータ(iPhone 17 / iOS 26.5)の `Documents/` へ配置して取り込ませる
+3. 描画を確認する
+
+結果は、本文が画面右上から始まり、行が右から左へ進む正しい縦組みだった。
+Readium の WKWebView が `writing-mode` をそのまま解釈するため、
+アプリ側に専用コードが無くても動作する。
+
+日本語圏では縦組みが読めるかどうかが選定条件になるため、この 2 語は露出枠として大きい。
+
+あわせて、日本語の概要にも縦組みで読める旨を追記する余地がある(現状は未記載)。
+検索で来た読者が製品ページで確認できないと、キーワードだけ当てても転換しない。
+
+### キーワードに入れない語(未対応)
+
+- `自炊` `PDF`: PDF 非対応。誤解を招くため使わない
+- `読み上げ`: TTS 非対応
+
+掲載語はすべて実装済み機能に対応する(`全文検索` `しおり` `目次` `同期` は
+`ReaderScreen` のツールバーおよび v1.7 の iCloud 同期で確認済み)。
+
+## 説明文(日本語・最大 4000 字)
+
+配信中の文面に 2 点を追加した版。App Store Connect の日本語ロケールへ貼る。
+
+追加点は次の 2 つ。
+
+1. **縦書き対応の明記**。新しいキーワード `縦書き` `青空文庫` で検索して来た読者が、
+   製品ページで裏付けを見つけられないと転換しない
+2. **無料で 1 回書き出せることの明記**。配信中の文面は書き出しを Pro 限定と書いており、
+   v1.10 の挙動と食い違う
+
+```
+Leafmark は、じっくり読んでメモを取る人のための、シンプルで高速な EPUB リーダーです。
+
+一度購入すれば永久に使えます。サブスクリプション不要、アカウント不要、クラウドロックインなし。あなたのライブラリはデバイス上のプレーンな EPUB ファイルで、ハイライトはいつでもエクスポートできます。
+
+読書を楽しむ
+・リフロー型 EPUB レンダリング（ライト・セピア・ダークテーマ）
+・縦書きの日本語書籍にも対応。青空文庫の EPUB など、縦組み指定のある本はそのまま縦書きで表示します
+・フォント、サイズ、行間、余白を自由に調整
+・1カラム・2カラム表示、スクロールモード対応（iPadのランドスケープに最適）
+・全文検索、目次ナビゲーション、内蔵辞書
+・本ごとに読書位置を記憶
+
+注釈してノートを持ち出す
+・4色のハイライトとノート
+・すべてのハイライトとノートを Markdown でエクスポート — Obsidian、Notion、任意のプレーンテキスト環境に直接貼り付け
+・読書統計: 今日・今週・累計の読書時間、ストリーク、本ごとの進捗
+
+プライバシー重視の設計
+・アカウント不要、サインイン不要
+・トラッキングなし、アナリティクスなし
+・すべてのデータはデバイス上に保持
+
+Leafmark Pro
+読書は永久無料。ライブラリをインポートし、好きな本をレンダリングし、使い心地を確かめてから購入を決められます。Markdown エクスポートも無料で1回試せるので、手元のノートに何が入るかを確かめてから判断できます。買い切りの Leafmark Pro で、無制限ハイライト（無料版は1冊あたり3件まで）、無制限の Markdown エクスポート、読書統計がアンロックされます。いつでも購入を復元できます。
+
+便利な情報
+・Files アプリから直接インポート — iCloud Drive、Google Drive、Dropbox 対応
+・DRM フリーの EPUB ファイルに対応。DRM 付き書籍と PDF には非対応
+・パブリックドメインの EPUB は青空文庫、Public Domain Library、Standard Ebooks で入手可能
+```
 
 ## カテゴリ
 

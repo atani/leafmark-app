@@ -16,7 +16,7 @@ enum PaywallContext {
         case .highlightLimit:
             return "You've used all \(StoreManager.freeHighlightLimit) free highlights in this book."
         case .export:
-            return "Take your highlights with you — export them all as Markdown."
+            return "You've used your free export. Unlock unlimited Markdown export."
         case .statistics:
             return "See how much you read — today, this week, and all time."
         }

@@ -13,7 +13,19 @@ final class StoreManager: ObservableObject {
     /// tried before buying. Pro removes the cap.
     nonisolated static let freeHighlightLimit = 3
 
+    /// Persists whether the one free Markdown export has been spent.
+    private static let freeExportUsedKey = "store.freeExportUsed"
+
     @Published private(set) var isPro = false
+
+    /// True once the free tier's single Markdown export has been used.
+    ///
+    /// Free readers get to export their highlights exactly once so they can
+    /// see the actual Markdown land in Obsidian before paying. Promising
+    /// "your highlights are yours" while blocking every export contradicts
+    /// the pitch, so the first one is always allowed.
+    @Published private(set) var hasUsedFreeExport =
+        UserDefaults.standard.bool(forKey: StoreManager.freeExportUsedKey)
     @Published private(set) var product: Product?
     @Published private(set) var purchaseInFlight = false
     @Published private(set) var productLoadFailed = false
@@ -107,6 +119,21 @@ final class StoreManager: ObservableObject {
     /// True while the user is allowed to create another highlight in a book.
     static func canAddHighlight(isPro: Bool, currentCount: Int) -> Bool {
         isPro || currentCount < freeHighlightLimit
+    }
+
+    /// True while the user is allowed to run a Markdown export.
+    ///
+    /// Pro exports without limit; the free tier gets exactly one.
+    static func canExport(isPro: Bool, hasUsedFreeExport: Bool) -> Bool {
+        isPro || !hasUsedFreeExport
+    }
+
+    /// Spends the free tier's single export. No-op for Pro, so restoring or
+    /// buying Pro never consumes the free allowance.
+    func markFreeExportUsed() {
+        guard !isPro, !hasUsedFreeExport else { return }
+        hasUsedFreeExport = true
+        UserDefaults.standard.set(true, forKey: Self.freeExportUsedKey)
     }
 
     private func refreshEntitlements() async {

@@ -563,6 +563,13 @@ private struct HighlightsSheet: View {
     @State private var showPaywall = false
     @State private var paywallContext: PaywallContext = .export
 
+    /// Set when the free export is spent, and applied only after this sheet
+    /// closes. Flipping the entitlement while the share sheet is presenting
+    /// would swap the ShareLink out for the paywall Button mid-presentation,
+    /// which crashes inside SwiftUI's activity picker
+    /// (EXC_BAD_ACCESS in SharingActivityPickerBridge.show).
+    @State private var freeExportPendingConsume = false
+
     private var items: [Highlight] {
         store.highlights(for: book.id)
     }
@@ -616,15 +623,23 @@ private struct HighlightsSheet: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     if !items.isEmpty {
-                        if purchases.isPro {
+                        if StoreManager.canExport(
+                            isPro: purchases.isPro,
+                            hasUsedFreeExport: purchases.hasUsedFreeExport
+                        ) {
                             ShareLink(
                                 item: store.exportFile(for: book),
                                 preview: SharePreview("\(book.title) — Highlights")
                             ) {
                                 Image(systemName: "square.and.arrow.up")
                             }
-                            .accessibilityLabel("Export as Markdown")
+                            .accessibilityLabel(
+                                purchases.isPro
+                                    ? "Export as Markdown"
+                                    : "Export as Markdown (one free export)"
+                            )
                             .simultaneousGesture(TapGesture().onEnded {
+                                freeExportPendingConsume = true
                                 if ReviewRequester.recordExport() {
                                     ReviewRequester.markRequested()
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
@@ -655,6 +670,14 @@ private struct HighlightsSheet: View {
             .sheet(isPresented: $showPaywall) {
                 PaywallView(store: purchases, context: paywallContext)
             }
+            .onDisappear {
+                // Safe to change the entitlement now: the share sheet is gone,
+                // so nothing is mid-presentation.
+                if freeExportPendingConsume {
+                    freeExportPendingConsume = false
+                    purchases.markFreeExportUsed()
+                }
+            }
         }
     }
 
@@ -662,9 +685,14 @@ private struct HighlightsSheet: View {
     /// ambush: the user always knows how many highlights they have left.
     private var freePlanFooter: some View {
         HStack(spacing: 12) {
-            Text("Free plan: \(min(items.count, StoreManager.freeHighlightLimit)) of \(StoreManager.freeHighlightLimit) highlights in this book")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Free plan: \(min(items.count, StoreManager.freeHighlightLimit)) of \(StoreManager.freeHighlightLimit) highlights in this book")
+                if !purchases.hasUsedFreeExport {
+                    Text("One free Markdown export available")
+                }
+            }
+            .font(.footnote)
+            .foregroundStyle(.secondary)
             Spacer()
             Button("Upgrade") {
                 paywallContext = .highlightLimit

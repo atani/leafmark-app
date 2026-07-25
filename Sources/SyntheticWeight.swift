@@ -79,6 +79,42 @@ enum SyntheticWeight {
         return Declaration(css: css).eraseToAnyHTMLFontFamilyDeclaration()
     }
 
+    /// `id` of the `<style>` element the live updater owns.
+    static let liveStyleElementID = "leafmark-synthetic-weight"
+
+    /// JavaScript that creates or rewrites the stroke rule in the document that
+    /// is already displayed.
+    ///
+    /// The serve-time declaration is baked in when a resource loads, so it
+    /// cannot change the pages currently on screen. Every EPUB spread lives in
+    /// its own document, so the script runs against each of them via the
+    /// navigator, and an empty rule (neutral weight) is written rather than
+    /// removing the element, which keeps the update idempotent.
+    static func liveUpdateScript(forWeight weight: Double) -> String {
+        let rule = css(forWeight: weight) ?? ""
+        // The rule is app-controlled (a formatted number and static text), but
+        // it still crosses into JS as a string literal, so encode it as JSON.
+        let encoded = String(
+            data: (try? JSONSerialization.data(withJSONObject: [rule], options: []))
+                ?? Data("[\"\"]".utf8),
+            encoding: .utf8
+        ) ?? "[\"\"]"
+        return """
+        (function() {
+          var rule = \(encoded)[0];
+          var id = "\(liveStyleElementID)";
+          var el = document.getElementById(id);
+          if (!el) {
+            el = document.createElement("style");
+            el.id = id;
+            el.type = "text/css";
+            document.head.appendChild(el);
+          }
+          el.textContent = rule;
+        })();
+        """
+    }
+
     private struct Declaration: HTMLFontFamilyDeclaration {
         let css: String
         var fontFamily: FontFamily { SyntheticWeight.sentinelFamily }

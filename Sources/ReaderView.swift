@@ -24,6 +24,19 @@ final class NavigatorBridge: ObservableObject {
         navigator?.submitPreferences(preferences)
     }
 
+    /// Applies the synthetic weight stroke to the pages already on screen.
+    ///
+    /// The serve-time declaration only reaches resources loaded after it is
+    /// registered, so on its own the Font Weight control appears dead until
+    /// the native `font-weight` happens to snap to a real Bold face — which is
+    /// the behaviour reported on MobileRead. Rewriting the rule in the live
+    /// document makes every step of the control visible immediately.
+    func applySyntheticWeight(_ weight: Double) {
+        guard let navigator else { return }
+        let script = SyntheticWeight.liveUpdateScript(forWeight: weight)
+        Task { _ = await navigator.evaluateJavaScript(script) }
+    }
+
     /// Current text selection, if any.
     var selectionLocator: Locator? {
         navigator?.currentSelection?.locator

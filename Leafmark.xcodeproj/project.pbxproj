@@ -18,6 +18,7 @@
 		46806E6B443CF98D0570BA82 /* AppearanceStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECBED9113A99C9EF8FCA2FF /* AppearanceStoreTests.swift */; };
 		4F170253F2D2449AFCE03B49 /* PagePositionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF059FC2E63877CE40FE149 /* PagePositionTests.swift */; };
 		537D0DC3BECC03D4FC3BA44F /* ReadiumStreamer in Frameworks */ = {isa = PBXBuildFile; productRef = BD83301B5EE3E55ADE6EA689 /* ReadiumStreamer */; };
+		53A89FFC017DA023D87EBB9B /* CatalogSyncModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85647E44F37AC0840ECBCBDB /* CatalogSyncModels.swift */; };
 		5449CDD76CB1E24BC96EE4E8 /* sample-frankenstein.epub in Resources */ = {isa = PBXBuildFile; fileRef = 35CFFC91FD2ACB7897E14A5B /* sample-frankenstein.epub */; };
 		5988C9CC5F351A0B59EAA225 /* BookmarkStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68E127622541F806E6B7F690 /* BookmarkStore.swift */; };
 		5FA94B77E270AD1C14B0E7BD /* Highlight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 778133C64BE5B786C5EC7543 /* Highlight.swift */; };
@@ -25,9 +26,9 @@
 		6356D53240DB93BBD33860D3 /* sample-benjamin-franklin.epub in Resources */ = {isa = PBXBuildFile; fileRef = 54982A4D740B4B4FEC06DE19 /* sample-benjamin-franklin.epub */; };
 		6AD599EF46772A691F9D78B1 /* PagePosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE94FDEA641791B65FBEB384 /* PagePosition.swift */; };
 		6B54F2EA66B1775051EA27A1 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D3451D5040C96C09C7F7E70 /* StatsView.swift */; };
+		6BC83C644E74F06CACB241BD /* CatalogMissingBooksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEB03BD52033DA24B1CF4796 /* CatalogMissingBooksTests.swift */; };
 		6E932F8C3E4FCD98E66F7DC3 /* AnnotationSyncModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB8EB382B533AF6C7B75F778 /* AnnotationSyncModels.swift */; };
-		6C5B4A3928170F6E5D4C3B2B /* CatalogSyncMerge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F6071829304A5B6C /* CatalogSyncMerge.swift */; };
-		5C4B3A2918070F6E5D4C3B2A /* CatalogSyncModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B5C /* CatalogSyncModels.swift */; };
+		75CDBAA02ECB82DB10CD4263 /* CatalogSyncMergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CF19B4D39037C54571A1D0B /* CatalogSyncMergeTests.swift */; };
 		7BD54B6FDBF30FFF970B511C /* LibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD49E33A178C8BD553C56736 /* LibraryStore.swift */; };
 		7C190C62145AFD3E3D201F29 /* StoreManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFAE2035D735F8B6C68B704D /* StoreManagerTests.swift */; };
 		7C87E86579B1BEA76DF268DC /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC30C446D1140BD0B7F8135E /* StoreManager.swift */; };
@@ -37,8 +38,6 @@
 		8DBFD20E212BF0DAB704441B /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2258232CB78FF8A65B94B388 /* PaywallView.swift */; };
 		916E67A6402068EC16401933 /* StorePurchaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A381A098CBBB8F4E778E488B /* StorePurchaseTests.swift */; };
 		9301D8ECBE35CE45DBF3FEB7 /* AnnotationSyncMergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 123BD0755B312AB090D48B95 /* AnnotationSyncMergeTests.swift */; };
-		8E7D6C5B4A2917060504C3B4 /* CatalogMissingBooksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E5F6071829304152637485 /* CatalogMissingBooksTests.swift */; };
-		7D6C5B4A39281706E5D4C3B3 /* CatalogSyncMergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D4E5F60718293041526374 /* CatalogSyncMergeTests.swift */; };
 		A1A2CF711CE3F1FF3F774938 /* ReviewRequester.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD82B8009C249390EB224343 /* ReviewRequester.swift */; };
 		A723F471D725A3C7392C19FF /* ReaderScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0368DD06A432C7DDA83C6F62 /* ReaderScreen.swift */; };
 		AC2632F96826C1B87903000A /* ReadiumNavigator in Frameworks */ = {isa = PBXBuildFile; productRef = 817F9F56B1B3163E7A7EA8F2 /* ReadiumNavigator */; };
@@ -47,6 +46,7 @@
 		BC82C2E5BF8ABDF80BB1FF6E /* ReadiumNavigator in Frameworks */ = {isa = PBXBuildFile; productRef = 236D71D0D49AB6147FD095FF /* ReadiumNavigator */; };
 		C089A97E72C7FAB30F30EA16 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2CC668075B2480DE3A89A190 /* PrivacyInfo.xcprivacy */; };
 		C663421BD1272A8066FB67AD /* AppearanceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55CE112C68CD2B9BA6630DB8 /* AppearanceStore.swift */; };
+		C8DF8404FFE69030468A9C09 /* CatalogSyncMerge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E63F50206A240C0C28B0DC0 /* CatalogSyncMerge.swift */; };
 		CEA01EDCD91D46D8B68D480E /* ReadiumShared in Frameworks */ = {isa = PBXBuildFile; productRef = 7AA755DB1BAD8D2B49EF8DCB /* ReadiumShared */; };
 		D1CA6BD69ABDD6AF8198A7FE /* SyntheticWeightTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 075DF03244CDE0EBE55143BE /* SyntheticWeightTests.swift */; };
 		D4A1D5D765048F0A00BB0BE8 /* StatsStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3E808A04A3AC068983F4E5 /* StatsStoreTests.swift */; };
@@ -81,8 +81,6 @@
 		075DF03244CDE0EBE55143BE /* SyntheticWeightTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntheticWeightTests.swift; sourceTree = "<group>"; };
 		0A31328B3686C1015E722EC5 /* HighlightStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightStoreTests.swift; sourceTree = "<group>"; };
 		123BD0755B312AB090D48B95 /* AnnotationSyncMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationSyncMergeTests.swift; sourceTree = "<group>"; };
-		D4E5F6071829304152637485 /* CatalogMissingBooksTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogMissingBooksTests.swift; sourceTree = "<group>"; };
-		C3D4E5F60718293041526374 /* CatalogSyncMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogSyncMergeTests.swift; sourceTree = "<group>"; };
 		1EC81A329420F362D3525267 /* ImageZoomMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageZoomMathTests.swift; sourceTree = "<group>"; };
 		2258232CB78FF8A65B94B388 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		23C1B97E352C50C8C2297FFE /* SearchSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSheet.swift; sourceTree = "<group>"; };
@@ -104,20 +102,22 @@
 		5D3451D5040C96C09C7F7E70 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		61C6D4B518701FDF9B5AD443 /* StatsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsStore.swift; sourceTree = "<group>"; };
 		68E127622541F806E6B7F690 /* BookmarkStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkStore.swift; sourceTree = "<group>"; };
+		6CF19B4D39037C54571A1D0B /* CatalogSyncMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogSyncMergeTests.swift; sourceTree = "<group>"; };
 		778133C64BE5B786C5EC7543 /* Highlight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Highlight.swift; sourceTree = "<group>"; };
 		7CAEC885D8FFD62D27A742D3 /* FontStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontStoreTests.swift; sourceTree = "<group>"; };
 		7E7931066EE320703A9EF687 /* ContentKeyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentKeyTests.swift; sourceTree = "<group>"; };
 		82EFC7EF4C81AEAFE747CC8D /* SyntheticWeight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntheticWeight.swift; sourceTree = "<group>"; };
+		85647E44F37AC0840ECBCBDB /* CatalogSyncModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogSyncModels.swift; sourceTree = "<group>"; };
 		8A414A467189F28FDC12C522 /* ReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderView.swift; sourceTree = "<group>"; };
 		8ECBED9113A99C9EF8FCA2FF /* AppearanceStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceStoreTests.swift; sourceTree = "<group>"; };
+		9E63F50206A240C0C28B0DC0 /* CatalogSyncMerge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogSyncMerge.swift; sourceTree = "<group>"; };
 		A0BEB06CC916B4E991FBACE7 /* FontStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontStore.swift; sourceTree = "<group>"; };
 		A381A098CBBB8F4E778E488B /* StorePurchaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorePurchaseTests.swift; sourceTree = "<group>"; };
 		AE94FDEA641791B65FBEB384 /* PagePosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagePosition.swift; sourceTree = "<group>"; };
 		BB8EB382B533AF6C7B75F778 /* AnnotationSyncModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationSyncModels.swift; sourceTree = "<group>"; };
-		B2C3D4E5F6071829304A5B6C /* CatalogSyncMerge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogSyncMerge.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F60718293A4B5C /* CatalogSyncModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogSyncModels.swift; sourceTree = "<group>"; };
 		BD49E33A178C8BD553C56736 /* LibraryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryStore.swift; sourceTree = "<group>"; };
 		BD82B8009C249390EB224343 /* ReviewRequester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewRequester.swift; sourceTree = "<group>"; };
+		BEB03BD52033DA24B1CF4796 /* CatalogMissingBooksTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogMissingBooksTests.swift; sourceTree = "<group>"; };
 		CAAF403AFC257885411DC2B1 /* HighlightStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightStore.swift; sourceTree = "<group>"; };
 		CC30C446D1140BD0B7F8135E /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
 		D21894100425C23BBC7A1443 /* AnnotationSyncMerge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationSyncMerge.swift; sourceTree = "<group>"; };
@@ -158,12 +158,12 @@
 				D21894100425C23BBC7A1443 /* AnnotationSyncMerge.swift */,
 				BB8EB382B533AF6C7B75F778 /* AnnotationSyncModels.swift */,
 				55CE112C68CD2B9BA6630DB8 /* AppearanceStore.swift */,
-				B2C3D4E5F6071829304A5B6C /* CatalogSyncMerge.swift */,
-				A1B2C3D4E5F60718293A4B5C /* CatalogSyncModels.swift */,
 				32C43B2B2B3C7796A0CA9260 /* Assets.xcassets */,
 				2FD8F22F199BCC99E005D45D /* Book.swift */,
 				37A8B97727D2023C958873B8 /* Bookmark.swift */,
 				68E127622541F806E6B7F690 /* BookmarkStore.swift */,
+				9E63F50206A240C0C28B0DC0 /* CatalogSyncMerge.swift */,
+				85647E44F37AC0840ECBCBDB /* CatalogSyncModels.swift */,
 				A0BEB06CC916B4E991FBACE7 /* FontStore.swift */,
 				778133C64BE5B786C5EC7543 /* Highlight.swift */,
 				E20D3AB2EA403C50910EB6F0 /* HighlightExport.swift */,
@@ -218,9 +218,9 @@
 				5B9939F3BC5DD37BBCACDDF4 /* AnnotationStoreSyncTests.swift */,
 				123BD0755B312AB090D48B95 /* AnnotationSyncMergeTests.swift */,
 				8ECBED9113A99C9EF8FCA2FF /* AppearanceStoreTests.swift */,
-				D4E5F6071829304152637485 /* CatalogMissingBooksTests.swift */,
-				C3D4E5F60718293041526374 /* CatalogSyncMergeTests.swift */,
 				03CEA69E9BCF0A27ADAAFCCA /* BookmarkStoreTests.swift */,
+				BEB03BD52033DA24B1CF4796 /* CatalogMissingBooksTests.swift */,
+				6CF19B4D39037C54571A1D0B /* CatalogSyncMergeTests.swift */,
 				7E7931066EE320703A9EF687 /* ContentKeyTests.swift */,
 				7CAEC885D8FFD62D27A742D3 /* FontStoreTests.swift */,
 				0A31328B3686C1015E722EC5 /* HighlightStoreTests.swift */,
@@ -363,10 +363,10 @@
 				112FE5A7D488CBBD3C15D373 /* AnnotationDecodeCompatibilityTests.swift in Sources */,
 				61EB154E379A42D80088987D /* AnnotationStoreSyncTests.swift in Sources */,
 				9301D8ECBE35CE45DBF3FEB7 /* AnnotationSyncMergeTests.swift in Sources */,
-				8E7D6C5B4A2917060504C3B4 /* CatalogMissingBooksTests.swift in Sources */,
-				7D6C5B4A39281706E5D4C3B3 /* CatalogSyncMergeTests.swift in Sources */,
 				46806E6B443CF98D0570BA82 /* AppearanceStoreTests.swift in Sources */,
 				1CDC5B0A3615BC9FAD23B612 /* BookmarkStoreTests.swift in Sources */,
+				6BC83C644E74F06CACB241BD /* CatalogMissingBooksTests.swift in Sources */,
+				75CDBAA02ECB82DB10CD4263 /* CatalogSyncMergeTests.swift in Sources */,
 				E9652C5513109422C309734A /* ContentKeyTests.swift in Sources */,
 				B2FFFD72D766F10B9F22B90E /* FontStoreTests.swift in Sources */,
 				EC956E48ABDA346997C11C99 /* HighlightStoreTests.swift in Sources */,
@@ -385,12 +385,12 @@
 			files = (
 				266A5D2C8CD3F0CD9EFD299C /* AnnotationSyncMerge.swift in Sources */,
 				6E932F8C3E4FCD98E66F7DC3 /* AnnotationSyncModels.swift in Sources */,
-				6C5B4A3928170F6E5D4C3B2B /* CatalogSyncMerge.swift in Sources */,
-				5C4B3A2918070F6E5D4C3B2A /* CatalogSyncModels.swift in Sources */,
 				C663421BD1272A8066FB67AD /* AppearanceStore.swift in Sources */,
 				7E2EB70DF7F4F83B8C693881 /* Book.swift in Sources */,
 				E6216E645805F87D2F26B8CA /* Bookmark.swift in Sources */,
 				5988C9CC5F351A0B59EAA225 /* BookmarkStore.swift in Sources */,
+				C8DF8404FFE69030468A9C09 /* CatalogSyncMerge.swift in Sources */,
+				53A89FFC017DA023D87EBB9B /* CatalogSyncModels.swift in Sources */,
 				EFB80E54DF7C465BE88D034D /* FontStore.swift in Sources */,
 				5FA94B77E270AD1C14B0E7BD /* Highlight.swift in Sources */,
 				E080376F80D4C019B378FBE4 /* HighlightExport.swift in Sources */,
@@ -448,7 +448,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Leafmark.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -456,7 +456,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9;
+				MARKETING_VERSION = 1.10;
 				PRODUCT_BUNDLE_IDENTIFIER = com.atani.inkwell;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -529,7 +529,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Leafmark.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -537,7 +537,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9;
+				MARKETING_VERSION = 1.10;
 				PRODUCT_BUNDLE_IDENTIFIER = com.atani.inkwell;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";

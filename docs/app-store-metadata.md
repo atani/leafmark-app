@@ -67,12 +67,50 @@ GOOD TO KNOW
 
 ## キーワード(最大 100 字・カンマ区切り・スペース無し)
 
+### en-US(99 字 / 14 語)
+
 ```
-ebook,annotation,markdown,obsidian,notion,reading,notes,export,book,ipad,vault,calibre,library,sepia
+markdown,obsidian,annotate,notes,export,ebook,calibre,vault,offline,drmfree,notion,logseq,anki,sync
 ```
 
-- 100 字ちょうど。タイトル・サブタイトルと重複する `epub,reader,highlight` を削除し
-  `calibre,library,sepia` を追加。Apple はタイトル+サブタイトル+キーワードを自動結合するため重複は無駄。
+### ja(93 字 / 21 語)
+
+```
+電子書籍,ハイライト,注釈,読書,読書メモ,読書記録,マークダウン,オブシディアン,書き出し,蔵書,統計,買い切り,サブスクなし,広告なし,辞書,全文検索,しおり,目次,同期,洋書,引用
+```
+
+### 改訂の根拠(2026-07-25 実測)
+
+iTunes Search API で対象検索語の上位を実測した結果は次のとおり。
+
+| ストア | 検索語 | Leafmark の順位 |
+|---|---|---|
+| US | epub reader | 圏外(上位は評価 1 万件級) |
+| US | epub highlights export | 圏外 |
+| US | annotate ebook | 圏外 |
+| JP | epub リーダー | 圏外 |
+| JP | 電子書籍 ハイライト | 圏外 |
+| JP | epub 注釈 | **3 位** |
+
+評価 1 件の新規アプリが `epub reader` のような head term で評価数千件の既存アプリに勝つ見込みは無い。
+獲得可能性のある long-tail(ツール名・買い切り・DRM フリー)へ寄せる。
+
+改訂点は次の 3 つ。
+
+1. **ja の枠を 43 字から 93 字へ**。従来は 57 字が未使用で、さらに `リーダー` `ノート` が
+   アプリ名と重複していた。Apple はアプリ名 + サブタイトル + キーワードを自動結合するため重複は純粋な無駄
+2. **勝てない広域語を外す**(`book` `library` `reading` `ipad` `sepia`)。`sepia` は検索意図が存在しない
+3. **同じ読者層が使うツール名を追加**(`logseq` `anki`)。`obsidian` `notion` と同じ PKM 層を狙う
+
+### キーワードに入れない語(未検証・未対応)
+
+- `縦書き` `青空文庫`: 縦組みの明示的な対応コードが無く(`writing-mode` の grep で該当なし)、
+  同梱サンプルも英語 3 冊のみ。動作を検証するまで使わない。検証できれば日本語圏で大きな枠になる
+- `自炊` `PDF`: PDF 非対応。誤解を招くため使わない
+- `読み上げ`: TTS 非対応
+
+掲載語はすべて実装済み機能に対応する(`全文検索` `しおり` `目次` `同期` は
+`ReaderScreen` のツールバーおよび v1.7 の iCloud 同期で確認済み)。
 
 ## カテゴリ
 

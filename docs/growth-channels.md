@@ -126,6 +126,9 @@ welcome.
 - 「iOS の EPUB リーダーを Readium 3 で作って、ハイライトを Markdown で取り出せるようにした」
 - 「サーバーを持たずに iCloud Drive だけで iPhone と iPad の読書データを同期する」
 
+**2 本目は全文を書き起こし済み**: `docs/drafts/zenn-icloud-sync.md`(textlint 通過済み)。
+`published: false` にしてあるので、Zenn へコピーして中身を確認してから公開できる。
+
 **構成案(2 本目のほうが読まれやすい)**
 
 1. 課題: 読書ハイライトが各リーダーに閉じ込められる

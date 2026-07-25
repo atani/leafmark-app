@@ -110,4 +110,33 @@ final class SyntheticWeightTests: XCTestCase {
         let html = "<html><body>no head</body></html>"
         XCTAssertEqual(try inject(declaration, into: html), html, "head が無ければ何も注入しない")
     }
+
+    // MARK: - live update script
+
+    func testLiveScriptCarriesTheStrokeRule() throws {
+        let script = SyntheticWeight.liveUpdateScript(forWeight: 2.0)
+        let rule = try XCTUnwrap(SyntheticWeight.css(forWeight: 2.0))
+        XCTAssertTrue(script.contains("-webkit-text-stroke"), "開いているページへ適用する規則を含む")
+        XCTAssertTrue(
+            script.contains(rule.replacingOccurrences(of: "\"", with: "\\\"")) || script.contains(rule),
+            "css(forWeight:) と同じ規則を運ぶ"
+        )
+        XCTAssertTrue(script.contains(SyntheticWeight.liveStyleElementID), "自分が所有する style 要素を識別する")
+    }
+
+    func testLiveScriptAtNeutralWeightClearsTheRule() {
+        let script = SyntheticWeight.liveUpdateScript(forWeight: 1.0)
+        XCTAssertFalse(script.contains("-webkit-text-stroke"), "既定に戻したらストロークを消す")
+        XCTAssertTrue(script.contains(SyntheticWeight.liveStyleElementID), "要素は残して空にするので id は含む")
+    }
+
+    func testLiveScriptIsIdempotentByReusingOneElement() {
+        let script = SyntheticWeight.liveUpdateScript(forWeight: 1.8)
+        XCTAssertTrue(script.contains("getElementById"), "既存の要素があれば作り直さない")
+        XCTAssertEqual(
+            script.components(separatedBy: "appendChild").count - 1,
+            1,
+            "style 要素の追加は 1 箇所だけ（連続適用で重ならない）"
+        )
+    }
 }

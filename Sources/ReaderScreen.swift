@@ -215,7 +215,13 @@ struct ReaderScreen: View {
         }
         .onChange(of: appearance.themeRaw) { bridge.submit(appearance.preferences) }
         .onChange(of: appearance.fontRaw) { bridge.submit(appearance.preferences) }
-        .onChange(of: appearance.fontWeight) { bridge.submit(appearance.preferences) }
+        .onChange(of: appearance.fontWeight) {
+            bridge.submit(appearance.preferences)
+            // The serve-time declaration cannot reach the open pages, so the
+            // stroke is rewritten in place; otherwise the control looks dead
+            // until the native weight snaps to a real Bold face.
+            bridge.applySyntheticWeight(appearance.fontWeight)
+        }
         .onChange(of: appearance.fontSize) { bridge.submit(appearance.preferences) }
         .onChange(of: appearance.columnsRaw) { bridge.submit(appearance.preferences) }
         .onChange(of: appearance.scrollEnabled) { bridge.submit(appearance.preferences) }

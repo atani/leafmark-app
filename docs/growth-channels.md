@@ -90,10 +90,34 @@ download — the export format in particular is easy to change while the user
 base is small.
 ```
 
-## 3. Obsidian 公式フォーラム(Share & showcase)
+## 3. 🔴 Obsidian 公式フォーラム(Share & showcase)— 投稿しない
 
-Reddit より腰を据えた読者が多い。実装と設計判断を書くほど反応が良い。
-r/ObsidianMD と同じ本文を使い回さず、**なぜこの形式にしたか**を足す。
+**当初この項目を投稿先として挙げたのは調査不足だった。規約を確認せずに書いていた。**
+
+2026-07-26 に実際の投稿画面を開いたところ、カテゴリのテンプレートが次の警告で始まっていた。
+
+> MUST READ - FAILURE TO FOLLOW THE RULES WILL LEAD TO A BAN
+> Please, remember that the main purpose of this forum is to help Obsidian users.
+> This goal should not be abused to advertise third-party projects.
+>
+> General Rules:
+> - We will only accept Obsidian plugins, themes, CSS snippets, tips, and custom vaults
+>   (workflow showcases).
+
+Leafmark は iOS の EPUB リーダーであり、プラグインでもテーマでも CSS スニペットでもない。
+third-party project の宣伝そのものに当たり、**アカウント BAN のリスク**がある。
+プラグイン / テーマは community directory への登録も必須で、当然満たさない。
+
+投稿は中止した。得られる露出より、アカウントを失う損失のほうが大きい。
+
+### それでも Obsidian 層に届けたい場合
+
+規約が認めている枠は **custom vaults(workflow showcase)** のみ。
+アプリ紹介ではなく「EPUB のハイライトを vault に取り込むワークフロー」を主題にし、
+Leafmark は手段として一度触れるだけにする必要がある。
+それでも宣伝と判断される余地は残るため、実施するかは要判断。
+
+r/ObsidianMD は別コミュニティで規約も別。そちらは自己宣伝ルールに従えば投稿可能。
 
 ## 4. MobileRead フォーラム
 
@@ -174,21 +198,25 @@ https://atani.github.io/leafmark-app/support.html
 - 原因を推測して断定しない(実際まだ特定できていない)
 - 言い訳や仕様説明を長く書かない。聞く姿勢だけを示す
 
-### 未解決: 症状が特定できていない
+### 解決済み(2026-07-26): 症状は split-page 不具合だった
 
-レビュー本文に具体的な症状が無く、次の確認では再現しなかった。
+上記は返信を書いた時点の記録で、その後に原因が判明した。
 
-- シミュレータ(iPhone 17 / iOS 26.5)でビルドし、ライブラリ表示・書籍を開く・
-  本文描画までは正常に動作
-- App Store Connect の Analytics 上、クラッシュは「十分なデータがありません」
-- 既知の未解決 issue は #20(横向きレイアウト)のみで、「使用不能」に相当しない
+MobileRead のスレッドで 2 名が同じ症状を報告していた。ページを送ると次ページの
+先頭行が現在のページに重なる不具合で、`ReaderView.swift` が Readium の
+`contentInset` を上下 20pt に縮めていたことが原因(v1.6 以降の全バージョンに存在)。
 
-したがって現時点で「このバグが原因」と断定できる材料は無い。返信で症状を聞き出すのが先。
+1 つ星の "bugs that make the app unusable" はこれを指していたと考えられる。
+修正は v1.10 でリリース済み。
+
+**この経緯から得られた教訓**: 症状が分からないときは、App Store のレビューより
+フォーラムのほうが具体的な情報が得られる。1 つ星が付いた時点で MobileRead の
+既存スレッドを確認していれば、2 週間早く直せていた。
 
 ## 投稿順序
 
 1. MobileRead(既存の実績チャネル。低リスクで即出せる)
-2. r/ObsidianMD と Obsidian フォーラム(対象読者の中心)
+2. r/ObsidianMD(対象読者の中心。Obsidian 公式フォーラムは規約により対象外)
 3. Zenn(日本語圏。記事の準備に時間がかかる)
 4. Show HN(一度しか使えない弾なので、上記のフィードバックで粗を取ってから)
 

@@ -122,3 +122,9 @@ swift-toolkit が取り込む → タグリリース、の順。リリースを�
       HighlightStore / StatsStore のロジックを Tests/ + LeafmarkTests ターゲットで検証。
       LibraryStore は Readium パース依存のため別途
 - [ ] 蔵書が増えた場合の SQLite 移行判断(ADR-0002 の見直し条件)
+- [ ] 2 段組みの段と段の間隔を戻す。段間（`--RS__colGap`）は Readium のページ送りの
+      計算と両立しないため 0 に戻した（[#40](https://github.com/atani/epub-reader-ios/pull/40)）。
+      間隔が必要なら root 幅を段間ぶん詰めるなど、ピッチをビューポート幅に保つ方法で入れる
+- [ ] レイアウトの回帰をテストで捕まえる手段がない。#33 と #40 はどちらも
+      単体テストが全 pass のまま出荷された。ページを送って本文の位置を測る
+      スクリーンショット比較を CI か手順に組み込む

@@ -961,6 +961,19 @@ private struct AppearanceSheet: View {
                         }
                     }
                 }
+
+                // Readers reporting rendering problems could not tell which
+                // build they were on ("the app gives no indication"), which
+                // made it impossible to know whether a fix had reached them.
+                Section("About") {
+                    HStack {
+                        Text("Version")
+                        Spacer()
+                        Text(AppInfo.versionDisplay)
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+                    }
+                }
             }
             .navigationTitle("Appearance")
             .navigationBarTitleDisplayMode(.inline)

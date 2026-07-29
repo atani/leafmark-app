@@ -21,20 +21,19 @@
 
 出所と「無いと移行できない機能」かどうかをタグで残す（go-to-market 6. 指標）。
 
-- [ ] ユーザーフォントの持ち込み（.ttf / .otf インポート → フォントピッカーに追加）
+- [x] ユーザーフォントの持ち込み（.ttf / .otf インポート → フォントピッカーに追加）— v1.7 で出荷
       — 出所: MobileRead t=374295 JSWolf(2026-07-06)。同氏は ScrollWizard スレッドでも同じ要求
       をしており、この層の定番要件。【移行ブロッカー候補】Readium の
-      `fontFamilyDeclarations` で技術的に実現可能なことは確認済み
-- [ ] フォント weight（太さ）調整 — 出所: 同上。Readium が可変フォントの weight を
-      公開しているか要調査。持ち込みフォント対応とセットで検討
-- [ ] ブックマーク（複数ページに印を付けて一覧からジャンプ）— 出所: MobileRead t=374295
-      (2026-07-07、Leafmark を試した好意的レビューで要望)。現状は読書位置の自動保存のみで
-      明示ブックマークは無い。Marvin にあった定番機能。HighlightStore と同型の BookmarkStore +
-      ツールバー導線 + 一覧シートで実現見込み。v1.6 の有力候補
-- [ ] 画像の全画面表示・ピンチズーム — 出所: 同上。
-      要望は画像を全画面まで拡大したいという内容。現状は画像タップ非対応（`didTapAt` は chrome トグルのみ）。
-      実装には JS で elementFromPoint による画像ヒットテスト + src 取得 → ズーム可能ビューア提示が必要。
-      挿絵の多い EPUB で効く
+      `fontFamilyDeclarations` で実装（`Sources/FontStore.swift`）
+- [x] フォント weight（太さ）調整 — v1.7 で出荷、v1.11 で開いているページへの即時反映を修正
+      — 出所: 同上。`-webkit-text-stroke` による合成ウェイト（`Sources/SyntheticWeight.swift`）。
+      可変フォントの weight 軸を駆動する対応は未着手（下の「upstream 待ち」を参照）
+- [x] ブックマーク（複数ページに印を付けて一覧からジャンプ）— v1.5 で出荷
+      — 出所: MobileRead t=374295
+      (2026-07-07、Leafmark を試した好意的レビューで要望)。`Sources/BookmarkStore.swift` +
+      ツールバー導線 + 一覧シート
+- [x] 画像の全画面表示・ピンチズーム — v1.5 で出荷
+      — 出所: 同上。画像タップで `Sources/ZoomableImageView.swift` を提示する
 
 ## upstream 待ち（合成ウェイトの置き換え）
 
@@ -123,3 +122,9 @@ swift-toolkit が取り込む → タグリリース、の順。リリースを�
       HighlightStore / StatsStore のロジックを Tests/ + LeafmarkTests ターゲットで検証。
       LibraryStore は Readium パース依存のため別途
 - [ ] 蔵書が増えた場合の SQLite 移行判断(ADR-0002 の見直し条件)
+- [ ] 2 段組みの段と段の間隔を戻す。段間（`--RS__colGap`）は Readium のページ送りの
+      計算と両立しないため 0 に戻した（[#40](https://github.com/atani/epub-reader-ios/pull/40)）。
+      間隔が必要なら root 幅を段間ぶん詰めるなど、ピッチをビューポート幅に保つ方法で入れる
+- [ ] レイアウトの回帰をテストで捕まえる手段がない。#33 と #40 はどちらも
+      単体テストが全 pass のまま出荷された。ページを送って本文の位置を測る
+      スクリーンショット比較を CI か手順に組み込む

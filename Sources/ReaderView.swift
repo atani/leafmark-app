@@ -100,9 +100,23 @@ struct ReaderView: UIViewControllerRepresentable {
     /// Text-block line-length cap (rem) fed to Readium CSS. Set high enough to
     /// never bind on the widest iPad so Auto / 2-column layouts fill the width.
     static let maxLineLength: Double = 120
-    /// Gap between columns in 2-column mode (px), so the columns don't touch
-    /// (Readium's default `--RS__colGap` is 0).
-    static let columnGap: Double = 30
+    /// Gap between columns (px). Must stay 0, which is Readium's default.
+    ///
+    /// Readium turns pages by scrolling the web view in `window.innerWidth`
+    /// steps and snapping to multiples of that width (`utils.js`
+    /// `scrollRight` / `snapOffset`). CSS lays the columns out with a pitch of
+    /// `columnWidth + columnGap`, and with one column per screen the column
+    /// width already fills the viewport. Any non-zero gap therefore makes the
+    /// columns advance faster than the scroll does, and the page lands short
+    /// by one gap more on every turn: the text creeps sideways until two pages
+    /// share the screen, then resets at the next chapter because each resource
+    /// gets a fresh scroll container. A 30px gap drifts 300px — a quarter of an
+    /// iPad screen — within ten page turns (MobileRead t=374295, post #37).
+    ///
+    /// The gap was added to keep the two columns apart in 2-column mode. That
+    /// job belongs to `--RS__pageGutter`, which readium-css applies as body
+    /// padding and which does not enter the pagination arithmetic.
+    static let columnGap: Double = 0
 
     func makeCoordinator() -> Coordinator {
         Coordinator(onLocatorChange: onLocatorChange)
@@ -131,8 +145,8 @@ struct ReaderView: UIViewControllerRepresentable {
             // white margins on the left/right of a landscape iPad. Raising the
             // cap lets Auto / 2-column layouts fill the screen; the existing
             // Margins setting (`--USER__pageMargins`) then controls the L/R
-            // inset live. A non-zero column gap keeps the two columns from
-            // touching in 2-column mode. These are Reading System properties,
+            // inset live. The column gap stays at Readium's 0 — see the
+            // constant above for why. These are Reading System properties,
             // fixed for the navigator's lifetime — Readium exposes them only
             // through `readiumCSSRSProperties`, not the per-user
             // `EPUBPreferences` — so they are constants here, not live

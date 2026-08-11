@@ -20,17 +20,43 @@ descriptor を付与、アイコン下は短いブランド名)。
 
 ## サブタイトル(最大 30 字)
 
+### en-US
+
 ```
 Your highlights are yours
 ```
 
 25 字。P2 × P8 の訴求コピーをそのまま使う。
 
+### ja
+
+```
+ハイライトを自由に持ち出す
+```
+
 ## プロモーションテキスト(最大 170 字)
+
+### en-US
 
 ```
 A buy-once EPUB reader for readers who annotate. Unlimited highlights, Markdown export to Obsidian or Notion, and reading stats. No subscription. No lock-in.
 ```
+
+### ja
+
+```
+買い切りの EPUB リーダー。ハイライトとメモを Markdown で Obsidian や Notion へ。サブスク・アカウント・広告はありません。
+```
+
+## URL（v1.13）
+
+- en-US Marketing URL: `https://atani.lolipop-now.app/leafmark/en/`
+- ja Marketing URL: `https://atani.lolipop-now.app/leafmark/`
+- Support URL（両言語）: `https://atani.github.io/leafmark-app/support.html`
+- Privacy Policy URL（両言語）: `https://atani.github.io/leafmark-app/privacy.html`
+
+日本語ロケールは App Store の商品ページのみ。アプリ内 UI は英語であることを説明文と
+スクリーンショットで明確にし、日本語 UI 対応とは表現しない。
 
 ## 説明文(最大 4000 字)
 
@@ -180,7 +206,21 @@ Leafmark Pro
 - 主: Books
 - 副: Productivity(Markdown エクスポート × PKM 層の訴求。go-to-market.md チャネル 5)
 
-## What's New(v1.4)
+## What's New(v1.13)
+
+### en-US
+
+```
+You can now sort your library by recently added, title, or author. Leafmark remembers your selection for the next time you open the app.
+```
+
+### ja
+
+```
+ライブラリを「最近追加」「タイトル」「著者」で並べ替えられるようになりました。選んだ並び順は、次回起動時にも引き継がれます。
+```
+
+## What's New(v1.4・履歴)
 
 ```
 New installations now include three public-domain classics.

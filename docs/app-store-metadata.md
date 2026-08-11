@@ -238,6 +238,15 @@ The empty library also links to Public Domain Library, making it easier to find 
   The titles are Frankenstein, Meditations, and The Autobiography of Benjamin Franklin.
 ```
 
+## Leafmark Pro（App Store Connect・2026-08-11確認）
+
+- 製品ID: `com.atani.inkwell.pro`
+- 種類: 非消耗型・承認済み
+- 基準価格: US $9.99（JP ¥1,500 / CA $12.99）
+- en-US: `Leafmark Pro` / `Unlimited highlights, Markdown export, stats`
+- ja: `Leafmark Pro` / `無制限ハイライト、Markdown書き出し、読書統計`
+- v1.13と日本語ローカリゼーションを同時提出（2026-08-11 19:54 JST）
+
 ## 文字数チェック(申請前に再確認)
 
 | 項目 | 上限 | 状態 |

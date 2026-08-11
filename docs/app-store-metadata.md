@@ -211,13 +211,13 @@ Leafmark Pro
 ### en-US
 
 ```
-You can now sort your library by recently added, title, or author. Leafmark remembers your selection for the next time you open the app.
+You can now sort your library by recently opened, recently added, title, or author. Leafmark remembers your selection for the next time you open the app.
 ```
 
 ### ja
 
 ```
-ライブラリを「最近追加」「タイトル」「著者」で並べ替えられるようになりました。選んだ並び順は、次回起動時にも引き継がれます。
+ライブラリを「最近開いた順」「最近追加」「タイトル」「著者」で並べ替えられるようになりました。選んだ並び順は、次回起動時にも引き継がれます。
 ```
 
 ## What's New(v1.4・履歴)

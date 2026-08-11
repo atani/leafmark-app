@@ -91,6 +91,13 @@ final class LibraryStore: ObservableObject {
         try? data.write(to: catalogURL, options: .atomic)
     }
 
+    /// Most-recently-opened-first order (falling back to most-recently-added
+    /// for books that have never been opened). This is not just the default
+    /// display order: `SyncEngine.canonicalBooksByContentKey()` relies on
+    /// `books` being in this order to pick a representative when the same
+    /// EPUB was imported more than once. Display-only reordering belongs in
+    /// `LibrarySortOrder`; don't change this predicate for presentation
+    /// reasons.
     private static func librarySort(_ a: Book, _ b: Book) -> Bool {
         switch (a.lastOpenedAt, b.lastOpenedAt) {
         case let (la?, lb?): return la > lb
@@ -221,6 +228,7 @@ final class LibraryStore: ObservableObject {
                 title = metaTitle
             }
             author = publication.metadata.authors.map(\.name).joined(separator: ", ")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
             if author?.isEmpty == true { author = nil }
 
             if let cover = try? await publication.coverFitting(

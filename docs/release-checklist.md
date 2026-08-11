@@ -1,13 +1,28 @@
 # App Store 申請チェックリスト
 
-Leafmark を App Store に出すまでの確認項目をまとめる。Apple Developer
-Program 登録済み(承認待ち)。承認が下りたら上から順に潰していく。
+Leafmark を App Store に出すまでの確認項目をまとめる。
 
 関連ドキュメント: 価格方針は [ADR-0005](adr/0005-buy-once-pricing-storekit.md)、
 販売戦略は [go-to-market.md](go-to-market.md)、プライバシーは
 [privacy-policy.md](privacy-policy.md)。
 
 ## 1. ビルド・技術要件
+
+### v1.13（build 20）
+
+- [x] ライブラリを「最近開いた順（既定）・追加順・タイトル・著者」で並べ替えられる。
+      既定値は従来の格納順（最近開いた順）と一致し、アップデートしても表示順は変わらない
+- [x] 選択した並び順がアプリ再起動後も保持される（シミュレータ確認）
+- [x] ユニットテスト 155 件中 152 件が pass。StoreKit 実購入 3 件（StorePurchaseTests）は
+      ヘッドレス実行ではスキップされる既存仕様のため実機確認へ回す
+- [ ] 実機で4種類の並び替え、再起動後の保持、既存蔵書の保持を確認
+- [ ] 🔴 行の同梱サンプル10ページ送り確認（フォントサイズ3通り）をv1.13でも実施する
+- [ ] 実機で Leafmark Pro の購入状態と「購入を復元」導線を確認
+- [x] バージョン番号・ビルド番号を 1.13 / 20 に設定
+- [x] Releaseアーカイブを作成し、build 20をApp Store Connectへアップロード
+- [x] en-US / ja のプロモーション文・What's New・Marketing URLを設定
+- [x] build 20とLeafmark Pro日本語ローカリゼーションの2項目を審査提出
+      — 2026-08-11 19:54 JST、ステータス「審査待ち」
 
 - [ ] 🔴 **同梱サンプルを 10 ページ以上送り、ページ境界の表示を目視する**
       — フォントサイズを最小・既定・最大の 3 通りで確認する。
@@ -31,8 +46,8 @@ Program 登録済み(承認待ち)。承認が下りたら上から順に潰し�
       ヘッドレス `xcodebuild test` ではスキップ(Xcode 実行時に検証)
 - [x] リリースビルド(Release 構成)でクラッシュ・警告がないこと
       — Release ビルド成功・警告 0(iPad 全方向対応で orientation 警告も解消)
-- [x] バージョン番号・ビルド番号を1.4 / 8に設定する。
-      — `MARKETING_VERSION: 1.4` / `CURRENT_PROJECT_VERSION: 8`(project.yml)
+- [x] 現在のバージョン番号・ビルド番号を設定する。
+      — `MARKETING_VERSION: 1.13` / `CURRENT_PROJECT_VERSION: 20`(project.yml)
 - [x] 最低 OS バージョンが iOS 17.0 で間違いないこと(`IPHONEOS_DEPLOYMENT_TARGET: 17.0`)
 
 ## 2. App Store Connect のメタデータ
@@ -42,7 +57,7 @@ App Store Connect への転記は Developer Program 承認後。
 
 - [x] アプリ名: App Store 名 `Leafmark — EPUB Reader`(App Store Connect 受理済み)/
       `CFBundleDisplayName` は `Leafmark`(ホーム画面用に短縮。意図的に別)
-- [ ] Bundle ID: `com.atani.inkwell`
+- [x] Bundle ID: `com.atani.inkwell`
 - [x] サブタイトル(30 字)・プロモーションテキスト — 草案済み(25 字 / 156 字)
 - [x] 説明文(英語)。訴求の軸は「買い切り・ロックインなし・エクスポート自由」
       (P2 × P8) — 草案済み
@@ -57,7 +72,7 @@ App Store Connect への転記は Developer Program 承認後。
   - `xcrun simctl status_bar override` の `--time 9:41` 指定でステータスバーを整える
 - [x] サポート URL: <https://atani.github.io/leafmark-app/support.html>
 - [x] プライバシーポリシー URL: <https://atani.github.io/leafmark-app/privacy.html>
-- [ ] App プライバシー(栄養成分表示): データ収集なし・トラッキングなしで申告
+- [x] App プライバシー(栄養成分表示): データ収集なし・トラッキングなしで申告
       — アカウントとクラウドを持たず端末内で完結するため
 
 ## 3. 課金(StoreKit 2 / Leafmark Pro)
@@ -66,12 +81,14 @@ ADR-0005 に従う。アプリ側の課金実装は完了。残りは App Store 
 
 - [x] StoreKit 2 実装(`StoreManager`: 商品ロード・購入・`currentEntitlements`
       監視・`AppStore.sync()` 復元)
-- [ ] 非消費型 IAP `com.atani.inkwell.pro`($9.99)を App Store Connect に登録
+- [x] 非消費型 IAP `com.atani.inkwell.pro`を App Store Connect に登録・承認済み
+      — 基準価格 $9.99、日本 ¥1,500、カナダ $12.99
 - [x] Pro 機能のゲーティング(無料枠ハイライト 3 件・エクスポート/統計のロック)
 - [x] 購入復元(`AppStore.sync()`)を Paywall(`PaywallView`)に配置 — Apple 審査要件
 - [ ] Small Business Program(手数料 15%)に登録
-- [ ] IAP の審査用メモに「非消費型・買い切り・サブスクなし」を明記
-- [ ] IAP はアプリ本体とは別レビュー。スクリーンショット・審査メモを別途用意
+- [x] IAP の審査用メモに「非消費型・買い切り・サブスクなし」を明記
+- [x] IAP の審査用スクリーンショット・審査メモを設定
+- [x] IAPに日本語表示名・説明を追加し、v1.13と同時に審査提出
 
 > MVP を「読む機能だけの無料アプリ」で先に出し、課金は次バージョンで載せる選択肢もある。
 > その場合は本セクションを次回申請に回し、§1・§2・§4 だけで申請する。
@@ -129,5 +146,6 @@ Developer Program の本人確認は 2026-06-13 受付・2 営業日以内に連
 11. [ ] サポート URL / プライバシーポリシー URL を設定(§2):
        サポート = `https://atani.github.io/leafmark-app/support.html`
        プライバシー = `https://atani.github.io/leafmark-app/privacy.html`
-12. [ ] **審査提出**(アプリ + IAP を同時に)。§5 のリジェクト回避チェックを最終確認
+12. [x] **審査提出**(v1.13 build 20 + Leafmark Pro日本語ローカリゼーション)。
+        2026-08-11 19:54 JST、ステータス「審査待ち」
 13. [ ] 審査通過後、リリース(手動公開 or 自動公開を選択)

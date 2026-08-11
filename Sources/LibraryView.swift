@@ -11,8 +11,13 @@ struct LibraryView: View {
     @State private var showImporter = false
     @State private var showStats = false
     @State private var openedBook: Book?
+    @AppStorage("library.sortOrder") private var sortOrder = LibrarySortOrder.recentlyOpened
 
     private let columns = [GridItem(.adaptive(minimum: 110, maximum: 160), spacing: 16)]
+
+    private var sortedBooks: [Book] {
+        sortOrder.sorted(library.books)
+    }
 
     var body: some View {
         NavigationStack {
@@ -37,7 +42,7 @@ struct LibraryView: View {
                     ScrollView {
                         if !library.books.isEmpty {
                             LazyVGrid(columns: columns, spacing: 24) {
-                                ForEach(library.books) { book in
+                                ForEach(sortedBooks) { book in
                                     Button {
                                         openedBook = book
                                     } label: {
@@ -78,6 +83,20 @@ struct LibraryView: View {
                         Image(systemName: "chart.bar")
                     }
                     .accessibilityLabel("Reading Statistics")
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Picker("Sort Library", selection: $sortOrder) {
+                            ForEach(LibrarySortOrder.allCases) { order in
+                                Label(order.label, systemImage: order.systemImage)
+                                    .tag(order)
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "arrow.up.arrow.down")
+                    }
+                    .accessibilityLabel("Sort Library")
+                    .accessibilityValue(sortOrder.label)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {

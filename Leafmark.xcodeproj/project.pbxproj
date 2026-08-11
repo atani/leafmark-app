@@ -53,6 +53,7 @@
 		CEA01EDCD91D46D8B68D480E /* ReadiumShared in Frameworks */ = {isa = PBXBuildFile; productRef = 7AA755DB1BAD8D2B49EF8DCB /* ReadiumShared */; };
 		D1CA6BD69ABDD6AF8198A7FE /* SyntheticWeightTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 075DF03244CDE0EBE55143BE /* SyntheticWeightTests.swift */; };
 		D4A1D5D765048F0A00BB0BE8 /* StatsStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3E808A04A3AC068983F4E5 /* StatsStoreTests.swift */; };
+		D4BC8B900DD9FD1A59E0E577 /* LibrarySortOrderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FD256E691453FBF4E69442C /* LibrarySortOrderTests.swift */; };
 		E05C707EE8AE01A8E8256EB5 /* sample-meditations.epub in Resources */ = {isa = PBXBuildFile; fileRef = 3EA085ED00D1998E1475ED9C /* sample-meditations.epub */; };
 		E080376F80D4C019B378FBE4 /* HighlightExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20D3AB2EA403C50910EB6F0 /* HighlightExport.swift */; };
 		E6216E645805F87D2F26B8CA /* Bookmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A8B97727D2023C958873B8 /* Bookmark.swift */; };
@@ -108,6 +109,7 @@
 		61C6D4B518701FDF9B5AD443 /* StatsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsStore.swift; sourceTree = "<group>"; };
 		68E127622541F806E6B7F690 /* BookmarkStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkStore.swift; sourceTree = "<group>"; };
 		6CF19B4D39037C54571A1D0B /* CatalogSyncMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogSyncMergeTests.swift; sourceTree = "<group>"; };
+		6FD256E691453FBF4E69442C /* LibrarySortOrderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySortOrderTests.swift; sourceTree = "<group>"; };
 		778133C64BE5B786C5EC7543 /* Highlight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Highlight.swift; sourceTree = "<group>"; };
 		7CAEC885D8FFD62D27A742D3 /* FontStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontStoreTests.swift; sourceTree = "<group>"; };
 		7E7931066EE320703A9EF687 /* ContentKeyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentKeyTests.swift; sourceTree = "<group>"; };
@@ -233,6 +235,7 @@
 				7CAEC885D8FFD62D27A742D3 /* FontStoreTests.swift */,
 				0A31328B3686C1015E722EC5 /* HighlightStoreTests.swift */,
 				1EC81A329420F362D3525267 /* ImageZoomMathTests.swift */,
+				6FD256E691453FBF4E69442C /* LibrarySortOrderTests.swift */,
 				DAF059FC2E63877CE40FE149 /* PagePositionTests.swift */,
 				4700615B62CB079E279C7091 /* ReaderPaginationTests.swift */,
 				FE3E808A04A3AC068983F4E5 /* StatsStoreTests.swift */,
@@ -381,6 +384,7 @@
 				B2FFFD72D766F10B9F22B90E /* FontStoreTests.swift in Sources */,
 				EC956E48ABDA346997C11C99 /* HighlightStoreTests.swift in Sources */,
 				F7B22EEC42C1CA857C017CD1 /* ImageZoomMathTests.swift in Sources */,
+				D4BC8B900DD9FD1A59E0E577 /* LibrarySortOrderTests.swift in Sources */,
 				4F170253F2D2449AFCE03B49 /* PagePositionTests.swift in Sources */,
 				9F2B05A25EC50A375A2DACFD /* ReaderPaginationTests.swift in Sources */,
 				D4A1D5D765048F0A00BB0BE8 /* StatsStoreTests.swift in Sources */,
@@ -460,7 +464,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Leafmark.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 20;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -468,7 +472,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.12;
+				MARKETING_VERSION = 1.13;
 				PRODUCT_BUNDLE_IDENTIFIER = com.atani.inkwell;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -541,7 +545,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Leafmark.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 20;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -549,7 +553,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.12;
+				MARKETING_VERSION = 1.13;
 				PRODUCT_BUNDLE_IDENTIFIER = com.atani.inkwell;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";

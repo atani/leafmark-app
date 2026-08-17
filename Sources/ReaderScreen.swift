@@ -32,6 +32,11 @@ struct ReaderScreen: View {
     @State private var currentLocator: Locator?
     @State private var sessionStart = Date()
 
+    /// Set when a usage milestone earns an App Store review prompt. The prompt
+    /// itself is held back until the reader closes the book, so it never lands
+    /// in the middle of reading.
+    @State private var reviewPending = false
+
     /// Synthetic ADE-style page positions (~1024 chars each), loaded once
     /// from Readium's positions service. Empty when the service is missing,
     /// which hides the optional page header/footer.
@@ -98,9 +103,10 @@ struct ReaderScreen: View {
                         progression: locator.locations.totalProgression
                     )
                     // Reaching the end of a book is the strongest signal that
-                    // the app did its job, so it is worth an ask.
+                    // the app did its job. The ask itself waits until the book
+                    // is closed — see `onDisappear`.
                     if ReviewRequester.recordReadingProgress(locator.locations.totalProgression) {
-                        offerReviewPrompt(after: 1.5)
+                        reviewPending = true
                     }
                 },
                 onTap: {
@@ -153,6 +159,7 @@ struct ReaderScreen: View {
                 book: book,
                 store: highlightStore,
                 purchases: store,
+                reviewPending: $reviewPending,
                 onSelect: { highlight in
                     showHighlights = false
                     if let locator = highlightStore.locator(of: highlight) {
@@ -239,11 +246,23 @@ struct ReaderScreen: View {
             // turn of the run loop so decorations land on a live web view.
             DispatchQueue.main.async { refreshDecorations() }
             if ReviewRequester.recordBookOpen(bookID: book.id) {
-                offerReviewPrompt(after: 2)
+                reviewPending = true
             }
         }
         .onDisappear {
             stats.recordSession(bookID: book.id, startedAt: sessionStart, endedAt: Date())
+            // Every milestone waits for this moment. Asking mid-page would
+            // interrupt the one thing the reader opened the app to do, and iOS
+            // drops the prompt anyway while a sheet is presenting.
+            if reviewPending {
+                reviewPending = false
+                // Recorded before the prompt because `requestReview()` reports
+                // nothing back about whether it was shown.
+                ReviewRequester.markRequested()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    requestReview()
+                }
+            }
         }
         .task {
             // Load the synthetic page list once. An empty result (no
@@ -312,25 +331,11 @@ struct ReaderScreen: View {
             color: highlightColor
         )
         refreshDecorations()
+        if ReviewRequester.recordHighlightCreated(totalCount: highlightStore.activeCount) {
+            reviewPending = true
+        }
         if withNote {
             noteTarget = highlight
-            // The note editor opens right away; asking over it would be
-            // dropped by the system and interrupt the reader besides.
-            return
-        }
-        if ReviewRequester.recordHighlightCreated(totalCount: highlightStore.activeCount) {
-            offerReviewPrompt(after: 1.5)
-        }
-    }
-
-    /// Offers the App Store review prompt after `delay`, so it lands on a
-    /// settled screen instead of one still animating. The attempt is recorded
-    /// up front because `requestReview()` reports nothing back, and because two
-    /// milestones reached moments apart must not ask twice.
-    private func offerReviewPrompt(after delay: TimeInterval) {
-        ReviewRequester.markRequested()
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-            requestReview()
         }
     }
 
@@ -579,10 +584,12 @@ private struct HighlightsSheet: View {
     let book: Book
     @ObservedObject var store: HighlightStore
     @ObservedObject var purchases: StoreManager
+    /// Raised when an export earns a review prompt. The reader screen shows it
+    /// once the book is closed.
+    @Binding var reviewPending: Bool
     let onSelect: (Highlight) -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.requestReview) private var requestReview
     @State private var showPaywall = false
     @State private var paywallContext: PaywallContext = .export
 
@@ -592,12 +599,6 @@ private struct HighlightsSheet: View {
     /// which crashes inside SwiftUI's activity picker
     /// (EXC_BAD_ACCESS in SharingActivityPickerBridge.show).
     @State private var freeExportPendingConsume = false
-
-    /// Set when an export reached the review milestone, and applied only after
-    /// this sheet closes. iOS silently drops `requestReview()` while another
-    /// sheet (here, the share sheet) is presenting, and the prompt is offered
-    /// only once per install, so firing it too early burns the only chance.
-    @State private var reviewPendingAfterExport = false
 
     private var items: [Highlight] {
         store.highlights(for: book.id)
@@ -670,7 +671,7 @@ private struct HighlightsSheet: View {
                             .simultaneousGesture(TapGesture().onEnded {
                                 freeExportPendingConsume = true
                                 if ReviewRequester.recordExport() {
-                                    reviewPendingAfterExport = true
+                                    reviewPending = true
                                 }
                             })
                         } else {
@@ -702,15 +703,6 @@ private struct HighlightsSheet: View {
                 if freeExportPendingConsume {
                     freeExportPendingConsume = false
                     purchases.markFreeExportUsed()
-                }
-                if reviewPendingAfterExport {
-                    reviewPendingAfterExport = false
-                    ReviewRequester.markRequested()
-                    // Let the dismissal animation finish so the prompt lands on
-                    // the reader instead of a view that is still going away.
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                        requestReview()
-                    }
                 }
             }
         }

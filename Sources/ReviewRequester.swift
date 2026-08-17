@@ -9,12 +9,15 @@ import Foundation
 /// - A tenth highlight was created
 /// - A book was read to 90%
 ///
-/// A milestone only *offers* the prompt. `requestReview()` reports nothing
-/// back and iOS drops it silently — while another sheet is presenting, or once
-/// Apple's own display budget (three prompts per 365 days) is spent. Attempts
-/// are therefore timestamped and spaced out rather than capped at one, so a
-/// prompt that was never actually shown is retried at the next milestone
-/// instead of permanently burning the only chance.
+/// A milestone only *offers* the prompt; `ReaderScreen` holds it back until
+/// the reader closes the book, so it never interrupts a page.
+///
+/// `requestReview()` reports nothing back and iOS drops it silently — while
+/// another sheet is presenting, or once Apple's own display budget (three
+/// prompts per 365 days) is spent. Attempts are therefore timestamped and
+/// spaced out rather than capped at one, so a prompt that was never actually
+/// shown is retried at the next milestone instead of permanently burning the
+/// only chance.
 ///
 /// What this deliberately does not do: ask how the reader feels first and only
 /// forward the happy ones to the prompt. Apple prohibits gating the prompt on
@@ -67,8 +70,7 @@ enum ReviewRequester {
 
     /// Call when the Markdown export share sheet is opened, matching where the
     /// free export quota is spent (`ShareLink` reports no completion). Returns
-    /// `true` when the prompt should be shown; the caller is expected to defer
-    /// it until no other sheet is presenting.
+    /// `true` when the prompt has been earned.
     static func recordExport(defaults: UserDefaults = .standard, now: Date = Date()) -> Bool {
         canAsk(defaults: defaults, now: now)
     }

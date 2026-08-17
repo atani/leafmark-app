@@ -31,6 +31,10 @@ Leafmark を App Store に出すまでの確認項目をまとめる。
 - [x] バージョン番号・ビルド番号を 1.14 / 21 に設定
 - [x] Release アーカイブを作成し、build 21 を App Store Connect へアップロード
 - [x] en-US / ja の「このバージョンの最新情報」を設定
+- [x] build 21 を審査提出 — 2026-08-17 11:38 JST、ステータス「審査待ち」。
+      App Store Connect API（キー MYBR4C2H27）で提出した。CLI からの書き出しには
+      配布用プロビジョニングプロファイルが要る。手元に 1 つも無かったため、
+      同じ API で `Leafmark App Store CLI` を作って手動署名で書き出した
 - [ ] 実機で評価ダイアログが実際に表示されることを確認する。
       `requestReview()` は表示可否を返さないため、自動テストでは検証できない
 - [ ] 実機で「Rate Leafmark」が App Store のレビュー投稿画面を開くことを確認する

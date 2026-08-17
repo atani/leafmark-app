@@ -37,6 +37,12 @@ final class HighlightStore: ObservableObject {
         }
     }
 
+    /// Active highlights across every book. Used for the usage milestone that
+    /// offers the App Store review prompt.
+    var activeCount: Int {
+        highlights.filter { $0.deletedAt == nil }.count
+    }
+
     func highlights(for bookID: String) -> [Highlight] {
         highlights
             .filter { $0.bookID == bookID && $0.deletedAt == nil }

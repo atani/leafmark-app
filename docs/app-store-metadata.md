@@ -206,7 +206,21 @@ Leafmark Pro
 - 主: Books
 - 副: Productivity(Markdown エクスポート × PKM 層の訴求。go-to-market.md チャネル 5)
 
-## What's New(v1.13)
+## What's New(v1.14)
+
+### en-US
+
+```
+Appearance settings now link straight to the App Store review page. The rating prompt also arrives at better moments and no longer lands on top of another screen.
+```
+
+### ja
+
+```
+表示設定から App Store の評価ページを直接開けるようになりました。あわせて、評価のお願いを表示するタイミングを見直しました。書き出しや画面の切り替えと重ならないようにしています。
+```
+
+## What's New(v1.13・履歴)
 
 ### en-US
 

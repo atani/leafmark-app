@@ -97,6 +97,11 @@ struct ReaderScreen: View {
                         locatorJSON: try? locator.jsonString(),
                         progression: locator.locations.totalProgression
                     )
+                    // Reaching the end of a book is the strongest signal that
+                    // the app did its job, so it is worth an ask.
+                    if ReviewRequester.recordReadingProgress(locator.locations.totalProgression) {
+                        offerReviewPrompt(after: 1.5)
+                    }
                 },
                 onTap: {
                     withAnimation(.easeInOut(duration: 0.2)) {
@@ -234,12 +239,7 @@ struct ReaderScreen: View {
             // turn of the run loop so decorations land on a live web view.
             DispatchQueue.main.async { refreshDecorations() }
             if ReviewRequester.recordBookOpen(bookID: book.id) {
-                // Mark immediately so a second book-open within the 2-second
-                // delay cannot trigger a duplicate review request.
-                ReviewRequester.markRequested()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    requestReview()
-                }
+                offerReviewPrompt(after: 2)
             }
         }
         .onDisappear {
@@ -314,6 +314,23 @@ struct ReaderScreen: View {
         refreshDecorations()
         if withNote {
             noteTarget = highlight
+            // The note editor opens right away; asking over it would be
+            // dropped by the system and interrupt the reader besides.
+            return
+        }
+        if ReviewRequester.recordHighlightCreated(totalCount: highlightStore.activeCount) {
+            offerReviewPrompt(after: 1.5)
+        }
+    }
+
+    /// Offers the App Store review prompt after `delay`, so it lands on a
+    /// settled screen instead of one still animating. The attempt is recorded
+    /// up front because `requestReview()` reports nothing back, and because two
+    /// milestones reached moments apart must not ask twice.
+    private func offerReviewPrompt(after delay: TimeInterval) {
+        ReviewRequester.markRequested()
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            requestReview()
         }
     }
 
@@ -576,6 +593,12 @@ private struct HighlightsSheet: View {
     /// (EXC_BAD_ACCESS in SharingActivityPickerBridge.show).
     @State private var freeExportPendingConsume = false
 
+    /// Set when an export reached the review milestone, and applied only after
+    /// this sheet closes. iOS silently drops `requestReview()` while another
+    /// sheet (here, the share sheet) is presenting, and the prompt is offered
+    /// only once per install, so firing it too early burns the only chance.
+    @State private var reviewPendingAfterExport = false
+
     private var items: [Highlight] {
         store.highlights(for: book.id)
     }
@@ -647,10 +670,7 @@ private struct HighlightsSheet: View {
                             .simultaneousGesture(TapGesture().onEnded {
                                 freeExportPendingConsume = true
                                 if ReviewRequester.recordExport() {
-                                    ReviewRequester.markRequested()
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                        requestReview()
-                                    }
+                                    reviewPendingAfterExport = true
                                 }
                             })
                         } else {
@@ -682,6 +702,15 @@ private struct HighlightsSheet: View {
                 if freeExportPendingConsume {
                     freeExportPendingConsume = false
                     purchases.markFreeExportUsed()
+                }
+                if reviewPendingAfterExport {
+                    reviewPendingAfterExport = false
+                    ReviewRequester.markRequested()
+                    // Let the dismissal animation finish so the prompt lands on
+                    // the reader instead of a view that is still going away.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        requestReview()
+                    }
                 }
             }
         }
@@ -972,6 +1001,13 @@ private struct AppearanceSheet: View {
                         Text(AppInfo.versionDisplay)
                             .foregroundStyle(.secondary)
                             .textSelection(.enabled)
+                    }
+
+                    // The system prompt can only be shown a few times a year
+                    // and gives no way to ask for it. This link always works,
+                    // for the reader who went looking for it.
+                    Link(destination: AppInfo.writeReviewURL) {
+                        Label("Rate Leafmark", systemImage: "star")
                     }
                 }
             }

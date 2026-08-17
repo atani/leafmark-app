@@ -28,8 +28,11 @@ enum ReviewRequester {
     /// Pre-1.14 one-shot flag, folded into `attemptsKey` on first read.
     private static let legacyHasRequestedKey = "reviewRequester.hasRequested"
 
-    /// Distinct books opened before the prompt is offered.
+    /// Distinct books read before the prompt is offered.
     static let bookOpenMilestone = 3
+    /// A book has to stay open this long before it counts as read. Opening one
+    /// and backing straight out is not a moment worth interrupting.
+    static let minimumReadingSession: TimeInterval = 3 * 60
     /// Highlights created before the prompt is offered.
     static let highlightMilestone = 10
     /// Share of a book that counts as having read it.
@@ -52,8 +55,9 @@ enum ReviewRequester {
         return now.timeIntervalSince(last) >= minimumInterval
     }
 
-    /// Call when a book is opened. Returns `true` when the prompt should be
-    /// shown.
+    /// Call when a book is closed after a session long enough to count as
+    /// reading (`minimumReadingSession`). Returns `true` when the prompt should
+    /// be shown.
     static func recordBookOpen(
         bookID: String,
         defaults: UserDefaults = .standard,

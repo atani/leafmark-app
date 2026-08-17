@@ -245,12 +245,16 @@ struct ReaderScreen: View {
             // The navigator is created in the same render pass; defer one
             // turn of the run loop so decorations land on a live web view.
             DispatchQueue.main.async { refreshDecorations() }
-            if ReviewRequester.recordBookOpen(bookID: book.id) {
-                reviewPending = true
-            }
         }
         .onDisappear {
-            stats.recordSession(bookID: book.id, startedAt: sessionStart, endedAt: Date())
+            let ended = Date()
+            stats.recordSession(bookID: book.id, startedAt: sessionStart, endedAt: ended)
+            // A book counts once it has actually been read, so that "opened
+            // three books" cannot mean "opened three and backed straight out".
+            if ended.timeIntervalSince(sessionStart) >= ReviewRequester.minimumReadingSession,
+               ReviewRequester.recordBookOpen(bookID: book.id) {
+                reviewPending = true
+            }
             // Every milestone waits for this moment. Asking mid-page would
             // interrupt the one thing the reader opened the app to do, and iOS
             // drops the prompt anyway while a sheet is presenting.

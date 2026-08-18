@@ -32,6 +32,11 @@ struct ReaderScreen: View {
     @State private var currentLocator: Locator?
     @State private var sessionStart = Date()
 
+    /// Set when a usage milestone earns an App Store review prompt. The prompt
+    /// itself is held back until the reader closes the book, so it never lands
+    /// in the middle of reading.
+    @State private var reviewPending = false
+
     /// Synthetic ADE-style page positions (~1024 chars each), loaded once
     /// from Readium's positions service. Empty when the service is missing,
     /// which hides the optional page header/footer.
@@ -97,6 +102,12 @@ struct ReaderScreen: View {
                         locatorJSON: try? locator.jsonString(),
                         progression: locator.locations.totalProgression
                     )
+                    // Reaching the end of a book is the strongest signal that
+                    // the app did its job. The ask itself waits until the book
+                    // is closed — see `onDisappear`.
+                    if ReviewRequester.recordReadingProgress(locator.locations.totalProgression) {
+                        reviewPending = true
+                    }
                 },
                 onTap: {
                     withAnimation(.easeInOut(duration: 0.2)) {
@@ -148,6 +159,7 @@ struct ReaderScreen: View {
                 book: book,
                 store: highlightStore,
                 purchases: store,
+                reviewPending: $reviewPending,
                 onSelect: { highlight in
                     showHighlights = false
                     if let locator = highlightStore.locator(of: highlight) {
@@ -233,17 +245,28 @@ struct ReaderScreen: View {
             // The navigator is created in the same render pass; defer one
             // turn of the run loop so decorations land on a live web view.
             DispatchQueue.main.async { refreshDecorations() }
-            if ReviewRequester.recordBookOpen(bookID: book.id) {
-                // Mark immediately so a second book-open within the 2-second
-                // delay cannot trigger a duplicate review request.
+        }
+        .onDisappear {
+            let ended = Date()
+            stats.recordSession(bookID: book.id, startedAt: sessionStart, endedAt: ended)
+            // A book counts once it has actually been read, so that "opened
+            // three books" cannot mean "opened three and backed straight out".
+            if ended.timeIntervalSince(sessionStart) >= ReviewRequester.minimumReadingSession,
+               ReviewRequester.recordBookOpen(bookID: book.id) {
+                reviewPending = true
+            }
+            // Every milestone waits for this moment. Asking mid-page would
+            // interrupt the one thing the reader opened the app to do, and iOS
+            // drops the prompt anyway while a sheet is presenting.
+            if reviewPending {
+                reviewPending = false
+                // Recorded before the prompt because `requestReview()` reports
+                // nothing back about whether it was shown.
                 ReviewRequester.markRequested()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                     requestReview()
                 }
             }
-        }
-        .onDisappear {
-            stats.recordSession(bookID: book.id, startedAt: sessionStart, endedAt: Date())
         }
         .task {
             // Load the synthetic page list once. An empty result (no
@@ -312,6 +335,9 @@ struct ReaderScreen: View {
             color: highlightColor
         )
         refreshDecorations()
+        if ReviewRequester.recordHighlightCreated(totalCount: highlightStore.activeCount) {
+            reviewPending = true
+        }
         if withNote {
             noteTarget = highlight
         }
@@ -562,10 +588,12 @@ private struct HighlightsSheet: View {
     let book: Book
     @ObservedObject var store: HighlightStore
     @ObservedObject var purchases: StoreManager
+    /// Raised when an export earns a review prompt. The reader screen shows it
+    /// once the book is closed.
+    @Binding var reviewPending: Bool
     let onSelect: (Highlight) -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.requestReview) private var requestReview
     @State private var showPaywall = false
     @State private var paywallContext: PaywallContext = .export
 
@@ -647,10 +675,7 @@ private struct HighlightsSheet: View {
                             .simultaneousGesture(TapGesture().onEnded {
                                 freeExportPendingConsume = true
                                 if ReviewRequester.recordExport() {
-                                    ReviewRequester.markRequested()
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                        requestReview()
-                                    }
+                                    reviewPending = true
                                 }
                             })
                         } else {
@@ -972,6 +997,13 @@ private struct AppearanceSheet: View {
                         Text(AppInfo.versionDisplay)
                             .foregroundStyle(.secondary)
                             .textSelection(.enabled)
+                    }
+
+                    // The system prompt can only be shown a few times a year
+                    // and gives no way to ask for it. This link always works,
+                    // for the reader who went looking for it.
+                    Link(destination: AppInfo.writeReviewURL) {
+                        Label("Rate Leafmark", systemImage: "star")
                     }
                 }
             }

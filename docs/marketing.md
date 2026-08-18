@@ -1,6 +1,8 @@
 # Leafmark マーケティング計画
 
-最終更新: 2026-07-04。
+> US/Canada向けの投稿画像・英語コピー・計測URLは [marketing/social/posts-en.md](marketing/social/posts-en.md) を参照。
+
+最終更新: 2026-08-13。
 
 ## 目的
 

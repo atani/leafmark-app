@@ -21,6 +21,7 @@
 		537D0DC3BECC03D4FC3BA44F /* ReadiumStreamer in Frameworks */ = {isa = PBXBuildFile; productRef = BD83301B5EE3E55ADE6EA689 /* ReadiumStreamer */; };
 		53A89FFC017DA023D87EBB9B /* CatalogSyncModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85647E44F37AC0840ECBCBDB /* CatalogSyncModels.swift */; };
 		5449CDD76CB1E24BC96EE4E8 /* sample-frankenstein.epub in Resources */ = {isa = PBXBuildFile; fileRef = 35CFFC91FD2ACB7897E14A5B /* sample-frankenstein.epub */; };
+		57BA61CFBAEB1A770211869A /* ReviewRequesterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC98B6FB891BD80FE8026129 /* ReviewRequesterTests.swift */; };
 		5988C9CC5F351A0B59EAA225 /* BookmarkStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68E127622541F806E6B7F690 /* BookmarkStore.swift */; };
 		5FA94B77E270AD1C14B0E7BD /* Highlight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 778133C64BE5B786C5EC7543 /* Highlight.swift */; };
 		61EB154E379A42D80088987D /* AnnotationStoreSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B9939F3BC5DD37BBCACDDF4 /* AnnotationStoreSyncTests.swift */; };
@@ -120,6 +121,7 @@
 		9E63F50206A240C0C28B0DC0 /* CatalogSyncMerge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogSyncMerge.swift; sourceTree = "<group>"; };
 		A0BEB06CC916B4E991FBACE7 /* FontStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontStore.swift; sourceTree = "<group>"; };
 		A381A098CBBB8F4E778E488B /* StorePurchaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorePurchaseTests.swift; sourceTree = "<group>"; };
+		AC98B6FB891BD80FE8026129 /* ReviewRequesterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewRequesterTests.swift; sourceTree = "<group>"; };
 		AE94FDEA641791B65FBEB384 /* PagePosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagePosition.swift; sourceTree = "<group>"; };
 		BB8EB382B533AF6C7B75F778 /* AnnotationSyncModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationSyncModels.swift; sourceTree = "<group>"; };
 		BD49E33A178C8BD553C56736 /* LibraryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryStore.swift; sourceTree = "<group>"; };
@@ -238,6 +240,7 @@
 				6FD256E691453FBF4E69442C /* LibrarySortOrderTests.swift */,
 				DAF059FC2E63877CE40FE149 /* PagePositionTests.swift */,
 				4700615B62CB079E279C7091 /* ReaderPaginationTests.swift */,
+				AC98B6FB891BD80FE8026129 /* ReviewRequesterTests.swift */,
 				FE3E808A04A3AC068983F4E5 /* StatsStoreTests.swift */,
 				EFAE2035D735F8B6C68B704D /* StoreManagerTests.swift */,
 				A381A098CBBB8F4E778E488B /* StorePurchaseTests.swift */,
@@ -387,6 +390,7 @@
 				D4BC8B900DD9FD1A59E0E577 /* LibrarySortOrderTests.swift in Sources */,
 				4F170253F2D2449AFCE03B49 /* PagePositionTests.swift in Sources */,
 				9F2B05A25EC50A375A2DACFD /* ReaderPaginationTests.swift in Sources */,
+				57BA61CFBAEB1A770211869A /* ReviewRequesterTests.swift in Sources */,
 				D4A1D5D765048F0A00BB0BE8 /* StatsStoreTests.swift in Sources */,
 				7C190C62145AFD3E3D201F29 /* StoreManagerTests.swift in Sources */,
 				916E67A6402068EC16401933 /* StorePurchaseTests.swift in Sources */,
@@ -464,7 +468,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Leafmark.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 20;
+				CURRENT_PROJECT_VERSION = 23;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -472,7 +476,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.13;
+				MARKETING_VERSION = 1.14;
 				PRODUCT_BUNDLE_IDENTIFIER = com.atani.inkwell;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -545,7 +549,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Leafmark.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 20;
+				CURRENT_PROJECT_VERSION = 23;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -553,7 +557,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.13;
+				MARKETING_VERSION = 1.14;
 				PRODUCT_BUNDLE_IDENTIFIER = com.atani.inkwell;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";

@@ -23,4 +23,15 @@ enum AppInfo {
     static var versionDisplay: String {
         "\(version) (\(build))"
     }
+
+    /// Numeric App Store id of `com.atani.inkwell`.
+    static let appStoreID = "6781045740"
+
+    /// Opens the App Store review composer for Leafmark. Unlike the system
+    /// prompt, this link carries no annual display budget and is never dropped
+    /// silently, so it is the one channel always open to a reader who wants to
+    /// leave a rating.
+    static var writeReviewURL: URL {
+        URL(string: "https://apps.apple.com/app/id\(appStoreID)?action=write-review")!
+    }
 }

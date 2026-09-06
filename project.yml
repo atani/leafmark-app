@@ -77,8 +77,8 @@ targets:
         # bundle id stays com.atani.inkwell; only the iCloud container is
         # namespaced as iCloud.com.atani.inkwell.
         CODE_SIGN_ENTITLEMENTS: Leafmark.entitlements
-        MARKETING_VERSION: "1.14"
-        CURRENT_PROJECT_VERSION: "23"
+        MARKETING_VERSION: "1.15"
+        CURRENT_PROJECT_VERSION: "24"
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon

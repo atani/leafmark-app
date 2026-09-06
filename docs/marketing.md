@@ -48,6 +48,39 @@
 
 1枚目は製品の独自価値を伝えていない。検索結果や商品ページで最初に見せる3枚を、購入理由に合わせて並べ直す。
 
+## 英語 ASO 改訂案(2026-09-01)
+
+広告費は使わず、Apple Ads Advanced を米国ストアの検索需要を見るためだけに使った。
+候補キーワードは追加画面へ一時入力し、保存していない。キャンペーンの作成も行っていない。
+
+| 項目 | 現在 | 次回案 |
+|---|---|---|
+| App 名 | `Leafmark: EPUB Reader & Notes` | 維持 |
+| サブタイトル | `Highlight, export & read EPUBs` | `Export Highlights to Markdown` |
+| en-US キーワード | 他社アプリ名と重複語を含む | 一般語のみで100 bytes |
+
+次回の en-US キーワード欄は次のとおり。
+
+```text
+ebook,annotation,offline,drm free,private,library,sync,cloud,vertical,stats,bookmark,buy once,search
+```
+
+タイトルに検索人気度 3 / 5 の `epub reader` を残し、サブタイトルで検索結果の転換理由を
+伝える。Apple Ads で人気度 4 / 5 だった他社アプリ名は、Apple のメタデータルールに
+合わせてキーワード欄に入れない。
+
+反映前に App Store Connect Analytics で直前 28 日間を保存し、反映後の同じ 28 日間と
+比較する。購入数は累計 3 件と少ないため、先行指標を次の順で見る。
+
+1. App Store Search の Unique Impressions
+2. Product Page Views
+3. First Time Downloads
+4. 検索表示から初回ダウンロードまでの転換率
+5. In-App Purchases
+
+検索表示とダウンロードが増えなければメタデータを再検討する。ダウンロードだけが増えて
+購入が増えなければ、ASO ではなく無料体験から Paywall までの導線を検討する。
+
 ## App Store素材
 
 推奨する先頭3枚は次のとおり。
@@ -226,9 +259,42 @@ Product HuntとShow HNは、評価10件、購入者の声3件、30秒のデモ�
 Appleの利用状況とリテンションは、共有に同意したユーザーだけが対象になる。
 件数が少ない間は数値が表示されない可能性もある。利用者との会話を併用する。
 
+## US Search Ads テスト（2026-09-06〜09-16）
+
+目的はインストール件数。人気度の高い `epub reader` だけで入札を競るのではなく、
+人気度 1〜2 のロングテール語を Exact で並べ、安い tap を数で拾う。
+Apple Ads は推奨入札額を個別キーワードに表示しなくなったため、人気度（5 段階）を
+キーワード追加パネルの「Related Keyword」検索で読み取り、競合アプリ名を除いて選んだ。
+
+| 項目 | 値 |
+|---|---|
+| キャンペーン | `Leafmark US Search`（Search Results / United States）。キャンペーン ID 2144620153、広告グループ ID 2150875044 |
+| 作成 | 2026-09-06 12:39 JST。作成直後の状態は「App pending review」（Apple Ads 側の審査待ち） |
+| 予算 | ¥750/日、終了日 2026-09-16 UTC。合計上限 ¥7,500（$50） |
+| 入札 | Manage Bids、広告グループ `epub-en-exact` の Default Max CPT Bid **¥150**（全キーワード同額） |
+| キーワード | 14 語すべて Exact。Search Match オフ。内訳は下の表 |
+| Apple の推奨 Default Max CPT Bid | **¥597**（作成画面の Suggested 表示、2026-09-06） |
+
+| 人気度 | キーワード |
+|---:|---|
+| 3 | `epub reader` `ebook` |
+| 2 | `book reader` `ebooks reader free` |
+| 1 | `epub` `ebook reader` `epub reader free` `e book reader` `ereader` `e reader` `free book reader` `book reader free` `ebooks` `e books` |
+
+損益分岐の CPT は ¥75（$8.5 × US のインストール→購入 11.8% ≒ $1.00 ÷ tap→install 0.5。
+[post-launch-kpi.md](post-launch-kpi.md) の取り直しベースライン）。¥150 はその 2 倍で、
+直接の回収より件数と評価件数を優先した判断。Apple の推奨 ¥597 は `epub reader` 級の
+競合を想定した値で、ロングテール語の実勢はこれより低いと見ている。
+
+判定は次のとおり。
+
+- 語ごとの Impressions / Taps / Avg CPT を見て、tap が付く語だけ残す
+- 全体の CPI が $2 を超えたら止める。$1 未満なら継続と予算増を検討する
+- 計測は `asc-sales --daily` の US 初回 DL と購入、Lookup API の US 評価件数
+
 ## 今月はやらないこと
 
-- 有料広告
+- 有料広告（例外: 2026-09-06 に始めた US 限定 $50 上限の Search Ads テスト。下の節を参照）
 - 有料インフルエンサー施策
 - PDF、TTS、同期の同時開発
 - 根拠のない多言語展開

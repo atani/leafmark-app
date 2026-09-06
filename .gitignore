@@ -49,3 +49,7 @@ fastlane/test_output
 *.epub
 *.epub/
 !Resources/sample-*.epub
+
+# Local tool state
+.playwright-cli/
+.serena/

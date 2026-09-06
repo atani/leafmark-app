@@ -10,11 +10,20 @@ App Store Connect 申請用のテキスト草案。承認が下りたら App Sto
 
 ## App 名(最大 30 字)
 
+### en-US
+
 ```
-Leafmark — EPUB Reader
+Leafmark: EPUB Reader & Notes
 ```
 
-App Store 上の表示名(22 字。App Store Connect で受理済み)。ホーム画面の
+### ja
+
+```
+Leafmark: EPUB リーダー & ノート
+```
+
+App Store 上の表示名(en-US 29 字 / ja 25 字。v1.15 で 2026-09-02 から配信中)。
+`EPUB Reader` で検索する人に用途を即座に伝え、`Notes` で注釈機能まで示す。ホーム画面の
 `CFBundleDisplayName` は短く `Leafmark`。両者は意図的に別(App Store 名は ASO 用に
 descriptor を付与、アイコン下は短いブランド名)。
 
@@ -23,10 +32,12 @@ descriptor を付与、アイコン下は短いブランド名)。
 ### en-US
 
 ```
-Your highlights are yours
+Export Highlights to Markdown
 ```
 
-25 字。P2 × P8 の訴求コピーをそのまま使う。
+29 字。タイトルと `EPUB` を重複させず、検索結果だけで「ハイライトを
+Markdown へ持ち出せる」という独自価値を伝える。`Your highlights are yours` は
+検索語よりブランドコピーに適しているため、スクリーンショット側で継続する。
 
 ### ja
 
@@ -92,12 +103,12 @@ GOOD TO KNOW
 • Public-domain EPUBs are available from Public Domain Library and Standard Ebooks.
 ```
 
-## キーワード(最大 100 字・カンマ区切り・スペース無し)
+## キーワード(最大 100 bytes・カンマ区切り・区切り後のスペース無し)
 
-### en-US(99 字 / 14 語)
+### en-US(100 bytes / 14 語)
 
 ```
-markdown,obsidian,annotate,notes,export,ebook,calibre,vault,offline,drmfree,notion,logseq,anki,sync
+ebook,annotation,offline,drm free,private,library,sync,cloud,vertical,stats,bookmark,buy once,search
 ```
 
 ### ja(93 字 / 20 語)
@@ -106,7 +117,10 @@ markdown,obsidian,annotate,notes,export,ebook,calibre,vault,offline,drmfree,noti
 電子書籍,ハイライト,注釈,読書,読書メモ,読書記録,マークダウン,オブシディアン,書き出し,蔵書,統計,買い切り,サブスクなし,広告なし,縦書き,青空文庫,全文検索,しおり,目次,同期
 ```
 
-### 改訂の根拠(2026-07-25 実測)
+### 改訂の根拠(2026-07-25 実測・旧案)
+
+2026-09-01 に Apple の現行メタデータ仕様に合わせて en-US を再改訂した。
+以下はそれ以前の検証履歴として残す。
 
 iTunes Search API で対象検索語の上位を実測した結果は次のとおり。
 
@@ -128,6 +142,33 @@ iTunes Search API で対象検索語の上位を実測した結果は次のと�
    アプリ名と重複していた。Apple はアプリ名 + サブタイトル + キーワードを自動結合するため重複は純粋な無駄
 2. **勝てない広域語を外す**(`book` `library` `reading` `ipad` `sepia`)。`sepia` は検索意図が存在しない
 3. **同じ読者層が使うツール名を追加**(`logseq` `anki`)。`obsidian` `notion` と同じ PKM 層を狙う
+
+### en-US ASO 改訂案(2026-09-01)
+
+Apple Ads Advanced の米国 Search Results キーワード追加画面で、保存せず検索人気度を
+比較した。人気度は 0〜5 の相対値で、ランキングや購入を保証するものではない。
+
+| 候補語 | 人気度 |
+|---|---:|
+| `obsidian` / `notion` / `anki` | 4 / 5 |
+| `epub reader` / `ebook` / `calibre` | 3 / 5 |
+| `markdown` / `epub highlights` / `epub annotation` | 1 / 5 |
+
+人気度が高くても、Apple はキーワード欄で他社のアプリ名や会社名を認めていない。
+そのため `obsidian` `notion` `anki` `calibre` `logseq` はキーワード欄から外す。
+機能の互換性を説明する必要がある場合は、事実に基づく説明文やプロモーションテキストに
+限定する。
+
+Apple の現行仕様では、名前は 30 文字、サブタイトルは 30 文字、キーワードは
+100 bytes まで。名前・サブタイトル・カテゴリに含まれる語はキーワード欄で重複させない。
+
+- [App Store search](https://developer.apple.com/app-store/search/)
+- [Platform version information](https://developer.apple.com/help/app-store-connect/reference/app-information/platform-version-information/)
+
+タイトルの `EPUB Reader & Notes` とサブタイトルの `Export Highlights to Markdown` を
+組み合わせ、head term と独自価値を分担させる。キーワード欄はそれらと重複しない
+機能・利用文脈だけで 100 bytes を使う。`buy once` は検索意図が1つのため、Appleが
+認めるスペース区切りのキーワードフレーズとして登録する。
 
 ### 縦書きの検証結果(2026-07-25)
 
@@ -206,7 +247,15 @@ Leafmark Pro
 - 主: Books
 - 副: Productivity(Markdown エクスポート × PKM 層の訴求。go-to-market.md チャネル 5)
 
-## What's New(v1.14)
+## What's New(v1.15)
+
+### en-US
+
+```
+This release updates Leafmark's App Store presentation. Reading, highlighting, Markdown export, and Leafmark Pro work as before.
+```
+
+## What's New(v1.14・履歴)
 
 ### en-US
 
@@ -265,8 +314,8 @@ The empty library also links to Public Domain Library, making it easier to find 
 
 | 項目 | 上限 | 状態 |
 |---|---|---|
-| App 名 | 30 | 22 字 ✅ |
-| サブタイトル | 30 | 25 字 ✅ |
+| App 名 | 30 | en-US 29 字 / ja 25 字 ✅ |
+| サブタイトル | 30 | en-US 29 字 / ja 13 字 ✅ |
 | プロモテキスト | 170 | 156 字 ✅ |
-| キーワード | 100 | 99 字 ✅ |
+| キーワード | 100 bytes | en-US 100 bytes ✅ |
 | 説明文 | 4000 | 余裕あり ✅ |

@@ -3,6 +3,30 @@ import XCTest
 
 @MainActor
 final class StoreManagerTests: XCTestCase {
+    func testCanceledExportPreservesAllowanceAndSuccessfulExportPersistsIt() {
+        let key = "store.freeExportUsed"
+        let previous = UserDefaults.standard.object(forKey: key)
+        UserDefaults.standard.removeObject(forKey: key)
+        defer { UserDefaults.standard.set(previous, forKey: key) }
+        let store = StoreManager()
+        XCTAssertFalse(store.completeExport(success: false))
+        XCTAssertFalse(store.hasUsedFreeExport)
+        XCTAssertFalse(UserDefaults.standard.bool(forKey: key))
+        XCTAssertTrue(store.completeExport(success: true))
+        XCTAssertTrue(store.hasUsedFreeExport)
+        XCTAssertTrue(StoreManager().hasUsedFreeExport)
+    }
+
+    func testPreparedExportPreservesTextAndFilenameAndCleansUp() throws {
+        let export = HighlightExport(text: "# Book\n\n> Quote\n\nNote: 日本語", fileName: "Book - Author.txt")
+        let file = try PreparedHighlightExport(export: export)
+        defer { file.cleanup() }
+        XCTAssertEqual(file.url.lastPathComponent, export.fileName)
+        XCTAssertEqual(try String(contentsOf: file.url, encoding: .utf8), export.text)
+        file.cleanup()
+        XCTAssertFalse(FileManager.default.fileExists(atPath: file.url.path))
+    }
+
     func testFreeTierAllowsUpToTheLimit() {
         XCTAssertTrue(StoreManager.canAddHighlight(isPro: false, currentCount: 0))
         XCTAssertTrue(StoreManager.canAddHighlight(isPro: false, currentCount: 2))

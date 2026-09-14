@@ -6,6 +6,7 @@ import StoreKit
 enum PaywallContext {
     case general
     case highlightLimit
+    case highlights
     case export
     case statistics
 
@@ -15,10 +16,12 @@ enum PaywallContext {
             return "Your highlights are yours."
         case .highlightLimit:
             return "You've used all \(StoreManager.freeHighlightLimit) free highlights in this book."
+        case .highlights:
+            return "Keep every passage that matters, without a highlight limit."
         case .export:
             return "You've used your free export. Unlock unlimited Markdown export."
         case .statistics:
-            return "See how much you read — today, this week, and all time."
+            return "Explore your weekly and all-time reading, streaks, and time per book."
         }
     }
 }
@@ -70,6 +73,8 @@ struct PaywallView: View {
                         }
                     }
                     .padding(.horizontal, 4)
+
+                    ReadingNoteExample()
 
                     VStack(spacing: 12) {
                         if store.productLoadFailed && store.product == nil {
@@ -127,5 +132,27 @@ struct PaywallView: View {
                 if isPro { dismiss() }
             }
         }
+    }
+}
+
+/// A labeled example, never presented as the reader's own data.
+struct ReadingNoteExample: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Your reading notes, ready to keep")
+                .font(.headline)
+            Text("Example Markdown export")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text("# A Book I Read\n\n> A passage worth remembering.\n\nMy note: Try this idea tomorrow.")
+                .font(.body.monospaced())
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Text("Keep quotes and your own notes together in a plain-text file.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .padding()
+        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+        .accessibilityElement(children: .contain)
     }
 }

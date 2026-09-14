@@ -12,12 +12,7 @@ struct StatsView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                statsContent
-                if !isPro {
-                    lockedOverlay
-                }
-            }
+            statsContent
             .navigationTitle("Statistics")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -42,9 +37,18 @@ struct StatsView: View {
             } else if isPro {
                 realStatsContent
             } else {
-                sampleStatsContent
-                    .blur(radius: 6)
-                    .allowsHitTesting(false)
+                ScrollView {
+                    VStack(spacing: 24) {
+                        StatCard(title: "Today", value: StatsStore.format(stats.todayTime))
+                        if stats.todayTime == 0 {
+                            Text("Read a little, then close your book to see your time here.")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        lockedOverlay
+                    }
+                    .padding()
+                }
             }
         }
     }
@@ -84,48 +88,14 @@ struct StatsView: View {
         }
     }
 
-    private var sampleStatsContent: some View {
-        List {
-            Section {
-                HStack(spacing: 12) {
-                    StatCard(title: "Today", value: "12m")
-                    StatCard(title: "This Week", value: "3h")
-                    StatCard(title: "All Time", value: "48h")
-                }
-                .listRowInsets(EdgeInsets())
-                .listRowBackground(Color.clear)
-            }
-            Section {
-                HStack {
-                    Label("Reading Streak", systemImage: "flame.fill")
-                        .foregroundStyle(.orange)
-                    Spacer()
-                    Text("7 days").fontWeight(.semibold)
-                }
-            }
-            Section("By Book") {
-                HStack {
-                    Text("Frankenstein")
-                    Spacer()
-                    Text("2h 15m").foregroundStyle(.secondary).monospacedDigit()
-                }
-                HStack {
-                    Text("Pride and Prejudice")
-                    Spacer()
-                    Text("5h 42m").foregroundStyle(.secondary).monospacedDigit()
-                }
-            }
-        }
-    }
-
     private var lockedOverlay: some View {
         VStack(spacing: 16) {
             Image(systemName: "lock.fill")
                 .font(.largeTitle)
                 .foregroundStyle(.secondary)
-            Text("Unlock Reading Statistics")
+            Text("See Your Reading History")
                 .font(.title3.bold())
-            Text("Track your time, streaks, and progress per book.")
+            Text("Today is free. Unlock weekly and all-time totals, reading streaks, and time per book with Pro.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

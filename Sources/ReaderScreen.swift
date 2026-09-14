@@ -597,12 +597,7 @@ private struct HighlightsSheet: View {
     @State private var showPaywall = false
     @State private var paywallContext: PaywallContext = .export
 
-    /// Set when the free export is spent, and applied only after this sheet
-    /// closes. Flipping the entitlement while the share sheet is presenting
-    /// would swap the ShareLink out for the paywall Button mid-presentation,
-    /// which crashes inside SwiftUI's activity picker
-    /// (EXC_BAD_ACCESS in SharingActivityPickerBridge.show).
-    @State private var freeExportPendingConsume = false
+    @State private var showExport = false
 
     private var items: [Highlight] {
         store.highlights(for: book.id)
@@ -619,6 +614,28 @@ private struct HighlightsSheet: View {
                     )
                 } else {
                     List {
+                        Section {
+                            Button {
+                                if StoreManager.canExport(isPro: purchases.isPro, hasUsedFreeExport: purchases.hasUsedFreeExport) {
+                                    showExport = true
+                                } else {
+                                    paywallContext = .export
+                                    showPaywall = true
+                                }
+                            } label: {
+                                Label {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Export Reading Notes")
+                                        Text(purchases.isPro ? "Preview and share your Markdown file" : (purchases.hasUsedFreeExport ? "Unlimited export with Pro" : "First export free — preview your Markdown"))
+                                            .font(.footnote)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                } icon: {
+                                    Image(systemName: "square.and.arrow.up")
+                                }
+                                .frame(minHeight: 44)
+                            }
+                        }
                         ForEach(items) { highlight in
                             Button {
                                 onSelect(highlight)
@@ -655,40 +672,6 @@ private struct HighlightsSheet: View {
             .navigationTitle("Highlights")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    if !items.isEmpty {
-                        if StoreManager.canExport(
-                            isPro: purchases.isPro,
-                            hasUsedFreeExport: purchases.hasUsedFreeExport
-                        ) {
-                            ShareLink(
-                                item: store.exportFile(for: book),
-                                preview: SharePreview("\(book.title) — Highlights")
-                            ) {
-                                Image(systemName: "square.and.arrow.up")
-                            }
-                            .accessibilityLabel(
-                                purchases.isPro
-                                    ? "Export as Markdown"
-                                    : "Export as Markdown (one free export)"
-                            )
-                            .simultaneousGesture(TapGesture().onEnded {
-                                freeExportPendingConsume = true
-                                if ReviewRequester.recordExport() {
-                                    reviewPending = true
-                                }
-                            })
-                        } else {
-                            Button {
-                                paywallContext = .export
-                                showPaywall = true
-                            } label: {
-                                Image(systemName: "square.and.arrow.up")
-                            }
-                            .accessibilityLabel("Export as Markdown (Leafmark Pro)")
-                        }
-                    }
-                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
                 }
@@ -701,12 +684,11 @@ private struct HighlightsSheet: View {
             .sheet(isPresented: $showPaywall) {
                 PaywallView(store: purchases, context: paywallContext)
             }
-            .onDisappear {
-                // Safe to change the entitlement now: the share sheet is gone,
-                // so nothing is mid-presentation.
-                if freeExportPendingConsume {
-                    freeExportPendingConsume = false
-                    purchases.markFreeExportUsed()
+            .sheet(isPresented: $showExport) {
+                ReadingNotesExportView(export: store.exportFile(for: book), purchases: purchases) {
+                    if ReviewRequester.recordExport() {
+                        reviewPending = true
+                    }
                 }
             }
         }
@@ -715,7 +697,7 @@ private struct HighlightsSheet: View {
     /// Keeps the free quota visible so the paywall never feels like an
     /// ambush: the user always knows how many highlights they have left.
     private var freePlanFooter: some View {
-        HStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Free plan: \(min(items.count, StoreManager.freeHighlightLimit)) of \(StoreManager.freeHighlightLimit) highlights in this book")
                 if !purchases.hasUsedFreeExport {
@@ -724,12 +706,12 @@ private struct HighlightsSheet: View {
             }
             .font(.footnote)
             .foregroundStyle(.secondary)
-            Spacer()
             Button("Upgrade") {
-                paywallContext = .highlightLimit
+                paywallContext = items.count >= StoreManager.freeHighlightLimit ? .highlightLimit : .highlights
                 showPaywall = true
             }
             .font(.footnote.weight(.semibold))
+            .frame(minHeight: 44)
         }
         .padding(.horizontal)
         .padding(.vertical, 10)

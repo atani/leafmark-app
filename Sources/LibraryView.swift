@@ -10,6 +10,7 @@ struct LibraryView: View {
     @EnvironmentObject private var bookmarks: BookmarkStore
     @State private var showImporter = false
     @State private var showStats = false
+    @State private var showPro = false
     @State private var openedBook: Book?
     @AppStorage("library.sortOrder") private var sortOrder = LibrarySortOrder.recentlyOpened
 
@@ -77,6 +78,19 @@ struct LibraryView: View {
             .navigationTitle("Library")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
+                    Menu {
+                        Button {
+                            showPro = true
+                        } label: {
+                            Label(store.isPro ? "Leafmark Pro — Purchased" : "Leafmark Pro — Unlimited highlights & export", systemImage: "book.closed")
+                        }
+                        .disabled(store.isPro)
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                    .accessibilityLabel("Library menu")
+                }
+                ToolbarItem(placement: .topBarLeading) {
                     Button {
                         showStats = true
                     } label: {
@@ -109,6 +123,9 @@ struct LibraryView: View {
             }
             .sheet(isPresented: $showStats) {
                 StatsView(stats: stats, library: library)
+            }
+            .sheet(isPresented: $showPro) {
+                PaywallView(store: store)
             }
             .fileImporter(
                 isPresented: $showImporter,

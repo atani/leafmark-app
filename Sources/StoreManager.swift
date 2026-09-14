@@ -136,6 +136,14 @@ final class StoreManager: ObservableObject {
         UserDefaults.standard.set(true, forKey: Self.freeExportUsedKey)
     }
 
+    /// Records the system share completion result; opening or canceling is not an export.
+    @discardableResult
+    func completeExport(success: Bool) -> Bool {
+        guard success else { return false }
+        markFreeExportUsed()
+        return true
+    }
+
     private func refreshEntitlements() async {
         var unlocked = false
         for await entitlement in Transaction.currentEntitlements {

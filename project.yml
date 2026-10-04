@@ -6,6 +6,9 @@ options:
   createIntermediateGroups: true
 
 packages:
+  RevenueCat:
+    url: https://github.com/RevenueCat/purchases-ios-spm.git
+    exactVersion: 5.92.0
   Readium:
     url: https://github.com/readium/swift-toolkit.git
     # 3.10.0 + フォント CORS 修正 (#845) を含む develop 固定。3.11 タグが出たら
@@ -14,6 +17,12 @@ packages:
 
 settings:
   base:
+    REVENUECAT_MODE: disabled
+    REVENUECAT_PUBLIC_SDK_KEY: ""
+    REVENUECAT_DATA_SHARING_APPROVED: "NO"
+    REVENUECAT_INTEGRATION_READY: "NO"
+    REVENUECAT_PRIVACY_READY: "NO"
+    REVENUECAT_RELEASE_ENABLED: "NO"
     SWIFT_VERSION: "5.9"
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
     TARGETED_DEVICE_FAMILY: "1,2"
@@ -31,6 +40,8 @@ targets:
       - path: Resources
         buildPhase: resources
     dependencies:
+      - package: RevenueCat
+        product: RevenueCat
       - package: Readium
         products:
           - ReadiumShared
@@ -39,6 +50,12 @@ targets:
     info:
       path: Info.plist
       properties:
+        RevenueCatMode: "$(REVENUECAT_MODE)"
+        RevenueCatPublicSDKKey: "$(REVENUECAT_PUBLIC_SDK_KEY)"
+        RevenueCatDataSharingApproved: "$(REVENUECAT_DATA_SHARING_APPROVED)"
+        RevenueCatIntegrationReady: "$(REVENUECAT_INTEGRATION_READY)"
+        RevenueCatPrivacyReady: "$(REVENUECAT_PRIVACY_READY)"
+        RevenueCatReleaseEnabled: "$(REVENUECAT_RELEASE_ENABLED)"
         CFBundleDisplayName: Leafmark
         # Keep versions pointed at build settings — without these keys
         # xcodegen regenerates Info.plist with hardcoded 1.0/1, which
@@ -77,8 +94,8 @@ targets:
         # bundle id stays com.atani.inkwell; only the iCloud container is
         # namespaced as iCloud.com.atani.inkwell.
         CODE_SIGN_ENTITLEMENTS: Leafmark.entitlements
-        MARKETING_VERSION: "1.16"
-        CURRENT_PROJECT_VERSION: "25"
+        MARKETING_VERSION: "1.17"
+        CURRENT_PROJECT_VERSION: "26"
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon

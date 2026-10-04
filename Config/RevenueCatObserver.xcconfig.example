@@ -1,0 +1,11 @@
+// Leafmark専用、レビュー用。実キー/連携/公開privacy未確認のため全ゲートはOFF。
+// SDKは過去のproduction/Sandbox取引も自動取得する。Sandboxだけの設定ではない。
+REVENUECAT_MODE = observer
+REVENUECAT_PUBLIC_SDK_KEY =
+REVENUECAT_DATA_SHARING_APPROVED = NO
+REVENUECAT_INTEGRATION_READY = NO
+REVENUECAT_PRIVACY_READY = NO
+REVENUECAT_RELEASE_ENABLED = NO
+// 確認順: 正しいapp/bundle/public SDK keyとIAP/catalog → 公開privacy/ASC申告 →
+// Debug検証のopt-in → 実購入/復元/返金/家族共有検証 → 別途Release有効化レビュー。
+// 旧sandbox設定をONにしても初期化されない。

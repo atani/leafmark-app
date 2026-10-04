@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import StoreKit
 import RevenueCat
 
@@ -17,10 +18,9 @@ private struct LiveRevenueCatObserverTransport: RevenueCatObserverTransport {
     var appUserID: String? { Purchases.isConfigured ? Purchases.shared.appUserID : nil }
 
     func configure(publicSDKKey: String) -> Bool {
+        // Re-check the real process, not the injected context, so tests never start the SDK.
         // Refuse to use an SDK instance configured by another owner/key.
-        let runtime = RevenueCatExecutionContext.current
-        guard runtime.bundleIdentifier == "com.atani.inkwell", !runtime.isTesting, !runtime.isPreview,
-              !runtime.isDemo, (!runtime.isReleaseBuild || releaseEnabled),
+        guard RevenueCatExecutionContext.current.allowsObserver(releaseEnabled: releaseEnabled),
               !Purchases.isConfigured else { return false }
         // SDK error/debug messages can contain complete receipt/customer response bodies.
         Purchases.logHandler = { _, _ in }
@@ -46,6 +46,8 @@ final class RevenueCatObserver {
     static let shared = RevenueCatObserver()
     private static let productIDs: Set<String> = ["com.atani.inkwell.pro"]
     private static let migrationPrefix = "revenuecat.observer.migration.v2.products."
+    // Fixed templates only: operation name and error type, never IDs, receipts or SDK messages.
+    private static let logger = Logger(subsystem: RevenueCatExecutionContext.appBundleIdentifier, category: "RevenueCat")
 
     private let configuration: RevenueCatMigrationConfiguration
     private let context: RevenueCatExecutionContext
@@ -59,28 +61,29 @@ final class RevenueCatObserver {
          transport: (any RevenueCatObserverTransport)? = nil,
          entitlementProductIDs: (() async -> Set<String>)? = nil,
          defaults: UserDefaults = .standard) {
-        self.configuration = configuration ?? .init(
-            mode: Bundle.main.object(forInfoDictionaryKey: "RevenueCatMode") as? String ?? "disabled",
-            publicSDKKey: Bundle.main.object(forInfoDictionaryKey: "RevenueCatPublicSDKKey") as? String ?? "",
-            dataSharingApproved: Bundle.main.object(forInfoDictionaryKey: "RevenueCatDataSharingApproved") as? String == "YES",
-            integrationReady: Bundle.main.object(forInfoDictionaryKey: "RevenueCatIntegrationReady") as? String == "YES",
-            privacyReady: Bundle.main.object(forInfoDictionaryKey: "RevenueCatPrivacyReady") as? String == "YES",
-            releaseEnabled: Bundle.main.object(forInfoDictionaryKey: "RevenueCatReleaseEnabled") as? String == "YES"
-        )
+        self.configuration = configuration ?? .init(infoDictionary: Bundle.main.infoDictionary)
         self.context = context
         self.transport = transport ?? LiveRevenueCatObserverTransport(releaseEnabled: self.configuration.releaseEnabled)
         self.entitlementProductIDs = entitlementProductIDs ?? { await Self.currentEntitlementProductIDs() }
-        let prefix = Self.migrationPrefix
-        coordinator = RevenueCatMigrationCoordinator(
+        coordinator = Self.makeCoordinator(defaults: defaults)
+    }
+
+    static func makeCoordinator(defaults: UserDefaults) -> RevenueCatMigrationCoordinator {
+        let prefix = migrationPrefix
+        return RevenueCatMigrationCoordinator(
             syncedProductIDs: { Set(defaults.stringArray(forKey: prefix + $0) ?? []) },
             markSynced: { defaults.set($1.sorted(), forKey: prefix + $0) },
             clearSynced: { defaults.removeObject(forKey: prefix + $0) }
         )
     }
 
-    func start() {
-        guard configureIfAllowed() else { return }
-        Task { await migrateExistingPurchases(userInitiated: false) }
+    static func syncedProductIDsKey(customerID: String) -> String { migrationPrefix + customerID }
+
+    /// The returned task lets callers (tests) await the migration; production ignores it.
+    @discardableResult
+    func start() -> Task<Void, Never>? {
+        guard configureIfAllowed() else { return nil }
+        return Task { await migrateExistingPurchases(userInitiated: false) }
     }
 
     func recordPurchase(_ result: StoreKit.Product.PurchaseResult) {
@@ -90,13 +93,18 @@ final class RevenueCatObserver {
         coordinator.invalidate(customerID: customerID)
         Task {
             do { try await transport.recordPurchase(result) }
-            catch { /* Preserve StoreKit success; migration retries on next launch/explicit restore. */ }
+            catch {
+                // Preserve StoreKit success; migration retries on next launch/explicit restore.
+                let errorType = String(describing: type(of: error))
+                Self.logger.error("recordPurchase failed: \(errorType, privacy: .public)")
+            }
         }
     }
 
-    func restoreCompleted() {
-        guard configureIfAllowed() else { return }
-        Task { await migrateExistingPurchases(userInitiated: true) }
+    @discardableResult
+    func restoreCompleted() -> Task<Void, Never>? {
+        guard configureIfAllowed() else { return nil }
+        return Task { await migrateExistingPurchases(userInitiated: true) }
     }
 
     private func configureIfAllowed() -> Bool {
@@ -111,10 +119,11 @@ final class RevenueCatObserver {
     private func migrateExistingPurchases(userInitiated: Bool) async {
         guard configured, let customerID = transport.appUserID else { return }
         let products = await entitlementProductIDs()
-        _ = await coordinator.syncExistingPurchases(
+        let outcome = await coordinator.syncExistingPurchases(
             enabled: configured, customerID: customerID,
             eligibleProductIDs: products, userInitiated: userInitiated
         ) { try await transport.syncPurchases() }
+        if outcome == .failed { Self.logger.error("syncExistingPurchases failed") }
     }
 
     private static func currentEntitlementProductIDs() async -> Set<String> {
@@ -130,8 +139,7 @@ final class RevenueCatObserver {
         RevenueCatMigrationPurchase(
             productID: transaction.productID, isVerified: true,
             isRevoked: transaction.revocationDate != nil,
-            expirationDate: transaction.expirationDate,
-            isSandbox: transaction.environment == .sandbox
+            expirationDate: transaction.expirationDate
         ).isEligible(productIDs: productIDs, now: .now)
     }
 }

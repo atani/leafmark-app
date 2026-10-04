@@ -1,6 +1,8 @@
 import Foundation
 
 struct RevenueCatExecutionContext: Equatable {
+    static let appBundleIdentifier = "com.atani.inkwell"
+
     let bundleIdentifier: String?
     let isReleaseBuild: Bool
     let isTesting: Bool
@@ -40,6 +42,11 @@ struct RevenueCatExecutionContext: Equatable {
                      isPreview: environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1",
                      isDemo: captureArguments || captureEnvironment)
     }
+
+    func allowsObserver(releaseEnabled: Bool) -> Bool {
+        bundleIdentifier == Self.appBundleIdentifier && !isTesting && !isPreview && !isDemo
+            && (!isReleaseBuild || releaseEnabled)
+    }
 }
 
 struct RevenueCatMigrationConfiguration: Equatable {
@@ -50,16 +57,28 @@ struct RevenueCatMigrationConfiguration: Equatable {
     var privacyReady = false
     var releaseEnabled = false
 
-    // Legacy Sandbox-only flags never authorize the SDK's broader automatic paths.
-    func permitsSandboxObserver(isDebugBuild: Bool, isTesting: Bool, isSandbox: Bool) -> Bool { false }
+    init(mode: String, publicSDKKey: String, dataSharingApproved: Bool,
+         integrationReady: Bool = false, privacyReady: Bool = false, releaseEnabled: Bool = false) {
+        self.mode = mode
+        self.publicSDKKey = publicSDKKey
+        self.dataSharingApproved = dataSharingApproved
+        self.integrationReady = integrationReady
+        self.privacyReady = privacyReady
+        self.releaseEnabled = releaseEnabled
+    }
 
-    func hasSandboxConfiguration(isDebugBuild: Bool, isTesting: Bool, isSandbox: Bool) -> Bool {
-        isDebugBuild && !isTesting && isSandbox && dataSharingApproved && mode == "sandbox" && validPublicSDKKey
+    init(infoDictionary info: [String: Any]?) {
+        func flag(_ key: String) -> Bool { info?[key] as? String == "YES" }
+        self.init(mode: info?["RevenueCatMode"] as? String ?? "disabled",
+                  publicSDKKey: info?["RevenueCatPublicSDKKey"] as? String ?? "",
+                  dataSharingApproved: flag("RevenueCatDataSharingApproved"),
+                  integrationReady: flag("RevenueCatIntegrationReady"),
+                  privacyReady: flag("RevenueCatPrivacyReady"),
+                  releaseEnabled: flag("RevenueCatReleaseEnabled"))
     }
 
     func permitsObserver(in context: RevenueCatExecutionContext) -> Bool {
-        context.bundleIdentifier == "com.atani.inkwell" && !context.isTesting && !context.isPreview
-            && !context.isDemo && (!context.isReleaseBuild || releaseEnabled)
+        context.allowsObserver(releaseEnabled: releaseEnabled)
             && mode == "observer" && dataSharingApproved && integrationReady && privacyReady && validPublicSDKKey
     }
 
@@ -76,7 +95,6 @@ struct RevenueCatMigrationPurchase: Equatable {
     let isVerified: Bool
     let isRevoked: Bool
     let expirationDate: Date?
-    let isSandbox: Bool
 
     func isEligible(productIDs: Set<String>, now: Date) -> Bool {
         isVerified && !isRevoked && productIDs.contains(productID)

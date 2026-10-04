@@ -17,7 +17,7 @@ final class RevenueCatMigrationTests: XCTestCase {
         XCTAssertFalse(Purchases.isConfigured)
     }
 
-    func testAllObserverEntryPointsStayUnconfiguredWithSandboxConsentAndKey() {
+    func testAllObserverEntryPointsStayUnconfiguredWithLegacyModeConsentAndKey() {
         let observer = RevenueCatObserver(configuration: configuration)
         XCTAssertFalse(Purchases.isConfigured)
         observer.start()
@@ -27,24 +27,31 @@ final class RevenueCatMigrationTests: XCTestCase {
         XCTAssertFalse(Purchases.isConfigured)
     }
 
-    func testDefaultAndUnapprovedConfigurationsCannotSend() {
-        let disabled = RevenueCatMigrationConfiguration(mode: "disabled", publicSDKKey: "", dataSharingApproved: false)
-        XCTAssertFalse(disabled.hasSandboxConfiguration(isDebugBuild: true, isTesting: false, isSandbox: true))
-        let unapproved = RevenueCatMigrationConfiguration(mode: "sandbox", publicSDKKey: configuration.publicSDKKey, dataSharingApproved: false)
-        XCTAssertFalse(unapproved.hasSandboxConfiguration(isDebugBuild: true, isTesting: false, isSandbox: true))
-    }
-
-    func testReleaseProductionAndTestsCannotSendEvenWithConfiguration() {
-        XCTAssertFalse(configuration.hasSandboxConfiguration(isDebugBuild: false, isTesting: false, isSandbox: true))
-        XCTAssertFalse(configuration.hasSandboxConfiguration(isDebugBuild: true, isTesting: false, isSandbox: false))
-        XCTAssertFalse(configuration.hasSandboxConfiguration(isDebugBuild: true, isTesting: true, isSandbox: true))
-        XCTAssertTrue(configuration.hasSandboxConfiguration(isDebugBuild: true, isTesting: false, isSandbox: true))
+    func testShippedInfoPlistKeepsObserverDisabledInRelease() {
+        let info = Bundle.main.infoDictionary
+        XCTAssertEqual(info?["RevenueCatMode"] as? String, "disabled")
+        XCTAssertEqual(info?["RevenueCatPublicSDKKey"] as? String, "")
+        for key in ["RevenueCatDataSharingApproved", "RevenueCatIntegrationReady",
+                    "RevenueCatPrivacyReady", "RevenueCatReleaseEnabled"] {
+            XCTAssertEqual(info?[key] as? String, "NO", key)
+        }
+        let shipped = RevenueCatMigrationConfiguration(infoDictionary: info)
+        let release = executionContext(release: true)
+        XCTAssertFalse(shipped.permitsObserver(in: release))
+        // ログを出す送信・同期経路は、既定設定では起動時点で閉じている。
+        let transport = TransportSpy()
+        let observer = RevenueCatObserver(configuration: shipped, context: release, transport: transport,
+                                          entitlementProductIDs: { ["pro"] })
+        XCTAssertNil(observer.start())
+        XCTAssertNil(observer.restoreCompleted())
+        XCTAssertEqual(transport.configurations, 0)
     }
 
     func testPrivateKeysPlaceholdersAndUnresolvedBuildSettingsAreRejected() {
         for key in ["", "sk_secret", "test_store", "$(REVENUECAT_PUBLIC_SDK_KEY)", "appl_yourKey123456", "appl_example123456", "appl_a b12345678", "appl_<replace_me>"] {
-            let value = RevenueCatMigrationConfiguration(mode: "sandbox", publicSDKKey: key, dataSharingApproved: true)
-            XCTAssertFalse(value.hasSandboxConfiguration(isDebugBuild: true, isTesting: false, isSandbox: true), key)
+            let value = RevenueCatMigrationConfiguration(mode: "observer", publicSDKKey: key, dataSharingApproved: true,
+                                                         integrationReady: true, privacyReady: true, releaseEnabled: true)
+            XCTAssertFalse(value.permitsObserver(in: executionContext()), key)
         }
     }
 
@@ -129,11 +136,27 @@ final class RevenueCatMigrationTests: XCTestCase {
         XCTAssertEqual(firstOutcome, .synced)
     }
 
-    func testSandboxKeyAndConsentCannotEnableUnisolatedSDK() {
-        XCTAssertTrue(configuration.hasSandboxConfiguration(isDebugBuild: true, isTesting: false, isSandbox: true))
-        XCTAssertFalse(configuration.permitsSandboxObserver(isDebugBuild: true, isTesting: false, isSandbox: true))
-        XCTAssertFalse(configuration.permitsSandboxObserver(isDebugBuild: false, isTesting: false, isSandbox: true))
-        XCTAssertFalse(configuration.permitsSandboxObserver(isDebugBuild: true, isTesting: false, isSandbox: false))
+    func testPurchaseInvalidationClearsOnlyThatCustomerAndResyncs() async {
+        let (defaults, suiteName) = isolatedDefaults()
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let keyA = RevenueCatObserver.syncedProductIDsKey(customerID: "a")
+        let keyB = RevenueCatObserver.syncedProductIDsKey(customerID: "b")
+        defaults.set(["pro"], forKey: keyA)
+        defaults.set(["pro"], forKey: keyB)
+        let coordinator = RevenueCatObserver.makeCoordinator(defaults: defaults)
+        let before = await coordinator.syncExistingPurchases(enabled: true, customerID: "a", eligibleProductIDs: ["pro"]) { XCTFail("already synced"); return [] }
+        XCTAssertEqual(before, .skipped)
+        coordinator.invalidate(customerID: "a")
+        XCTAssertNil(defaults.object(forKey: keyA))
+        XCTAssertEqual(defaults.stringArray(forKey: keyB), ["pro"])
+        var calls = 0
+        let resync = await coordinator.syncExistingPurchases(enabled: true, customerID: "a", eligibleProductIDs: ["pro"]) {
+            calls += 1
+            return ["pro"]
+        }
+        XCTAssertEqual(resync, .synced)
+        XCTAssertEqual(calls, 1)
+        XCTAssertEqual(defaults.stringArray(forKey: keyA), ["pro"])
     }
 
     func testStaleSyncCannotOverwriteNewPurchaseInvalidation() async {
@@ -202,22 +225,17 @@ final class RevenueCatMigrationTests: XCTestCase {
         XCTAssertFalse(complete.permitsObserver(in: executionContext(bundle: "com.example.other")))
     }
 
-    func testAuthorizedProductionPurchaseCanBeMigrated() {
-        XCTAssertTrue(purchase(sandbox: false).isEligible(productIDs: ["pro"], now: Date(timeIntervalSince1970: 100)))
-    }
-
-    func testIncompleteReadinessNeverCallsTransportFromAnyEntryPoint() async {
+    func testIncompleteReadinessNeverCallsTransportFromAnyEntryPoint() {
         for ready in [false, true] {
             var config = observerConfiguration()
             config.integrationReady = ready
             config.privacyReady = false
             let transport = TransportSpy()
             let observer = RevenueCatObserver(configuration: config, context: executionContext(), transport: transport, entitlementProductIDs: { ["pro"] })
-            observer.start()
+            XCTAssertNil(observer.start())
             observer.recordPurchase(.pending)
             observer.recordPurchase(.userCancelled)
-            observer.restoreCompleted()
-            await Task.yield()
+            XCTAssertNil(observer.restoreCompleted())
             XCTAssertEqual(transport.configurations, 0)
             XCTAssertEqual(transport.syncs, 0)
             XCTAssertFalse(Purchases.isConfigured)
@@ -227,22 +245,44 @@ final class RevenueCatMigrationTests: XCTestCase {
     func testReadyObserverConfiguresTransportOnlyOnceWithoutLiveSDK() async {
         let transport = TransportSpy()
         let observer = RevenueCatObserver(configuration: observerConfiguration(), context: executionContext(), transport: transport, entitlementProductIDs: { [] })
-        observer.start()
-        observer.start()
-        observer.restoreCompleted()
-        await Task.yield()
+        for task in [observer.start(), observer.start(), observer.restoreCompleted()] {
+            XCTAssertNotNil(task)
+            await task?.value
+        }
         XCTAssertEqual(transport.configurations, 1)
         XCTAssertEqual(transport.syncs, 0)
         XCTAssertFalse(Purchases.isConfigured)
     }
 
-    func testRejectedTransportOwnerDoesNotSync() async {
+    func testSyncPersistsProductSetAndRelaunchSkipsSameSet() async {
+        let (defaults, suiteName) = isolatedDefaults()
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let product = "com.atani.inkwell.pro"
+        let first = TransportSpy(syncedProductIDs: [product])
+        let firstTask = RevenueCatObserver(configuration: observerConfiguration(), context: executionContext(), transport: first,
+                                           entitlementProductIDs: { [product] }, defaults: defaults).start()
+        XCTAssertNotNil(firstTask)
+        await firstTask?.value
+        XCTAssertEqual(first.syncs, 1)
+        let key = RevenueCatObserver.syncedProductIDsKey(customerID: first.appUserID ?? "")
+        XCTAssertEqual(defaults.stringArray(forKey: key), [product])
+
+        let relaunch = TransportSpy(syncedProductIDs: [product])
+        let relaunchTask = RevenueCatObserver(configuration: observerConfiguration(), context: executionContext(), transport: relaunch,
+                                              entitlementProductIDs: { [product] }, defaults: defaults).start()
+        XCTAssertNotNil(relaunchTask)
+        await relaunchTask?.value
+        XCTAssertEqual(relaunch.configurations, 1)
+        XCTAssertEqual(relaunch.syncs, 0)
+        XCTAssertEqual(defaults.stringArray(forKey: key), [product])
+    }
+
+    func testRejectedTransportOwnerDoesNotSync() {
         let transport = TransportSpy()
         transport.acceptsConfiguration = false
         let observer = RevenueCatObserver(configuration: observerConfiguration(), context: executionContext(), transport: transport, entitlementProductIDs: { ["pro"] })
-        observer.start()
-        observer.restoreCompleted()
-        await Task.yield()
+        XCTAssertNil(observer.start())
+        XCTAssertNil(observer.restoreCompleted())
         XCTAssertGreaterThanOrEqual(transport.configurations, 1)
         XCTAssertEqual(transport.syncs, 0)
         XCTAssertFalse(Purchases.isConfigured)
@@ -292,18 +332,25 @@ final class RevenueCatMigrationTests: XCTestCase {
         .init(bundleIdentifier: bundle, isReleaseBuild: release, isTesting: testing, isPreview: preview, isDemo: demo)
     }
 
+    private func isolatedDefaults() -> (UserDefaults, String) {
+        let suiteName = "RevenueCatMigrationTests.\(UUID().uuidString)"
+        return (UserDefaults(suiteName: suiteName)!, suiteName)
+    }
+
     private final class TransportSpy: RevenueCatObserverTransport {
         var appUserID: String? { "unit-test-only" }
         var acceptsConfiguration = true
         var configurations = 0
         var syncs = 0
+        let syncedProductIDs: Set<String>
+        init(syncedProductIDs: Set<String> = ["pro"]) { self.syncedProductIDs = syncedProductIDs }
         func configure(publicSDKKey: String) -> Bool { configurations += 1; return acceptsConfiguration }
         func recordPurchase(_ result: StoreKit.Product.PurchaseResult) async throws { XCTFail("No real transaction in these tests") }
-        func syncPurchases() async throws -> Set<String> { syncs += 1; return ["pro"] }
+        func syncPurchases() async throws -> Set<String> { syncs += 1; return syncedProductIDs }
     }
 
-    private func purchase(productID: String = "pro", verified: Bool = true, revoked: Bool = false, expiration: Date? = nil, sandbox: Bool = true) -> RevenueCatMigrationPurchase {
-        .init(productID: productID, isVerified: verified, isRevoked: revoked, expirationDate: expiration, isSandbox: sandbox)
+    private func purchase(productID: String = "pro", verified: Bool = true, revoked: Bool = false, expiration: Date? = nil) -> RevenueCatMigrationPurchase {
+        .init(productID: productID, isVerified: verified, isRevoked: revoked, expirationDate: expiration)
     }
 
     private final class State { var synced = [String: Set<String>]() }

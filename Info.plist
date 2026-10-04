@@ -39,6 +39,18 @@
 	<false/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
+	<key>RevenueCatDataSharingApproved</key>
+	<string>$(REVENUECAT_DATA_SHARING_APPROVED)</string>
+	<key>RevenueCatIntegrationReady</key>
+	<string>$(REVENUECAT_INTEGRATION_READY)</string>
+	<key>RevenueCatMode</key>
+	<string>$(REVENUECAT_MODE)</string>
+	<key>RevenueCatPrivacyReady</key>
+	<string>$(REVENUECAT_PRIVACY_READY)</string>
+	<key>RevenueCatPublicSDKKey</key>
+	<string>$(REVENUECAT_PUBLIC_SDK_KEY)</string>
+	<key>RevenueCatReleaseEnabled</key>
+	<string>$(REVENUECAT_RELEASE_ENABLED)</string>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchScreen</key>

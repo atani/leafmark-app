@@ -1,6 +1,6 @@
 # Leafmark — Privacy Policy
 
-_Last updated: June 11, 2026_
+_Last updated: October 4, 2026_
 
 Leafmark is built on a simple principle: **your books, highlights, and
 reading habits belong to you — and to no one else, including us.**
@@ -10,8 +10,8 @@ reading habits belong to you — and to no one else, including us.**
 **Nothing.**
 
 - No account. You never sign up, log in, or give us an email address.
-- No tracking. The app contains no analytics SDKs, no advertising SDKs, and no
-  third-party trackers of any kind.
+- No tracking. The app runs no analytics, no advertising, and no third-party
+  trackers of any kind.
 - No cloud. Your books, highlights, notes, reading positions, and reading
   statistics are stored only on your device, in plain files you can inspect.
 - No network requests. The app does not phone home. It works fully offline.
@@ -33,6 +33,11 @@ asked us to, because we never had it.
 Leafmark uses the open-source [Readium Swift Toolkit](https://github.com/readium/swift-toolkit)
 to render EPUB files. It runs entirely on your device and sends nothing
 anywhere.
+
+Starting with version 1.18, Leafmark includes the [RevenueCat purchases SDK](https://github.com/RevenueCat/purchases-ios).
+It is currently disabled: it is never started and sends nothing to RevenueCat.
+If we ever enable it, this policy will describe what it sends before it is
+turned on.
 
 ## Changes
 

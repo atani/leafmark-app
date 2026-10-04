@@ -51,5 +51,6 @@ fastlane/test_output
 !Resources/sample-*.epub
 
 # Local tool state
+.asc/
 .playwright-cli/
 .serena/

@@ -12,6 +12,7 @@ struct LeafmarkApp: App {
     @StateObject private var sync: SyncEngine
 
     init() {
+        RevenueCatObserver.shared.start()
         // The sync engine mirrors the same store instances that the views use,
         // so it must be built from them rather than from fresh copies.
         let library = LibraryStore()

@@ -94,6 +94,7 @@ final class StoreManager: ObservableObject {
             let result = try await product.purchase()
             switch result {
             case .success(let verification):
+                RevenueCatObserver.shared.recordPurchase(.success(verification))
                 if case .verified(let transaction) = verification {
                     await transaction.finish()
                     await refreshEntitlements()
@@ -112,7 +113,10 @@ final class StoreManager: ObservableObject {
 
     /// Restores a previous purchase (App Store account sync).
     func restore() async {
-        try? await AppStore.sync()
+        do {
+            try await AppStore.sync()
+            RevenueCatObserver.shared.restoreCompleted()
+        } catch {}
         await refreshEntitlements()
     }
 

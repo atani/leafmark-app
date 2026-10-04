@@ -7,7 +7,7 @@ RevenueCat 5.92.0を既存StoreKitと併用する実装です。StoreKitが購�
 GitHubの`main`（`ef72b89e2a1b1a741654098170d9b1c450d5849b`）を基点にしています。
 商品ID: `"com.atani.inkwell.pro"`。
 
-Leafmarkの公開1.17に対応する未コミットのアイコン変更は含めません。GitHub mainへ課金フックを追加し、版番号のみ1.17へ合わせています。配布前に公開版の確定した基点へ統合して再検証が必要です。
+公開1.17（build 26）に含まれる代替アイコン`AppIconPaperLeaf`を統合し、版番号を1.18（build 27）としました。公開ポリシー（`privacy.html`と`docs/privacy-policy.md`）へSDKを無効のまま同梱していることを記載済みです。
 
 ## 起動条件
 
@@ -28,7 +28,7 @@ SDKは.myApp/.storeKit2で構成し、独自appUserIDや氏名/email/広告属�
 
 ## 検証と有効化の順序
 
-移行/起動条件の25件の単体テストはtransport spyと純粋policyを使い、SDKを初期化せず実行します。実施結果はPR本文に記録します。実SDK接続・実購入・実復元・期限切れ/返金・通知・家族共有は未実施です。
+移行/起動条件の24件の単体テストはtransport spyと純粋policyを使い、SDKを初期化せず実行します。実施結果はPR本文に記録します。実SDK接続・実購入・実復元・期限切れ/返金・通知・家族共有は未実施です。
 
 1. Dottoからapp/bundle/catalog、本人によるIAP鍵設定、public SDK key、privacyとrestore/transfer/通知を確認します。
 2. Debugのみopt-inし、既購入の維持、購入/復元、解約/期限切れ、返金、家族共有、オフライン、SKU不足、再インストールを検証します。PlanOnceのローカル30日プレビューは購入扱いにせず、Peyoの旧removeAds購入者も確認します。

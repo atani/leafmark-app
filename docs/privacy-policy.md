@@ -1,23 +1,22 @@
 # Leafmark — Privacy Policy
 
-_Last updated: October 4, 2026_
+_Last updated: October 5, 2026_
 
 Leafmark is built on a simple principle: **your books, highlights, and
 reading habits belong to you — and to no one else, including us.**
 
 ## What we collect
 
-**Nothing.**
+Books, highlights, notes and reading habits stay on your device or in your own iCloud.
+Purchase processing in enabled versions is described below.
 
 - No account. You never sign up, log in, or give us an email address.
-- No tracking. The app runs no analytics, no advertising, and no third-party
-  trackers of any kind.
+- No reading-behavior tracking or advertising. Enabled versions use RevenueCat for purchase analytics.
 - No Leafmark cloud. Leafmark has no server. Your books, highlights, notes,
   reading positions, and reading statistics are stored on your device, in
   plain files you can inspect. Some of them are also synced through your own
   iCloud (see iCloud sync below).
-- No network requests to us. The app does not phone home. It works fully
-  offline.
+- No reading content is sent to us. Core reading features work offline. Apple and, in enabled versions, RevenueCat handle purchase requests.
 
 ## What stays on your device
 
@@ -51,16 +50,29 @@ Leafmark uses the open-source [Readium Swift Toolkit](https://github.com/readium
 to render EPUB files. It runs entirely on your device and sends nothing
 anywhere.
 
-Starting with version 1.18, Leafmark includes the [RevenueCat purchases SDK](https://github.com/RevenueCat/purchases-ios).
-It is currently disabled: it is never started and sends nothing to RevenueCat.
-If we ever enable it, this policy will describe what it sends before it is
-turned on.
+## Purchase processing with RevenueCat
+
+Versions enabling RevenueCat use its purchase service for validation, fraud prevention,
+purchase reliability and purchase analytics. Currently distributed versions keep it disabled.
+When enabled, the SDK automatically sends past and new Apple purchase records, product and
+transaction IDs, purchase dates and status, and applicable renewal, expiry or revocation data.
+It uses a randomly generated anonymous app user ID. Request information includes app and OS
+versions, locale, currency and network IP address. Production and Sandbox purchases may be included.
+
+Names, email addresses, advertising identifiers, a custom cross-app identity and reading content
+are not added to RevenueCat. Automatic device-identifier collection is disabled.
+See [RevenueCat's Privacy Policy](https://www.revenuecat.com/privacy).
+
+Apple StoreKit continues to determine ownership and eligible Family Sharing access.
+Existing purchases, prices and free features remain unchanged. A repeat purchase is not required.
+Uninstalling does not delete Apple's purchase history or RevenueCat records.
+Send deletion requests privately; do not post receipts or transaction IDs in public issues.
 
 ## Changes
 
-If a future feature ever needs to send data anywhere other than your device and
-your own iCloud, it will be opt-in and documented here first.
+This policy describes automatic purchase processing in enabled versions.
+Other future changes will be documented before activation.
 
 ## Contact
 
-Questions: open an issue at <https://github.com/atani/epub-reader-ios/issues>
+Privacy questions or deletion requests: <mailto:akira.taniwaki@gmail.com>

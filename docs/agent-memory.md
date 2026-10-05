@@ -20,3 +20,10 @@
 ## RevenueCatの段階導入
 
 SDK 5.92.0のStoreKit併用実装を追加しています。既定無効、価格/利用権はStoreKitを維持します。起動条件・公開基点の制約・実環境で未検証の項目はdocs/revenuecat-migration.mdを参照してください。秘密鍵やSDKキーは記録しません。
+
+## 2026-10-05の有効化準備
+
+Debug/Releaseの設定を分離し、Releaseのbundle・キー形式・4ゲートをビルド時に検査します。
+実接続用のRevenueCatSandboxはローカルStoreKit fixtureを使いません。
+既定無効を維持し、公開ポリシーとASC申告の整合前はprivacyReadyをNOにします。
+公開・提出・merge・production切替は未実施です。最新の手順はdocs/revenuecat-migration.mdを参照してください。

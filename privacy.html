@@ -21,17 +21,17 @@
 </head>
 <body>
 <h1>Leafmark — Privacy Policy</h1>
-<p class="updated">Last updated: October 4, 2026</p>
+<p class="updated">Last updated: October 5, 2026</p>
 
 <p>Leafmark is built on a simple principle: <strong>your books, highlights, and reading habits belong to you — and to no one else, including us.</strong></p>
 
 <h2>What we collect</h2>
-<p><strong>Nothing.</strong></p>
+<p>Books, highlights, notes and reading habits stay on your device or in your own iCloud. Purchase processing in versions that enable RevenueCat is described below.</p>
 <ul>
   <li>No account. You never sign up, log in, or give us an email address.</li>
-  <li>No tracking. The app runs no analytics, no advertising, and no third-party trackers of any kind.</li>
+  <li>No reading-behavior tracking or advertising. Purchase analytics use RevenueCat only in versions that enable it.</li>
   <li>No Leafmark cloud. Leafmark has no server. Your books, highlights, notes, reading positions, and reading statistics are stored on your device, in plain files you can inspect. Some of them are also synced through your own iCloud (see iCloud sync below).</li>
-  <li>No network requests to us. The app does not phone home. It works fully offline.</li>
+  <li>No reading content is sent to us. Core reading features work offline. Apple and, in enabled versions, RevenueCat handle purchase-service requests.</li>
 </ul>
 
 <h2>What stays on your device</h2>
@@ -53,13 +53,18 @@
 
 <h2>Third parties</h2>
 <p>Leafmark uses the open-source <a href="https://github.com/readium/swift-toolkit">Readium Swift Toolkit</a> to render EPUB files. It runs entirely on your device and sends nothing anywhere.</p>
-<p>Starting with version 1.18, Leafmark includes the <a href="https://github.com/RevenueCat/purchases-ios">RevenueCat purchases SDK</a>. It is currently disabled: it is never started and sends nothing to RevenueCat. If we ever enable it, this policy will describe what it sends before it is turned on.</p>
+<h2>Purchase processing with RevenueCat</h2>
+<p>Versions that enable RevenueCat use its purchase service for receipt validation, fraud prevention, purchase reliability, and purchase analytics. The currently distributed versions keep this SDK disabled and do not send data to RevenueCat.</p>
+<p>When enabled, the SDK automatically sends past and new Apple purchase records, including product and transaction identifiers, purchase dates and status, and renewal, expiry or revocation information where applicable. It also uses a randomly generated anonymous app user ID. RevenueCat receives request information such as app and operating-system versions, locale, currency and network IP address. Purchase records may include purchases from earlier versions and both production and Sandbox transactions.</p>
+<p>The app does not add your name, email address, advertising identifiers or a custom cross-app identity to RevenueCat. Automatic device-identifier collection is disabled. App-created content is not sent to RevenueCat. See <a href="https://www.revenuecat.com/privacy">RevenueCat's Privacy Policy</a>.</p>
+<p>Apple StoreKit continues to determine purchase ownership and eligible Family Sharing access. Existing purchases, prices and free features are unchanged, and this migration does not require a repeat purchase. Uninstalling the app removes local app data but does not delete Apple's purchase history or RevenueCat purchase records. Manage subscriptions through Apple and send privacy or deletion requests privately to <a href="mailto:akira.taniwaki@gmail.com">akira.taniwaki@gmail.com</a>. Do not post receipts or transaction identifiers in public issues.</p>
+
 
 <h2>Changes</h2>
-<p>If a future feature ever needs to send data anywhere other than your device and your own iCloud, it will be opt-in and documented here first.</p>
+<p>This policy describes the automatic purchase-service processing in versions that enable RevenueCat. Other future changes will be documented here before activation.</p>
 
 <h2>Contact</h2>
-<p>Questions: <a href="https://github.com/atani/epub-reader-ios/issues">open an issue on GitHub</a></p>
+<p>Privacy questions or deletion requests: <a href="mailto:akira.taniwaki@gmail.com">akira.taniwaki@gmail.com</a>. Do not post receipts or transaction identifiers in public issues.</p>
 
 <footer><a href="index.html">← Leafmark</a></footer>
 </body>

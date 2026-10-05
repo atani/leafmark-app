@@ -90,6 +90,7 @@
 		03CEA69E9BCF0A27ADAAFCCA /* BookmarkStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkStoreTests.swift; sourceTree = "<group>"; };
 		075DF03244CDE0EBE55143BE /* SyntheticWeightTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntheticWeightTests.swift; sourceTree = "<group>"; };
 		0A31328B3686C1015E722EC5 /* HighlightStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightStoreTests.swift; sourceTree = "<group>"; };
+		0C5F930E854765F3C6B3626D /* RevenueCatRelease.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = RevenueCatRelease.xcconfig; sourceTree = "<group>"; };
 		0F245A60B95471C30C69A4A7 /* RevenueCatObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RevenueCatObserver.swift; sourceTree = "<group>"; };
 		123BD0755B312AB090D48B95 /* AnnotationSyncMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationSyncMergeTests.swift; sourceTree = "<group>"; };
 		1EC81A329420F362D3525267 /* ImageZoomMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageZoomMathTests.swift; sourceTree = "<group>"; };
@@ -134,6 +135,7 @@
 		BD49E33A178C8BD553C56736 /* LibraryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryStore.swift; sourceTree = "<group>"; };
 		BD82B8009C249390EB224343 /* ReviewRequester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewRequester.swift; sourceTree = "<group>"; };
 		BEB03BD52033DA24B1CF4796 /* CatalogMissingBooksTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogMissingBooksTests.swift; sourceTree = "<group>"; };
+		BFD7F4F0B7A93B037A692B95 /* RevenueCatDebug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = RevenueCatDebug.xcconfig; sourceTree = "<group>"; };
 		CAAF403AFC257885411DC2B1 /* HighlightStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightStore.swift; sourceTree = "<group>"; };
 		CC30C446D1140BD0B7F8135E /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
 		D21894100425C23BBC7A1443 /* AnnotationSyncMerge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationSyncMerge.swift; sourceTree = "<group>"; };
@@ -215,6 +217,7 @@
 			isa = PBXGroup;
 			children = (
 				3554FE4B9DCFD1DBAB92B414 /* Leafmark.storekit */,
+				DAD1106A60A85A82F85AA565 /* Config */,
 				5C479347589D9EBD50E4DA21 /* Resources */,
 				2E8DD8FFC5F166626BB821DA /* Sources */,
 				5E1EF71C434BEE78F57E707B /* Tests */,
@@ -260,6 +263,15 @@
 			path = Tests;
 			sourceTree = "<group>";
 		};
+		DAD1106A60A85A82F85AA565 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				BFD7F4F0B7A93B037A692B95 /* RevenueCatDebug.xcconfig */,
+				0C5F930E854765F3C6B3626D /* RevenueCatRelease.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
 		F67E88DCDBAAC3F076A7B238 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -276,6 +288,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 09035648F09949CCB8EA1995 /* Build configuration list for PBXNativeTarget "Leafmark" */;
 			buildPhases = (
+				3C2A17C7826A2E68739E9735 /* Check RevenueCat Release activation gates */,
 				8337051FCC32A9A2928CFFF6 /* Sources */,
 				A2C0D50AA7E965346BB96103 /* Resources */,
 				8B28333EA74D598538F1ACEB /* Frameworks */,
@@ -382,6 +395,29 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3C2A17C7826A2E68739E9735 /* Check RevenueCat Release activation gates */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Check RevenueCat Release activation gates";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/sh \"${SRCROOT}/scripts/check_revenuecat_release.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4B9E5C2F20B4C1CAD3713E8D /* Sources */ = {
@@ -502,6 +538,7 @@
 		};
 		386E3853D49A04A405B417E7 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0C5F930E854765F3C6B3626D /* RevenueCatRelease.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -552,12 +589,6 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				REVENUECAT_DATA_SHARING_APPROVED = NO;
-				REVENUECAT_INTEGRATION_READY = NO;
-				REVENUECAT_MODE = disabled;
-				REVENUECAT_PRIVACY_READY = NO;
-				REVENUECAT_PUBLIC_SDK_KEY = "";
-				REVENUECAT_RELEASE_ENABLED = NO;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
@@ -590,6 +621,7 @@
 		};
 		BCBA1DD1CFA300DEF38E8DE3 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BFD7F4F0B7A93B037A692B95 /* RevenueCatDebug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -647,12 +679,6 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				REVENUECAT_DATA_SHARING_APPROVED = NO;
-				REVENUECAT_INTEGRATION_READY = NO;
-				REVENUECAT_MODE = disabled;
-				REVENUECAT_PRIVACY_READY = NO;
-				REVENUECAT_PUBLIC_SDK_KEY = "";
-				REVENUECAT_RELEASE_ENABLED = NO;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";

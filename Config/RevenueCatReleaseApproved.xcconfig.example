@@ -1,0 +1,9 @@
+// 承認・公開ポリシー・ASC申告・Sandbox検証の完了後にだけ、対応する .xcconfig へ複製します。
+// 既定値は送信しません。Debug のファイルをそのままコピーしないでください。
+// 公開 SDK key 以外の鍵（.p8・秘密 API key）はここへ入れません。
+REVENUECAT_MODE = disabled
+REVENUECAT_PUBLIC_SDK_KEY =
+REVENUECAT_DATA_SHARING_APPROVED = NO
+REVENUECAT_INTEGRATION_READY = NO
+REVENUECAT_PRIVACY_READY = NO
+REVENUECAT_RELEASE_ENABLED = NO

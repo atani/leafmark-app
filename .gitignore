@@ -54,3 +54,9 @@ fastlane/test_output
 .asc/
 .playwright-cli/
 .serena/
+
+# 実キーや承認設定は追跡せず、既定値と配線だけを共有します。
+Config/*.xcconfig
+!Config/RevenueCatDefaults.xcconfig
+!Config/RevenueCatDebug.xcconfig
+!Config/RevenueCatRelease.xcconfig

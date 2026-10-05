@@ -75,4 +75,4 @@ Other future changes will be documented before activation.
 
 ## Contact
 
-Privacy questions or deletion requests: <mailto:akira.taniwaki@gmail.com>
+Privacy questions or deletion requests: <mailto:andphoto.co@gmail.com>

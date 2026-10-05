@@ -27,3 +27,14 @@ Debug/Releaseの設定を分離し、Releaseのbundle・キー形式・4ゲー�
 実接続用のRevenueCatSandboxはローカルStoreKit fixtureを使いません。
 既定無効を維持し、公開ポリシーとASC申告の整合前はprivacyReadyをNOにします。
 公開・提出・merge・production切替は未実施です。最新の手順はdocs/revenuecat-migration.mdを参照してください。
+
+
+## 2026-10-05 公開ポリシーと有効化準備の更新
+
+本人が6アプリの公開ポリシーとASC申告更新を承認しました。問い合わせ先は`andphoto.co@gmail.com`です。公開ページのHTTP200、準備した本文との一致、指定窓口とRevenueCatの説明を読み戻して確認しました。公開用PRだけをmergeし、アプリの実装PRはmergeしていません。
+
+6アプリ14商品のbundle・商品ID・pro割当を、認可されたRevenueCat設定の引継ぎと現コードで照合しました。公開SDKキーを配置した検証候補は別worktreeにあります。キー入り設定は0600の無視対象ファイルです。SDKは未起動で、integration/privacy/releaseはNOを維持します。
+
+ASCの実申告は別担当の読み戻しが必要です。匿名IDだけでLinked=Noとは判定しません。既存SDKとサーバー連携設定を確認し、DottoのSandbox検証を確立してから展開します。実接続・購入・復元・返金等は未検証です。アプリの提出・公開・審査取下げ・production切替は行っていません。
+
+証拠は作業領域の`operations-20261005/activation-2056/PUBLICATION-REPORT.md`にあります。申告根拠は同じ作業領域の`audit/app-privacy-security-evidence.md`にあります。

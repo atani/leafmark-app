@@ -1,0 +1,7 @@
+// Debug 構成だけが読む設定です。既定値を読み込んだ後、ローカルの上書きがあれば重ねます。
+// ローカルの上書きは追跡しない Config/RevenueCatObserver.xcconfig に書きます。
+// 書き方は Config/RevenueCatObserver.xcconfig.example を参照してください。
+#include "RevenueCatDefaults.xcconfig"
+
+// ファイルが無ければ何も読み込まず、既定値のまま進みます。
+#include? "RevenueCatObserver.xcconfig"

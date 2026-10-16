@@ -1,0 +1,6 @@
+// Debug の実キー入り設定は archive に流用しません。
+#include "RevenueCatDefaults.xcconfig"
+
+// 公開ポリシー・ASC申告・Sandbox検証・Release有効化が確認済みの設定だけを別に置きます。
+// 未設定なら既定無効のままです。半端な有効化は preBuild の検査で止めます。
+#include? "RevenueCatReleaseApproved.xcconfig"

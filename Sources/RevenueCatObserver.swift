@@ -23,7 +23,7 @@ private struct LiveRevenueCatObserverTransport: RevenueCatObserverTransport {
         guard RevenueCatExecutionContext.current.allowsObserver(releaseEnabled: releaseEnabled),
               !Purchases.isConfigured else { return false }
         // SDK error/debug messages can contain complete receipt/customer response bodies.
-        Purchases.logHandler = { _, _ in }
+        Purchases.logHandler = { @Sendable _, _ in }
         Purchases.configure(with: .init(withAPIKey: publicSDKKey)
             .with(purchasesAreCompletedBy: .myApp, storeKitVersion: .storeKit2)
             .with(automaticDeviceIdentifierCollectionEnabled: false))

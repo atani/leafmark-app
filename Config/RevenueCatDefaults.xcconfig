@@ -1,0 +1,8 @@
+// RevenueCat の既定値の正本です。出荷するビルドは既定無効のままにします。
+// Debug と Release は別々の読み込み口を使います。設定が無ければ両方とも無効です。
+REVENUECAT_MODE = disabled
+REVENUECAT_PUBLIC_SDK_KEY =
+REVENUECAT_DATA_SHARING_APPROVED = NO
+REVENUECAT_INTEGRATION_READY = NO
+REVENUECAT_PRIVACY_READY = NO
+REVENUECAT_RELEASE_ENABLED = NO

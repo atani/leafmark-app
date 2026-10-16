@@ -15,14 +15,13 @@ packages:
     # from 指定に戻す (https://github.com/atani/epub-reader-ios/issues/18)。
     revision: 8811f0ec6fff3562ffc4b739d22733cf259431d9
 
+# DebugとReleaseのローカル設定を分け、承認前は両方とも送信を止めます。
+configFiles:
+  Debug: Config/RevenueCatDebug.xcconfig
+  Release: Config/RevenueCatRelease.xcconfig
+
 settings:
   base:
-    REVENUECAT_MODE: disabled
-    REVENUECAT_PUBLIC_SDK_KEY: ""
-    REVENUECAT_DATA_SHARING_APPROVED: "NO"
-    REVENUECAT_INTEGRATION_READY: "NO"
-    REVENUECAT_PRIVACY_READY: "NO"
-    REVENUECAT_RELEASE_ENABLED: "NO"
     SWIFT_VERSION: "5.9"
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
     TARGETED_DEVICE_FAMILY: "1,2"
@@ -33,6 +32,12 @@ settings:
 targets:
   Leafmark:
     type: application
+    preBuildScripts:
+      - name: Check RevenueCat Release activation gates
+        basedOnDependencyAnalysis: false
+        showEnvVars: false
+        script: |
+          /bin/sh "${SRCROOT}/scripts/check_revenuecat_release.sh"
     platform: iOS
     sources:
       - path: Sources
@@ -130,3 +135,11 @@ schemes:
     run:
       config: Debug
       storeKitConfiguration: Leafmark.storekit
+  RevenueCatSandbox:
+    build:
+      targets:
+        Leafmark: all
+    run:
+      config: Debug
+    archive:
+      config: Release

@@ -43,6 +43,13 @@ final class HighlightStore: ObservableObject {
         highlights.filter { $0.deletedAt == nil }.count
     }
 
+    /// Active highlight count per book ID, without sorting or locator parsing.
+    func activeHighlightCounts() -> [String: Int] {
+        highlights.reduce(into: [:]) { counts, highlight in
+            if highlight.deletedAt == nil { counts[highlight.bookID, default: 0] += 1 }
+        }
+    }
+
     func highlights(for bookID: String) -> [Highlight] {
         highlights
             .filter { $0.bookID == bookID && $0.deletedAt == nil }
@@ -136,33 +143,138 @@ final class HighlightStore: ObservableObject {
     // MARK: - Export
 
     /// Renders all highlights of a book as Markdown, ready for Obsidian/Notion.
-    func exportMarkdown(for book: Book) -> String {
+    ///
+    /// The file starts with YAML front matter so Obsidian picks up the title,
+    /// author and export date as note properties. `exportedAt` and `timeZone`
+    /// are injectable to keep the `exported` date deterministic in tests.
+    func exportMarkdown(
+        for book: Book,
+        layout: MarkdownExportLayout = .readingOrder,
+        exportedAt: Date = Date(),
+        timeZone: TimeZone = .current
+    ) -> String {
         let items = highlights(for: book.id)
-        var lines = ["# \(book.title)"]
+        var lines = Self.frontMatter(for: book, exportedAt: exportedAt, timeZone: timeZone)
+        lines.append("")
+        lines.append("# \(Self.singleLine(book.title))")
         if let author = book.author {
-            lines.append("by \(author)")
+            lines.append("by \(Self.singleLine(author))")
         }
         lines.append("")
-        for item in items {
-            lines.append("> \(item.text.replacingOccurrences(of: "\n", with: "\n> "))")
-            lines.append("")
-            if let note = item.note, !note.isEmpty {
-                lines.append(note)
-                lines.append("")
+
+        switch layout {
+        case .readingOrder:
+            for item in items {
+                lines.append(contentsOf: markdownLines(for: item))
             }
-            if let progression = progression(of: item) {
-                lines.append("— at \(Int((progression * 100).rounded()))%")
+        case .byColor:
+            for color in HighlightColor.allCases {
+                let group = items.filter { $0.color == color }
+                guard !group.isEmpty else { continue }
+                lines.append("## \(color.label)")
                 lines.append("")
+                for item in group {
+                    lines.append(contentsOf: markdownLines(for: item))
+                }
             }
         }
         return lines.joined(separator: "\n")
     }
 
-    func exportFile(for book: Book) -> HighlightExport {
+    /// A line break inside a title or author would end the heading or `by`
+    /// line early and turn the rest into body text.
+    private static func singleLine(_ value: String) -> String {
+        value.replacingOccurrences(of: "\r\n|\r|\n", with: " ", options: .regularExpression)
+    }
+
+    private func markdownLines(for item: Highlight) -> [String] {
+        var lines = ["> \(item.text.replacingOccurrences(of: "\n", with: "\n> "))", ""]
+        if let note = item.note, !note.isEmpty {
+            lines.append(note)
+            lines.append("")
+        }
+        if let progression = progression(of: item) {
+            lines.append("— at \(Int((progression * 100).rounded()))%")
+            lines.append("")
+        }
+        return lines
+    }
+
+    static func frontMatter(for book: Book, exportedAt: Date, timeZone: TimeZone) -> [String] {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate]
+        formatter.timeZone = timeZone
+
+        var lines = ["---", "title: \(yamlQuoted(book.title))"]
+        if let author = book.author, !author.isEmpty {
+            lines.append("author: \(yamlQuoted(author))")
+        }
+        lines.append("source: Leafmark")
+        lines.append("exported: \(formatter.string(from: exportedAt))")
+        lines.append("---")
+        return lines
+    }
+
+    /// Renders a YAML double-quoted scalar. Always quoting avoids YAML's
+    /// implicit typing (`yes`, `1984`, `null`) and indicator characters such
+    /// as `:` and `#` in book titles.
+    static func yamlQuoted(_ value: String) -> String {
+        var result = "\""
+        for scalar in value.unicodeScalars {
+            switch scalar {
+            case "\\": result += "\\\\"
+            case "\"": result += "\\\""
+            case "\n": result += "\\n"
+            case "\r": result += "\\r"
+            case "\t": result += "\\t"
+            default:
+                // C0/C1 control characters are not printable in YAML.
+                if scalar.value < 0x20 || (0x7F...0x9F).contains(scalar.value) {
+                    result += String(format: "\\u%04X", scalar.value)
+                } else {
+                    result.unicodeScalars.append(scalar)
+                }
+            }
+        }
+        return result + "\""
+    }
+
+    func exportFile(for book: Book, layout: MarkdownExportLayout = .readingOrder) -> HighlightExport {
         HighlightExport(
-            text: exportMarkdown(for: book),
+            text: exportMarkdown(for: book, layout: layout),
             fileName: Self.exportFileName(for: book)
         )
+    }
+
+    /// One Markdown file per book that has at least one active highlight, in
+    /// the given order. File names are made unique so books sharing a title
+    /// and author do not overwrite each other in the share sheet.
+    func exportFiles(for books: [Book], layout: MarkdownExportLayout = .readingOrder) -> [HighlightExport] {
+        let counts = activeHighlightCounts()
+        var usedNames = Set<String>()
+        return books
+            .filter { counts[$0.id, default: 0] > 0 }
+            .map { book in
+                let export = exportFile(for: book, layout: layout)
+                let name = Self.uniqueFileName(export.fileName, avoiding: usedNames)
+                usedNames.insert(name.lowercased())
+                return HighlightExport(text: export.text, fileName: name)
+            }
+    }
+
+    /// Appends " (2)", " (3)" … before the extension until the name is free.
+    /// Comparison is case-insensitive because the iOS file system is.
+    static func uniqueFileName(_ fileName: String, avoiding usedNames: Set<String>) -> String {
+        guard usedNames.contains(fileName.lowercased()) else { return fileName }
+        let url = URL(fileURLWithPath: fileName)
+        let ext = url.pathExtension
+        let stem = url.deletingPathExtension().lastPathComponent
+        var counter = 2
+        while true {
+            let candidate = ext.isEmpty ? "\(stem) (\(counter))" : "\(stem) (\(counter)).\(ext)"
+            if !usedNames.contains(candidate.lowercased()) { return candidate }
+            counter += 1
+        }
     }
 
     static func exportFileName(for book: Book) -> String {
@@ -170,7 +282,7 @@ final class HighlightStore: ObservableObject {
             .compactMap(Self.sanitizedFileNamePart)
             .joined(separator: " - ")
 
-        return "\(baseName.isEmpty ? "Highlights" : baseName).txt"
+        return "\(baseName.isEmpty ? "Highlights" : baseName).\(HighlightExport.fileExtension)"
     }
 
     private static func sanitizedFileNamePart(_ value: String?) -> String? {

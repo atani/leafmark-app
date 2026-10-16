@@ -24,6 +24,7 @@ final class HighlightStoreTests: XCTestCase {
         bookID: String,
         text: String,
         note: String? = nil,
+        color: String = "yellow",
         progression: Double
     ) -> Highlight {
         let locatorJSON = """
@@ -33,7 +34,7 @@ final class HighlightStoreTests: XCTestCase {
             id: id,
             bookID: bookID,
             locatorJSON: locatorJSON,
-            colorRaw: "yellow",
+            colorRaw: color,
             note: note,
             createdAt: Date(timeIntervalSinceReferenceDate: 0),
             text: text
@@ -73,7 +74,8 @@ final class HighlightStoreTests: XCTestCase {
 
         let md = store.exportMarkdown(for: book)
 
-        XCTAssertTrue(md.hasPrefix("# Test Book"), "見出しに書名")
+        XCTAssertTrue(md.hasPrefix("---\n"), "先頭は YAML front matter")
+        XCTAssertTrue(md.contains("\n# Test Book\n"), "見出しに書名")
         XCTAssertTrue(md.contains("by Jane Doe"), "著者名")
         XCTAssertTrue(md.contains("> an important line"), "ハイライトは引用ブロック")
         XCTAssertTrue(md.contains("my note"), "ノートを含む")
@@ -92,8 +94,9 @@ final class HighlightStoreTests: XCTestCase {
         let book = Book(id: "book-a", fileName: "b.epub", title: "No Author", author: nil, addedAt: Date())
 
         let md = store.exportMarkdown(for: book)
-        XCTAssertTrue(md.hasPrefix("# No Author"))
+        XCTAssertTrue(md.contains("\n# No Author\n"))
         XCTAssertFalse(md.contains("by "), "著者 nil なら by 行を出さない")
+        XCTAssertFalse(md.contains("author:"), "著者 nil なら front matter にも author を出さない")
     }
 
     func testMultilineHighlightBecomesMultilineQuote() {
@@ -106,7 +109,7 @@ final class HighlightStoreTests: XCTestCase {
         XCTAssertTrue(md.contains("> line one\n> line two"), "改行ごとに引用記号を付ける")
     }
 
-    func testExportFileNameUsesBookTitleAuthorAndTxtExtension() {
+    func testExportFileNameUsesBookTitleAuthorAndMarkdownExtension() {
         let book = Book(
             id: "book-a",
             fileName: "b.epub",
@@ -115,7 +118,7 @@ final class HighlightStoreTests: XCTestCase {
             addedAt: Date()
         )
 
-        XCTAssertEqual(HighlightStore.exportFileName(for: book), "A B Test Book - Jane Doe.txt")
+        XCTAssertEqual(HighlightStore.exportFileName(for: book), "A B Test Book - Jane Doe.md")
     }
 
     func testExportFileNameFallsBackWhenTitleAndAuthorAreBlank() {
@@ -127,7 +130,142 @@ final class HighlightStoreTests: XCTestCase {
             addedAt: Date()
         )
 
-        XCTAssertEqual(HighlightStore.exportFileName(for: book), "Highlights.txt")
+        XCTAssertEqual(HighlightStore.exportFileName(for: book), "Highlights.md")
+    }
+
+    // MARK: - Front matter and layouts (1.19)
+
+    func testExportMarkdownStartsWithFrontMatter() {
+        let store = seed([
+            highlight(id: "1", bookID: "book-a", text: "line", progression: 0.1),
+        ])
+        let book = Book(id: "book-a", fileName: "b.epub", title: "Test Book", author: "Jane Doe", addedAt: Date())
+        // 2026-10-16T15:30:00Z は東京では 10-17、UTC では 10-16
+        let exportedAt = Date(timeIntervalSince1970: 1_792_164_600)
+
+        let tokyo = store.exportMarkdown(for: book, exportedAt: exportedAt, timeZone: TimeZone(identifier: "Asia/Tokyo")!)
+        XCTAssertTrue(tokyo.hasPrefix("""
+        ---
+        title: "Test Book"
+        author: "Jane Doe"
+        source: Leafmark
+        exported: 2026-10-17
+        ---
+
+        # Test Book
+        by Jane Doe
+        """), tokyo)
+
+        let utc = store.exportMarkdown(for: book, exportedAt: exportedAt, timeZone: TimeZone(identifier: "UTC")!)
+        XCTAssertTrue(utc.contains("exported: 2026-10-16\n"), "日付は端末のタイムゾーンで決まる")
+    }
+
+    func testFrontMatterEscapesQuotesBackslashesAndNewlines() {
+        let book = Book(
+            id: "book-a",
+            fileName: "b.epub",
+            title: #"A/B: "Test" Book \ Vol.1"#,
+            author: "Line\nBreak",
+            addedAt: Date()
+        )
+
+        let lines = HighlightStore.frontMatter(for: book, exportedAt: Date(), timeZone: .current)
+
+        XCTAssertEqual(lines[1], #"title: "A/B: \"Test\" Book \\ Vol.1""#)
+        XCTAssertEqual(lines[2], #"author: "Line\nBreak""#)
+    }
+
+    func testHeadingAndAuthorLineCollapseLineBreaksToASpace() {
+        let store = seed([
+            highlight(id: "1", bookID: "book-a", text: "line", progression: 0.1),
+        ])
+        let book = Book(id: "book-a", fileName: "b.epub", title: "Part\r\nOne\rTwo\nThree", author: "Jane\nDoe", addedAt: Date())
+
+        let md = store.exportMarkdown(for: book)
+
+        XCTAssertTrue(md.contains("\n# Part One Two Three\nby Jane Doe\n"), md)
+        XCTAssertTrue(md.contains(#"title: "Part\r\nOne\rTwo\nThree""#), "front matter は従来どおりエスケープする")
+    }
+
+    func testYAMLQuotedEscapesControlCharactersAndKeepsUnicode() {
+        XCTAssertEqual(HighlightStore.yamlQuoted("yes"), #""yes""#, "暗黙の型変換を避けるため常に引用符で囲む")
+        XCTAssertEqual(HighlightStore.yamlQuoted("a\tb\u{07}"), #""a\tb\u0007""#)
+        XCTAssertEqual(HighlightStore.yamlQuoted("吾輩は猫である 👩‍👩‍👧"), "\"吾輩は猫である 👩‍👩‍👧\"", "日本語と絵文字はそのまま残す")
+    }
+
+    func testByColorLayoutGroupsUnderColorHeadingsInReadingOrder() {
+        let store = seed([
+            highlight(id: "1", bookID: "book-a", text: "green late", color: "green", progression: 0.9),
+            highlight(id: "2", bookID: "book-a", text: "yellow mid", color: "yellow", progression: 0.5),
+            highlight(id: "3", bookID: "book-a", text: "green early", color: "green", progression: 0.1),
+            highlight(id: "4", bookID: "book-a", text: "unknown color", color: "purple", progression: 0.7),
+        ])
+        let book = Book(id: "book-a", fileName: "b.epub", title: "T", author: nil, addedAt: Date())
+
+        let md = store.exportMarkdown(for: book, layout: .byColor)
+
+        XCTAssertTrue(md.contains("## Yellow\n"))
+        XCTAssertTrue(md.contains("## Green\n"))
+        XCTAssertFalse(md.contains("## Blue"), "ハイライトの無い色は見出しを出さない")
+        XCTAssertFalse(md.contains("## Pink"))
+        func position(_ text: String) -> String.Index { md.range(of: text)!.lowerBound }
+        // 見出しは色定義の順（Yellow → Green）、各色の中は読書位置順
+        XCTAssertLessThan(position("## Yellow"), position("yellow mid"))
+        XCTAssertLessThan(position("yellow mid"), position("unknown color"), "未知の色は Yellow 扱い")
+        XCTAssertLessThan(position("unknown color"), position("## Green"))
+        XCTAssertLessThan(position("## Green"), position("green early"))
+        XCTAssertLessThan(position("green early"), position("green late"))
+    }
+
+    func testReadingOrderLayoutHasNoColorHeadings() {
+        let store = seed([
+            highlight(id: "1", bookID: "book-a", text: "green", color: "green", progression: 0.2),
+            highlight(id: "2", bookID: "book-a", text: "pink", color: "pink", progression: 0.1),
+        ])
+        let book = Book(id: "book-a", fileName: "b.epub", title: "T", author: nil, addedAt: Date())
+
+        let md = store.exportMarkdown(for: book, layout: .readingOrder)
+
+        XCTAssertFalse(md.contains("## "), "読んだ順では色見出しを出さない")
+        XCTAssertLessThan(md.range(of: "> pink")!.lowerBound, md.range(of: "> green")!.lowerBound)
+    }
+
+    func testExportFileUsesMarkdownExtensionAndLayout() {
+        let store = seed([
+            highlight(id: "1", bookID: "book-a", text: "q", color: "blue", progression: 0.2),
+        ])
+        let book = Book(id: "book-a", fileName: "b.epub", title: "T", author: "A", addedAt: Date())
+
+        let export = store.exportFile(for: book, layout: .byColor)
+
+        XCTAssertEqual(export.fileName, "T - A.md")
+        XCTAssertTrue(export.text.contains("## Blue"))
+    }
+
+    func testExportFilesSkipsBooksWithoutHighlightsAndDedupesNames() {
+        let store = seed([
+            highlight(id: "1", bookID: "book-a", text: "a", progression: 0.1),
+            highlight(id: "2", bookID: "book-b", text: "b", progression: 0.1),
+            highlight(id: "3", bookID: "book-c", text: "c", progression: 0.1),
+        ])
+        store.remove("3")
+        let books = [
+            Book(id: "book-a", fileName: "a.epub", title: "Same", author: "Author", addedAt: Date()),
+            Book(id: "book-b", fileName: "b.epub", title: "Same", author: "Author", addedAt: Date()),
+            Book(id: "book-c", fileName: "c.epub", title: "Deleted Only", author: nil, addedAt: Date()),
+            Book(id: "book-d", fileName: "d.epub", title: "Never Highlighted", author: nil, addedAt: Date()),
+        ]
+
+        let exports = store.exportFiles(for: books)
+
+        XCTAssertEqual(exports.map(\.fileName), ["Same - Author.md", "Same - Author (2).md"], "削除済みのみ・未ハイライトの本は出さない")
+        XCTAssertTrue(exports[1].text.contains("> b"))
+    }
+
+    func testUniqueFileNameIsCaseInsensitiveAndCountsUp() {
+        let used: Set<String> = ["book.md", "book (2).md"]
+        XCTAssertEqual(HighlightStore.uniqueFileName("Book.md", avoiding: used), "Book (3).md")
+        XCTAssertEqual(HighlightStore.uniqueFileName("Other.md", avoiding: used), "Other.md")
     }
 
     func testRemoveAllForBookRemovesOnlyThatBook() {

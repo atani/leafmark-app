@@ -1,4 +1,5 @@
 import XCTest
+import UniformTypeIdentifiers
 @testable import Leafmark
 
 @MainActor
@@ -18,13 +19,32 @@ final class StoreManagerTests: XCTestCase {
     }
 
     func testPreparedExportPreservesTextAndFilenameAndCleansUp() throws {
-        let export = HighlightExport(text: "# Book\n\n> Quote\n\nNote: 日本語", fileName: "Book - Author.txt")
+        let export = HighlightExport(text: "# Book\n\n> Quote\n\nNote: 日本語", fileName: "Book - Author.md")
         let file = try PreparedHighlightExport(export: export)
         defer { file.cleanup() }
         XCTAssertEqual(file.url.lastPathComponent, export.fileName)
         XCTAssertEqual(try String(contentsOf: file.url, encoding: .utf8), export.text)
         file.cleanup()
         XCTAssertFalse(FileManager.default.fileExists(atPath: file.url.path))
+    }
+
+    func testPreparedExportWritesEveryFileAndCleansUpTogether() throws {
+        let exports = [
+            HighlightExport(text: "one", fileName: "A.md"),
+            HighlightExport(text: "two", fileName: "B.md"),
+        ]
+        let file = try PreparedHighlightExport(exports: exports)
+        defer { file.cleanup() }
+        XCTAssertEqual(file.urls.map(\.lastPathComponent), ["A.md", "B.md"])
+        XCTAssertEqual(try String(contentsOf: file.urls[1], encoding: .utf8), "two")
+        file.cleanup()
+        XCTAssertFalse(file.urls.contains { FileManager.default.fileExists(atPath: $0.path) }, "全ファイルを一括で削除する")
+    }
+
+    func testMarkdownContentTypeConformsToPlainText() {
+        XCTAssertTrue(HighlightExport.contentType.conforms(to: .plainText), "共有先がテキストとして受け取れる")
+        XCTAssertEqual(HighlightExport.contentType.preferredFilenameExtension, "md")
+        XCTAssertFalse(HighlightExport.contentType.isDynamic, "システム宣言の Markdown 型に解決される")
     }
 
     func testFreeTierAllowsUpToTheLimit() {

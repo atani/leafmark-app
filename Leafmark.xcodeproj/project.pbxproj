@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		02142B27AF51027EEDF80C81 /* PriceChangeNoticeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD29BC18AE0AD3C84BCC6AA5 /* PriceChangeNoticeTests.swift */; };
 		05F9F0D28EEDA26D0F099FDE /* ZoomableImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3F52B1BEA61BBAFAEF273 /* ZoomableImageView.swift */; };
 		0A9DFF2ADD6E86E7A73122AA /* AppInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F9EAEF4C5AEC3E39EE5B0B /* AppInfoTests.swift */; };
 		0AC6EDE498F59E62A9B635CE /* SyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03428FEB8BE38F2541650503 /* SyncEngine.swift */; };
@@ -140,6 +141,7 @@
 		D303918786A66063AE513757 /* AppInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfo.swift; sourceTree = "<group>"; };
 		D3D3F52B1BEA61BBAFAEF273 /* ZoomableImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableImageView.swift; sourceTree = "<group>"; };
 		DAF059FC2E63877CE40FE149 /* PagePositionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagePositionTests.swift; sourceTree = "<group>"; };
+		DD29BC18AE0AD3C84BCC6AA5 /* PriceChangeNoticeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceChangeNoticeTests.swift; sourceTree = "<group>"; };
 		E20D3AB2EA403C50910EB6F0 /* HighlightExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightExport.swift; sourceTree = "<group>"; };
 		E677C3E878FF72BDF5B15D05 /* LeafmarkTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LeafmarkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFAE2035D735F8B6C68B704D /* StoreManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManagerTests.swift; sourceTree = "<group>"; };
@@ -249,6 +251,7 @@
 				1EC81A329420F362D3525267 /* ImageZoomMathTests.swift */,
 				6FD256E691453FBF4E69442C /* LibrarySortOrderTests.swift */,
 				DAF059FC2E63877CE40FE149 /* PagePositionTests.swift */,
+				DD29BC18AE0AD3C84BCC6AA5 /* PriceChangeNoticeTests.swift */,
 				4700615B62CB079E279C7091 /* ReaderPaginationTests.swift */,
 				01F3590C6786C9D530F270CA /* RevenueCatMigrationTests.swift */,
 				AC98B6FB891BD80FE8026129 /* ReviewRequesterTests.swift */,
@@ -402,6 +405,7 @@
 				F7B22EEC42C1CA857C017CD1 /* ImageZoomMathTests.swift in Sources */,
 				D4BC8B900DD9FD1A59E0E577 /* LibrarySortOrderTests.swift in Sources */,
 				4F170253F2D2449AFCE03B49 /* PagePositionTests.swift in Sources */,
+				02142B27AF51027EEDF80C81 /* PriceChangeNoticeTests.swift in Sources */,
 				9F2B05A25EC50A375A2DACFD /* ReaderPaginationTests.swift in Sources */,
 				D9FFBBCCA14D4286049EA56B /* RevenueCatMigrationTests.swift in Sources */,
 				57BA61CFBAEB1A770211869A /* ReviewRequesterTests.swift in Sources */,
@@ -485,7 +489,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Leafmark.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 27;
+				CURRENT_PROJECT_VERSION = 28;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -493,7 +497,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.18;
+				MARKETING_VERSION = 1.19;
 				PRODUCT_BUNDLE_IDENTIFIER = com.atani.inkwell;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -573,7 +577,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Leafmark.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 27;
+				CURRENT_PROJECT_VERSION = 28;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -581,7 +585,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.18;
+				MARKETING_VERSION = 1.19;
 				PRODUCT_BUNDLE_IDENTIFIER = com.atani.inkwell;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";

@@ -43,6 +43,13 @@ final class HighlightStore: ObservableObject {
         highlights.filter { $0.deletedAt == nil }.count
     }
 
+    /// Active highlight count per book ID, without sorting or locator parsing.
+    func activeHighlightCounts() -> [String: Int] {
+        highlights.reduce(into: [:]) { counts, highlight in
+            if highlight.deletedAt == nil { counts[highlight.bookID, default: 0] += 1 }
+        }
+    }
+
     func highlights(for bookID: String) -> [Highlight] {
         highlights
             .filter { $0.bookID == bookID && $0.deletedAt == nil }
@@ -149,9 +156,9 @@ final class HighlightStore: ObservableObject {
         let items = highlights(for: book.id)
         var lines = Self.frontMatter(for: book, exportedAt: exportedAt, timeZone: timeZone)
         lines.append("")
-        lines.append("# \(book.title)")
+        lines.append("# \(Self.singleLine(book.title))")
         if let author = book.author {
-            lines.append("by \(author)")
+            lines.append("by \(Self.singleLine(author))")
         }
         lines.append("")
 
@@ -172,6 +179,12 @@ final class HighlightStore: ObservableObject {
             }
         }
         return lines.joined(separator: "\n")
+    }
+
+    /// A line break inside a title or author would end the heading or `by`
+    /// line early and turn the rest into body text.
+    private static func singleLine(_ value: String) -> String {
+        value.replacingOccurrences(of: "\r\n|\r|\n", with: " ", options: .regularExpression)
     }
 
     private func markdownLines(for item: Highlight) -> [String] {
@@ -237,9 +250,10 @@ final class HighlightStore: ObservableObject {
     /// the given order. File names are made unique so books sharing a title
     /// and author do not overwrite each other in the share sheet.
     func exportFiles(for books: [Book], layout: MarkdownExportLayout = .readingOrder) -> [HighlightExport] {
+        let counts = activeHighlightCounts()
         var usedNames = Set<String>()
         return books
-            .filter { !highlights(for: $0.id).isEmpty }
+            .filter { counts[$0.id, default: 0] > 0 }
             .map { book in
                 let export = exportFile(for: book, layout: layout)
                 let name = Self.uniqueFileName(export.fileName, avoiding: usedNames)

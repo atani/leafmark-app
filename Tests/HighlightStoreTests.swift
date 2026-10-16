@@ -175,6 +175,18 @@ final class HighlightStoreTests: XCTestCase {
         XCTAssertEqual(lines[2], #"author: "Line\nBreak""#)
     }
 
+    func testHeadingAndAuthorLineCollapseLineBreaksToASpace() {
+        let store = seed([
+            highlight(id: "1", bookID: "book-a", text: "line", progression: 0.1),
+        ])
+        let book = Book(id: "book-a", fileName: "b.epub", title: "Part\r\nOne\rTwo\nThree", author: "Jane\nDoe", addedAt: Date())
+
+        let md = store.exportMarkdown(for: book)
+
+        XCTAssertTrue(md.contains("\n# Part One Two Three\nby Jane Doe\n"), md)
+        XCTAssertTrue(md.contains(#"title: "Part\r\nOne\rTwo\nThree""#), "front matter は従来どおりエスケープする")
+    }
+
     func testYAMLQuotedEscapesControlCharactersAndKeepsUnicode() {
         XCTAssertEqual(HighlightStore.yamlQuoted("yes"), #""yes""#, "暗黙の型変換を避けるため常に引用符で囲む")
         XCTAssertEqual(HighlightStore.yamlQuoted("a\tb\u{07}"), #""a\tb\u0007""#)

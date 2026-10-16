@@ -3,13 +3,15 @@ import StoreKit
 
 /// Why the paywall is being shown. Drives the subtitle so the user sees the
 /// value of Pro in the context of what they just tried to do.
-enum PaywallContext {
+enum PaywallContext: Identifiable {
     case general
     case highlightLimit
     case highlights
     case export
     case exportAll
     case statistics
+
+    var id: Self { self }
 
     var subtitle: String {
         switch self {
@@ -33,21 +35,33 @@ enum PaywallContext {
 ///
 /// The date lives only here. The notice names no amount because the price
 /// differs by storefront currency, and it disappears on the change date in
-/// the device's local calendar.
+/// the device's local time zone.
 enum PriceChangeNotice {
+    /// A Gregorian date. `changeDate(in:)` resolves it, so devices set to the
+    /// Japanese or Buddhist calendar still get 2026-11-16.
     static let effectiveDate = DateComponents(year: 2026, month: 11, day: 16)
 
     /// True strictly before local midnight at the start of `effectiveDate`.
     static func isVisible(now: Date = Date(), calendar: Calendar = .current) -> Bool {
-        guard let start = calendar.date(from: effectiveDate) else { return false }
+        guard let start = changeDate(in: calendar) else { return false }
         return now < start
     }
 
+    /// Formats the date in the given calendar and locale, so a Japanese
+    /// calendar device reads it in its own era.
     static func message(calendar: Calendar = .current, locale: Locale = .current) -> String {
-        guard let date = calendar.date(from: effectiveDate) else { return "" }
+        guard let date = changeDate(in: calendar) else { return "" }
         var style = Date.FormatStyle(date: .long, time: .omitted, locale: locale, calendar: calendar)
         style.timeZone = calendar.timeZone
         return "Price changes on \(date.formatted(style)). If you've already purchased, there's nothing more to pay."
+    }
+
+    /// Local midnight at the start of `effectiveDate`: Gregorian fields, read
+    /// in the time zone of `calendar`.
+    private static func changeDate(in calendar: Calendar) -> Date? {
+        var gregorian = Calendar(identifier: .gregorian)
+        gregorian.timeZone = calendar.timeZone
+        return gregorian.date(from: effectiveDate)
     }
 }
 

@@ -191,15 +191,19 @@ struct ReadingNotesExportView: View {
 /// flow never spends the free tier's single export.
 struct AllHighlightsExportView: View {
     let books: [Book]
+    @ObservedObject var purchases: StoreManager
     @EnvironmentObject private var highlights: HighlightStore
     @AppStorage(MarkdownExportLayout.storageKey) private var layout = MarkdownExportLayout.readingOrder
     @State private var sharedFile: PreparedHighlightExport?
     @State private var pendingCleanup: PreparedHighlightExport?
     @State private var exportError = false
+    @State private var showPaywall = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        let exports = highlights.exportFiles(for: books, layout: layout)
+        // Only titles and counts here; the Markdown is built on export.
+        let counts = highlights.activeHighlightCounts()
+        let exportable = books.filter { counts[$0.id, default: 0] > 0 }
         NavigationStack {
             List {
                 Section {
@@ -208,21 +212,32 @@ struct AllHighlightsExportView: View {
                     Text("Each book becomes its own Markdown file with front matter for Obsidian.")
                 }
                 Section {
-                    if exports.isEmpty {
+                    if exportable.isEmpty {
                         Text("No highlights yet. Highlight a passage in any book to export it.")
                             .foregroundStyle(.secondary)
                     } else {
-                        ForEach(exports, id: \.fileName) { export in
-                            Label(export.fileName, systemImage: "doc.text")
-                                .lineLimit(2)
+                        ForEach(exportable) { book in
+                            let count = counts[book.id, default: 0]
+                            LabeledContent {
+                                Text(count == 1 ? "1 highlight" : "\(count) highlights")
+                            } label: {
+                                Label(book.title, systemImage: "doc.text")
+                                    .lineLimit(2)
+                            }
                         }
                     }
                 } header: {
-                    Text(exports.count == 1 ? "1 file" : "\(exports.count) files")
+                    Text(exportable.count == 1 ? "1 file" : "\(exportable.count) files")
                 }
                 Section {
                     Button {
+                        guard purchases.isPro else {
+                            showPaywall = true
+                            return
+                        }
                         do {
+                            let exports = highlights.exportFiles(for: books, layout: layout)
+                            guard !exports.isEmpty else { return }
                             let file = try PreparedHighlightExport(exports: exports)
                             pendingCleanup = file
                             sharedFile = file
@@ -233,7 +248,7 @@ struct AllHighlightsExportView: View {
                         Label("Export All", systemImage: "square.and.arrow.up")
                             .frame(maxWidth: .infinity, minHeight: 44)
                     }
-                    .disabled(exports.isEmpty)
+                    .disabled(exportable.isEmpty)
                 }
             }
             .navigationTitle("Export All Highlights")
@@ -250,6 +265,9 @@ struct AllHighlightsExportView: View {
                 HighlightShareSheet(file: file) { _ in
                     sharedFile = nil
                 }
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView(store: purchases, context: .exportAll)
             }
             .alert("Could Not Prepare Export", isPresented: $exportError) {
                 Button("OK", role: .cancel) {}

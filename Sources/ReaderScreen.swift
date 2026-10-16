@@ -685,7 +685,7 @@ private struct HighlightsSheet: View {
                 PaywallView(store: purchases, context: paywallContext)
             }
             .sheet(isPresented: $showExport) {
-                ReadingNotesExportView(export: store.exportFile(for: book), purchases: purchases) {
+                ReadingNotesExportView(makeExport: { store.exportFile(for: book, layout: $0) }, purchases: purchases) {
                     if ReviewRequester.recordExport() {
                         reviewPending = true
                     }

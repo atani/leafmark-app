@@ -8,6 +8,7 @@ enum PaywallContext {
     case highlightLimit
     case highlights
     case export
+    case exportAll
     case statistics
 
     var subtitle: String {
@@ -20,9 +21,33 @@ enum PaywallContext {
             return "Keep every passage that matters, without a highlight limit."
         case .export:
             return "You've used your free export. Unlock unlimited Markdown export."
+        case .exportAll:
+            return "Export the highlights of every book at once, one Markdown file per book."
         case .statistics:
             return "Explore your weekly and all-time reading, streaks, and time per book."
         }
+    }
+}
+
+/// The advance notice of the Leafmark Pro price change (ADR-0008).
+///
+/// The date lives only here. The notice names no amount because the price
+/// differs by storefront currency, and it disappears on the change date in
+/// the device's local calendar.
+enum PriceChangeNotice {
+    static let effectiveDate = DateComponents(year: 2026, month: 11, day: 16)
+
+    /// True strictly before local midnight at the start of `effectiveDate`.
+    static func isVisible(now: Date = Date(), calendar: Calendar = .current) -> Bool {
+        guard let start = calendar.date(from: effectiveDate) else { return false }
+        return now < start
+    }
+
+    static func message(calendar: Calendar = .current, locale: Locale = .current) -> String {
+        guard let date = calendar.date(from: effectiveDate) else { return "" }
+        var style = Date.FormatStyle(date: .long, time: .omitted, locale: locale, calendar: calendar)
+        style.timeZone = calendar.timeZone
+        return "Price changes on \(date.formatted(style)). If you've already purchased, there's nothing more to pay."
     }
 }
 
@@ -35,7 +60,7 @@ struct PaywallView: View {
 
     private let perks: [(icon: String, title: String, detail: String)] = [
         ("highlighter", "Unlimited highlights", "Mark up every page, in any of four colors."),
-        ("square.and.arrow.up", "Export to Markdown", "Send your highlights and notes to Obsidian or Notion."),
+        ("square.and.arrow.up", "Export to Markdown", "Markdown files with front matter for Obsidian. Export one book, or every book at once."),
         ("chart.bar", "Reading statistics", "Track your time, streak and progress per book."),
     ]
 
@@ -112,6 +137,13 @@ struct PaywallView: View {
                             .font(.footnote)
                             .foregroundStyle(.secondary)
 
+                        if PriceChangeNotice.isVisible() {
+                            Label(PriceChangeNotice.message(), systemImage: "calendar")
+                                .font(.footnote)
+                                .multilineTextAlignment(.center)
+                                .frame(maxWidth: .infinity)
+                        }
+
                         Button("Restore Purchase") {
                             Task {
                                 await store.restore()
@@ -144,10 +176,10 @@ struct ReadingNoteExample: View {
             Text("Example Markdown export")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Text("# A Book I Read\n\n> A passage worth remembering.\n\nMy note: Try this idea tomorrow.")
+            Text("---\ntitle: \"A Book I Read\"\nsource: Leafmark\n---\n\n# A Book I Read\n\n> A passage worth remembering.\n\nMy note: Try this idea tomorrow.")
                 .font(.body.monospaced())
                 .frame(maxWidth: .infinity, alignment: .leading)
-            Text("Keep quotes and your own notes together in a plain-text file.")
+            Text("Keep quotes and your own notes together in a Markdown file.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }

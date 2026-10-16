@@ -11,6 +11,8 @@ struct LibraryView: View {
     @State private var showImporter = false
     @State private var showStats = false
     @State private var showPro = false
+    @State private var proContext = PaywallContext.general
+    @State private var showExportAll = false
     @State private var openedBook: Book?
     @AppStorage("library.sortOrder") private var sortOrder = LibrarySortOrder.recentlyOpened
 
@@ -80,11 +82,23 @@ struct LibraryView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     Menu {
                         Button {
+                            proContext = .general
                             showPro = true
                         } label: {
                             Label(store.isPro ? "Leafmark Pro — Purchased" : "Leafmark Pro — Unlimited highlights & export", systemImage: "book.closed")
                         }
                         .disabled(store.isPro)
+                        Button {
+                            if store.isPro {
+                                showExportAll = true
+                            } else {
+                                proContext = .exportAll
+                                showPro = true
+                            }
+                        } label: {
+                            Label(store.isPro ? "Export All Highlights" : "Export All Highlights (Pro)", systemImage: "square.and.arrow.up.on.square")
+                        }
+                        .disabled(library.books.isEmpty)
                     } label: {
                         Image(systemName: "ellipsis.circle")
                     }
@@ -125,7 +139,12 @@ struct LibraryView: View {
                 StatsView(stats: stats, library: library)
             }
             .sheet(isPresented: $showPro) {
-                PaywallView(store: store)
+                PaywallView(store: store, context: proContext)
+            }
+            .sheet(isPresented: $showExportAll) {
+                // Only imported books: the EPUB-less entries in missingBooks
+                // keep their highlights in sync but have no Book to export.
+                AllHighlightsExportView(books: sortedBooks)
             }
             .fileImporter(
                 isPresented: $showImporter,

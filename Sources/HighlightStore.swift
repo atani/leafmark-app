@@ -12,8 +12,13 @@ final class HighlightStore: ObservableObject {
     /// Parsed Locators keyed by highlight id, with the JSON each was parsed
     /// from. The reading-order sort, the reader's decorations and the export
     /// ask for locators on every call (the sort on every comparison), so each
-    /// record's JSON is parsed once here instead. Keeping the JSON lets a
-    /// caller holding a different copy of a record still get its own locator.
+    /// record's JSON is parsed once instead.
+    ///
+    /// Filled lazily on first lookup, so launch does not parse every record
+    /// (tombstones included) on the main thread. Failed parses are cached too.
+    /// An entry is reused only while its JSON matches the record asked about,
+    /// which invalidates it when the JSON changes and lets a caller holding a
+    /// different copy of a record still get that copy's locator.
     private var locatorCache: [String: CachedLocator] = [:]
 
     private struct CachedLocator {
@@ -31,34 +36,16 @@ final class HighlightStore: ObservableObject {
     private func load() {
         guard let decoded = JSONFileStorage.load([Highlight].self, from: storeURL) else { return }
         highlights = decoded.prunedOfExpiredTombstones()
-        rebuildCache()
     }
 
     private func save() {
         JSONFileStorage.save(highlights, to: storeURL)
     }
 
-    /// Re-syncs the cache with `highlights`, reusing entries whose JSON is
-    /// unchanged so only new or edited records are parsed.
-    private func rebuildCache() {
-        var cache: [String: CachedLocator] = [:]
-        cache.reserveCapacity(highlights.count)
-        for highlight in highlights {
-            cache[highlight.id] = cachedLocator(for: highlight)
-        }
-        locatorCache = cache
-    }
-
-    private func cachedLocator(for highlight: Highlight) -> CachedLocator {
-        if let cached = locatorCache[highlight.id], cached.json == highlight.locatorJSON {
-            return cached
-        }
-        return CachedLocator(json: highlight.locatorJSON, locator: Self.parseLocator(highlight.locatorJSON))
-    }
-
-    private static func parseLocator(_ json: String) -> Locator? {
-        guard let value = try? JSONValue(jsonString: json) else { return nil }
-        return try? Locator(json: value, warnings: nil)
+    /// Drops cache entries of records that are no longer in the store.
+    private func evictRemovedLocators() {
+        let ids = Set(highlights.map(\.id))
+        locatorCache = locatorCache.filter { ids.contains($0.key) }
     }
 
     /// Active highlights across every book. Used for the usage milestone that
@@ -109,7 +96,6 @@ final class HighlightStore: ObservableObject {
             text: locator.text.highlight ?? ""
         )
         highlights.append(highlight)
-        locatorCache[highlight.id] = CachedLocator(json: highlight.locatorJSON, locator: Self.parseLocator(highlight.locatorJSON))
         save()
         return highlight
     }
@@ -118,7 +104,6 @@ final class HighlightStore: ObservableObject {
         guard let index = highlights.firstIndex(where: { $0.id == id }) else { return }
         mutate(&highlights[index])
         highlights[index].updatedAt = Date()
-        locatorCache[id] = cachedLocator(for: highlights[index])
         save()
     }
 
@@ -137,7 +122,7 @@ final class HighlightStore: ObservableObject {
     /// device that still holds the book keeps its annotations.
     func removeAll(for bookID: String) {
         highlights.removeAll { $0.bookID == bookID }
-        rebuildCache()
+        evictRemovedLocators()
         save()
     }
 
@@ -152,20 +137,25 @@ final class HighlightStore: ObservableObject {
     /// Replaces a book's records with a merged set from the sync layer. Callers
     /// guard against the resulting publisher change re-triggering a push.
     ///
-    /// When the result holds the same records as now, nothing is published or
-    /// written (see `Array.hasSameRecords(as:)`).
+    /// When nothing would change, nothing is published or written (see
+    /// `Array.replacingRecords(of:with:now:)`).
     func applyMerged(_ records: [SyncedHighlight], bookID: String) {
-        var merged = highlights.filter { $0.bookID != bookID }
-        merged.append(contentsOf: records.map { $0.highlight(bookID: bookID) })
-        merged = merged.prunedOfExpiredTombstones()
-        guard !merged.hasSameRecords(as: highlights) else { return }
-        highlights = merged
-        rebuildCache()
+        guard let replaced = highlights.replacingRecords(
+            of: bookID,
+            with: records.map { $0.highlight(bookID: bookID) }
+        ) else { return }
+        highlights = replaced
+        evictRemovedLocators()
         save()
     }
 
     func locator(of highlight: Highlight) -> Locator? {
-        cachedLocator(for: highlight).locator
+        if let cached = locatorCache[highlight.id], cached.json == highlight.locatorJSON {
+            return cached.locator
+        }
+        let locator = LocatorJSON.parse(highlight.locatorJSON)
+        locatorCache[highlight.id] = CachedLocator(json: highlight.locatorJSON, locator: locator)
+        return locator
     }
 
     private func progression(of highlight: Highlight) -> Double? {

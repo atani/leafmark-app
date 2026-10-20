@@ -39,6 +39,7 @@
 		7C87E86579B1BEA76DF268DC /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC30C446D1140BD0B7F8135E /* StoreManager.swift */; };
 		7E2EB70DF7F4F83B8C693881 /* Book.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FD8F22F199BCC99E005D45D /* Book.swift */; };
 		7F05CB3AD9FBEA8A3568F92C /* Leafmark.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 3554FE4B9DCFD1DBAB92B414 /* Leafmark.storekit */; };
+		7FBF8A93CEEF281012BDC4F1 /* SyncSkipRuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2AD592273E892C63DAA4F46 /* SyncSkipRuleTests.swift */; };
 		81819B55ECBF720FC6CAA988 /* StatsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61C6D4B518701FDF9B5AD443 /* StatsStore.swift */; };
 		8DBFD20E212BF0DAB704441B /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2258232CB78FF8A65B94B388 /* PaywallView.swift */; };
 		916E67A6402068EC16401933 /* StorePurchaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A381A098CBBB8F4E778E488B /* StorePurchaseTests.swift */; };
@@ -147,6 +148,7 @@
 		DAF059FC2E63877CE40FE149 /* PagePositionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagePositionTests.swift; sourceTree = "<group>"; };
 		DD29BC18AE0AD3C84BCC6AA5 /* PriceChangeNoticeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceChangeNoticeTests.swift; sourceTree = "<group>"; };
 		E20D3AB2EA403C50910EB6F0 /* HighlightExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightExport.swift; sourceTree = "<group>"; };
+		E2AD592273E892C63DAA4F46 /* SyncSkipRuleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncSkipRuleTests.swift; sourceTree = "<group>"; };
 		E677C3E878FF72BDF5B15D05 /* LeafmarkTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LeafmarkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFAE2035D735F8B6C68B704D /* StoreManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManagerTests.swift; sourceTree = "<group>"; };
 		FE3E808A04A3AC068983F4E5 /* StatsStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsStoreTests.swift; sourceTree = "<group>"; };
@@ -263,6 +265,7 @@
 				FE3E808A04A3AC068983F4E5 /* StatsStoreTests.swift */,
 				EFAE2035D735F8B6C68B704D /* StoreManagerTests.swift */,
 				A381A098CBBB8F4E778E488B /* StorePurchaseTests.swift */,
+				E2AD592273E892C63DAA4F46 /* SyncSkipRuleTests.swift */,
 				075DF03244CDE0EBE55143BE /* SyntheticWeightTests.swift */,
 				4A3DEBF3B0B55FAE19D3683A /* TestSupport.swift */,
 			);
@@ -418,6 +421,7 @@
 				D4A1D5D765048F0A00BB0BE8 /* StatsStoreTests.swift in Sources */,
 				7C190C62145AFD3E3D201F29 /* StoreManagerTests.swift in Sources */,
 				916E67A6402068EC16401933 /* StorePurchaseTests.swift in Sources */,
+				7FBF8A93CEEF281012BDC4F1 /* SyncSkipRuleTests.swift in Sources */,
 				D1CA6BD69ABDD6AF8198A7FE /* SyntheticWeightTests.swift in Sources */,
 				BE12489C9A222B6344A6285B /* TestSupport.swift in Sources */,
 			);

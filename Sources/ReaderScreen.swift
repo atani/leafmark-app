@@ -66,11 +66,7 @@ struct ReaderScreen: View {
     }
 
     private var initialLocator: Locator? {
-        guard let json = book.locatorJSON,
-              let value = try? JSONValue(jsonString: json),
-              let locator = try? Locator(json: value, warnings: nil)
-        else { return nil }
-        return locator
+        book.locatorJSON.flatMap(LocatorJSON.parse)
     }
 
     var body: some View {

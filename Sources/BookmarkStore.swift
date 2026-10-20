@@ -44,15 +44,10 @@ final class BookmarkStore: ObservableObject {
         locatorCache = Dictionary(
             bookmarks.compactMap { bookmark -> (String, Locator)? in
                 guard bookmark.deletedAt == nil else { return nil }
-                return Self.parseLocator(bookmark.locatorJSON).map { (bookmark.id, $0) }
+                return LocatorJSON.parse(bookmark.locatorJSON).map { (bookmark.id, $0) }
             },
             uniquingKeysWith: { current, _ in current }
         )
-    }
-
-    private static func parseLocator(_ json: String) -> Locator? {
-        guard let value = try? JSONValue(jsonString: json) else { return nil }
-        return try? Locator(json: value, warnings: nil)
     }
 
     /// Bookmarks of a book, ordered by reading position.
@@ -160,14 +155,14 @@ final class BookmarkStore: ObservableObject {
     /// Replaces a book's records with a merged set from the sync layer. Callers
     /// guard against the resulting publisher change re-triggering a push.
     ///
-    /// When the result holds the same records as now, nothing is published or
-    /// written (see `Array.hasSameRecords(as:)`).
+    /// When nothing would change, nothing is published or written (see
+    /// `Array.replacingRecords(of:with:now:)`).
     func applyMerged(_ records: [SyncedBookmark], bookID: String) {
-        var merged = bookmarks.filter { $0.bookID != bookID }
-        merged.append(contentsOf: records.map { $0.bookmark(bookID: bookID) })
-        merged = merged.prunedOfExpiredTombstones()
-        guard !merged.hasSameRecords(as: bookmarks) else { return }
-        bookmarks = merged
+        guard let replaced = bookmarks.replacingRecords(
+            of: bookID,
+            with: records.map { $0.bookmark(bookID: bookID) }
+        ) else { return }
+        bookmarks = replaced
         rebuildCache()
         save()
     }

@@ -312,19 +312,26 @@ final class LibraryStore: ObservableObject {
     /// re-sort, republish `books` and rewrite the catalog for no change.
     func applySyncedPosition(_ position: AnnotationSyncPosition?, bookID: String) {
         guard let position,
-              let current = books.first(where: { $0.id == bookID }),
-              position.updatedAt >= (current.positionUpdatedAt ?? .distantPast)
+              Self.shouldApplySyncedPosition(position, to: books.first(where: { $0.id == bookID }))
         else { return }
-        if current.locatorJSON == position.locatorJSON,
-           current.progression == position.progression,
-           current.positionUpdatedAt == position.updatedAt {
-            return
-        }
         update(bookID) {
             $0.locatorJSON = position.locatorJSON
             $0.progression = position.progression
             $0.positionUpdatedAt = position.updatedAt
         }
+    }
+
+    /// True when applying `position` would change `book`: the book exists, the
+    /// position is not older than the local one, and at least one of the three
+    /// stored fields differs. Pure so the skip rule is unit-testable without
+    /// the on-disk library.
+    nonisolated static func shouldApplySyncedPosition(_ position: AnnotationSyncPosition, to book: Book?) -> Bool {
+        guard let book,
+              position.updatedAt >= (book.positionUpdatedAt ?? .distantPast)
+        else { return false }
+        return book.locatorJSON != position.locatorJSON
+            || book.progression != position.progression
+            || book.positionUpdatedAt != position.updatedAt
     }
 
     // MARK: - Library catalog sync (ADR-0007)

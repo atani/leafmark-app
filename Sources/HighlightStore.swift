@@ -9,6 +9,18 @@ final class HighlightStore: ObservableObject {
 
     private let storeURL: URL
 
+    /// Parsed Locators keyed by highlight id, with the JSON each was parsed
+    /// from. The reading-order sort, the reader's decorations and the export
+    /// ask for locators on every call (the sort on every comparison), so each
+    /// record's JSON is parsed once here instead. Keeping the JSON lets a
+    /// caller holding a different copy of a record still get its own locator.
+    private var locatorCache: [String: CachedLocator] = [:]
+
+    private struct CachedLocator {
+        let json: String
+        let locator: Locator?
+    }
+
     init(storeURL: URL? = nil) {
         self.storeURL = storeURL ?? FileManager.default
             .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -17,24 +29,36 @@ final class HighlightStore: ObservableObject {
     }
 
     private func load() {
-        guard let data = try? Data(contentsOf: storeURL),
-              let decoded = try? JSONDecoder().decode([Highlight].self, from: data)
-        else { return }
-        highlights = Self.pruningExpiredTombstones(decoded)
+        guard let decoded = JSONFileStorage.load([Highlight].self, from: storeURL) else { return }
+        highlights = decoded.prunedOfExpiredTombstones()
+        rebuildCache()
     }
 
     private func save() {
-        guard let data = try? JSONEncoder().encode(highlights) else { return }
-        try? data.write(to: storeURL, options: .atomic)
+        JSONFileStorage.save(highlights, to: storeURL)
     }
 
-    /// Drops tombstones past the sync retention window so soft-deleted records
-    /// cannot accumulate forever in the local catalog.
-    private static func pruningExpiredTombstones(_ records: [Highlight], now: Date = Date()) -> [Highlight] {
-        records.filter { record in
-            guard let deletedAt = record.deletedAt else { return true }
-            return now.timeIntervalSince(deletedAt) < AnnotationSyncMerge.tombstoneRetention
+    /// Re-syncs the cache with `highlights`, reusing entries whose JSON is
+    /// unchanged so only new or edited records are parsed.
+    private func rebuildCache() {
+        var cache: [String: CachedLocator] = [:]
+        cache.reserveCapacity(highlights.count)
+        for highlight in highlights {
+            cache[highlight.id] = cachedLocator(for: highlight)
         }
+        locatorCache = cache
+    }
+
+    private func cachedLocator(for highlight: Highlight) -> CachedLocator {
+        if let cached = locatorCache[highlight.id], cached.json == highlight.locatorJSON {
+            return cached
+        }
+        return CachedLocator(json: highlight.locatorJSON, locator: Self.parseLocator(highlight.locatorJSON))
+    }
+
+    private static func parseLocator(_ json: String) -> Locator? {
+        guard let value = try? JSONValue(jsonString: json) else { return nil }
+        return try? Locator(json: value, warnings: nil)
     }
 
     /// Active highlights across every book. Used for the usage milestone that
@@ -85,6 +109,7 @@ final class HighlightStore: ObservableObject {
             text: locator.text.highlight ?? ""
         )
         highlights.append(highlight)
+        locatorCache[highlight.id] = CachedLocator(json: highlight.locatorJSON, locator: Self.parseLocator(highlight.locatorJSON))
         save()
         return highlight
     }
@@ -93,6 +118,7 @@ final class HighlightStore: ObservableObject {
         guard let index = highlights.firstIndex(where: { $0.id == id }) else { return }
         mutate(&highlights[index])
         highlights[index].updatedAt = Date()
+        locatorCache[id] = cachedLocator(for: highlights[index])
         save()
     }
 
@@ -111,6 +137,7 @@ final class HighlightStore: ObservableObject {
     /// device that still holds the book keeps its annotations.
     func removeAll(for bookID: String) {
         highlights.removeAll { $0.bookID == bookID }
+        rebuildCache()
         save()
     }
 
@@ -124,16 +151,21 @@ final class HighlightStore: ObservableObject {
 
     /// Replaces a book's records with a merged set from the sync layer. Callers
     /// guard against the resulting publisher change re-triggering a push.
+    ///
+    /// When the result holds the same records as now, nothing is published or
+    /// written (see `Array.hasSameRecords(as:)`).
     func applyMerged(_ records: [SyncedHighlight], bookID: String) {
-        highlights.removeAll { $0.bookID == bookID }
-        highlights.append(contentsOf: records.map { $0.highlight(bookID: bookID) })
-        highlights = Self.pruningExpiredTombstones(highlights)
+        var merged = highlights.filter { $0.bookID != bookID }
+        merged.append(contentsOf: records.map { $0.highlight(bookID: bookID) })
+        merged = merged.prunedOfExpiredTombstones()
+        guard !merged.hasSameRecords(as: highlights) else { return }
+        highlights = merged
+        rebuildCache()
         save()
     }
 
     func locator(of highlight: Highlight) -> Locator? {
-        guard let value = try? JSONValue(jsonString: highlight.locatorJSON) else { return nil }
-        return try? Locator(json: value, warnings: nil)
+        cachedLocator(for: highlight).locator
     }
 
     private func progression(of highlight: Highlight) -> Double? {
@@ -200,9 +232,17 @@ final class HighlightStore: ObservableObject {
         return lines
     }
 
-    static func frontMatter(for book: Book, exportedAt: Date, timeZone: TimeZone) -> [String] {
+    /// Reused across exports ("Export All" builds one front matter per book).
+    /// Main-actor isolated with the store, so setting `timeZone` per call
+    /// cannot race.
+    private static let exportDateFormatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withFullDate]
+        return formatter
+    }()
+
+    static func frontMatter(for book: Book, exportedAt: Date, timeZone: TimeZone) -> [String] {
+        let formatter = exportDateFormatter
         formatter.timeZone = timeZone
 
         var lines = ["---", "title: \(yamlQuoted(book.title))"]

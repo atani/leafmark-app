@@ -69,7 +69,9 @@ struct StatsView: View {
                     Label("Reading Streak", systemImage: "flame.fill")
                         .foregroundStyle(.orange)
                     Spacer()
-                    Text("\(stats.streakDays) day\(stats.streakDays == 1 ? "" : "s")")
+                    // Computed once: each read rebuilds a day set from every session.
+                    let streakDays = stats.streakDays
+                    Text("\(streakDays) day\(streakDays == 1 ? "" : "s")")
                         .fontWeight(.semibold)
                 }
             }

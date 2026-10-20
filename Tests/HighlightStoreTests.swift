@@ -1,3 +1,4 @@
+import Combine
 import XCTest
 import ReadiumShared
 @testable import Leafmark
@@ -8,13 +9,7 @@ final class HighlightStoreTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        tempURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("highlights-\(UUID().uuidString).json")
-    }
-
-    override func tearDown() {
-        try? FileManager.default.removeItem(at: tempURL)
-        super.tearDown()
+        tempURL = makeTemporaryURL("highlights")
     }
 
     /// Builds a Highlight whose locator carries a totalProgression so the
@@ -27,13 +22,10 @@ final class HighlightStoreTests: XCTestCase {
         color: String = "yellow",
         progression: Double
     ) -> Highlight {
-        let locatorJSON = """
-        {"href":"chapter.html","type":"text/html","locations":{"totalProgression":\(progression)}}
-        """
-        return Highlight(
+        Highlight(
             id: id,
             bookID: bookID,
-            locatorJSON: locatorJSON,
+            locatorJSON: locatorJSON(href: "chapter.html", progression: progression),
             colorRaw: color,
             note: note,
             createdAt: Date(timeIntervalSinceReferenceDate: 0),
@@ -290,9 +282,7 @@ final class HighlightStoreTests: XCTestCase {
         let json = """
         {"href":"chapter.html","type":"text/html","text":{"highlight":"captured text"},"locations":{"totalProgression":0.3}}
         """
-        let value = try JSONValue(jsonString: json)
-        let locator = try XCTUnwrap(try? Locator(json: value, warnings: nil))
-        let added = store.add(bookID: "book-a", locator: locator, color: .green, note: "n")
+        let added = store.add(bookID: "book-a", locator: try makeLocator(json: json), color: .green, note: "n")
         XCTAssertEqual(store.highlights(for: "book-a").count, 1)
         XCTAssertEqual(added.text, "captured text", "ハイライト本文を locator から取り込む")
 
@@ -301,5 +291,96 @@ final class HighlightStoreTests: XCTestCase {
 
         store.remove(added.id)
         XCTAssertEqual(store.highlights(for: "book-a").count, 0)
+    }
+
+    // MARK: - Locator cache
+
+    func testUpdateThatMovesALocatorReordersAndReportsTheNewProgression() throws {
+        let store = seed([
+            highlight(id: "1", bookID: "book-a", text: "first", progression: 0.2),
+            highlight(id: "2", bookID: "book-a", text: "second", progression: 0.8),
+        ])
+        XCTAssertEqual(store.highlights(for: "book-a").map(\.id), ["1", "2"])
+
+        let moved = locatorJSON(href: "chapter.html", progression: 0.9)
+        store.update("1") { $0.locatorJSON = moved }
+
+        XCTAssertEqual(store.highlights(for: "book-a").map(\.id), ["2", "1"], "locator を書き換えたら並び順も追従する")
+        let updated = try XCTUnwrap(store.highlight(withID: "1"))
+        XCTAssertEqual(store.locator(of: updated)?.locations.totalProgression, 0.9, "キャッシュは更新後の locator を返す")
+    }
+
+    func testLocatorOfACopyWithDifferentJSONParsesThatCopy() throws {
+        let store = seed([highlight(id: "1", bookID: "book-a", text: "t", progression: 0.2)])
+        var copy = try XCTUnwrap(store.highlight(withID: "1"))
+        copy.locatorJSON = locatorJSON(href: "chapter.html", progression: 0.7)
+
+        XCTAssertEqual(store.locator(of: copy)?.locations.totalProgression, 0.7, "渡された値の JSON を優先する")
+        XCTAssertEqual(store.locator(of: store.highlights[0])?.locations.totalProgression, 0.2, "ストア側の値は変わらない")
+    }
+
+    func testUnparseableLocatorSortsAsZeroProgression() {
+        var broken = highlight(id: "broken", bookID: "book-a", text: "b", progression: 0)
+        broken.locatorJSON = "{}"
+        let store = seed([
+            highlight(id: "late", bookID: "book-a", text: "l", progression: 0.5),
+            broken,
+        ])
+
+        XCTAssertEqual(store.highlights(for: "book-a").map(\.id), ["broken", "late"], "解析できない locator は進捗 0 として扱う")
+        XCTAssertNil(store.locator(of: broken))
+    }
+
+    // MARK: - Sync apply
+
+    func testApplyMergedWithUnchangedRecordsSkipsPublishAndWrite() throws {
+        let store = seed([
+            highlight(id: "a1", bookID: "book-a", text: "a", progression: 0.1),
+            highlight(id: "b1", bookID: "book-b", text: "b", progression: 0.2),
+        ])
+        let records = store.syncedRecords(for: "book-a")
+        // 1 回目は updatedAt の補完（nil → createdAt）で実際に変わる。2 回目が同期の定常状態。
+        store.applyMerged(records, bookID: "book-a")
+        let sentinel = Data("sentinel".utf8)
+        try sentinel.write(to: tempURL)
+        var publishes = 0
+        let subscription = store.$highlights.dropFirst().sink { _ in publishes += 1 }
+        defer { subscription.cancel() }
+
+        store.applyMerged(records, bookID: "book-a")
+
+        XCTAssertEqual(publishes, 0, "変化が無ければ publish しない")
+        XCTAssertEqual(try Data(contentsOf: tempURL), sentinel, "変化が無ければファイルを書き直さない")
+        XCTAssertEqual(store.highlights(for: "book-a").map(\.id), ["a1"])
+        XCTAssertEqual(store.highlights(for: "book-b").map(\.id), ["b1"])
+    }
+
+    func testApplyMergedWithChangedRecordPublishesOnceAndPersists() throws {
+        let store = seed([highlight(id: "a1", bookID: "book-a", text: "a", progression: 0.1)])
+        var record = try XCTUnwrap(store.syncedRecords(for: "book-a").first)
+        record.note = "edited elsewhere"
+        record.updatedAt = Date()
+        var publishes = 0
+        let subscription = store.$highlights.dropFirst().sink { _ in publishes += 1 }
+        defer { subscription.cancel() }
+
+        store.applyMerged([record], bookID: "book-a")
+
+        XCTAssertEqual(publishes, 1)
+        XCTAssertEqual(store.highlights(for: "book-a").first?.note, "edited elsewhere")
+        XCTAssertEqual(HighlightStore(storeURL: tempURL).highlights(for: "book-a").first?.note, "edited elsewhere", "変更は永続化される")
+    }
+
+    func testApplyMergedPrunesExpiredTombstones() {
+        var expired = highlight(id: "old", bookID: "book-a", text: "gone", progression: 0.1)
+        let longAgo = Date().addingTimeInterval(-AnnotationSyncMerge.tombstoneRetention - 60)
+        expired.deletedAt = longAgo
+        expired.updatedAt = longAgo
+        let live = highlight(id: "a1", bookID: "book-a", text: "a", progression: 0.2)
+        let store = HighlightStore(storeURL: tempURL)
+
+        store.applyMerged([SyncedHighlight(expired), SyncedHighlight(live)], bookID: "book-a")
+
+        XCTAssertEqual(store.syncedRecords(for: "book-a").map(\.id), ["a1"], "期限切れの墓標は適用時に刈り取られる")
     }
 }

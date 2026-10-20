@@ -77,7 +77,7 @@ struct ReaderScreen: View {
         ZStack {
             ReaderView(
                 publication: publication,
-                initialLocation: initialLocator,
+                makeInitialLocation: { initialLocator },
                 preferences: appearance.preferences,
                 makeFontFamilyDeclarations: {
                     var declarations = fontStore.fontFamilyDeclarations(for: selectedCustomFamily)
@@ -784,11 +784,14 @@ private struct AppearanceSheet: View {
         }
     }
 
-    private var systemFamilies: [String] {
-        UIFont.familyNames
-            .filter { !$0.hasPrefix(".") }
-            .sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
-    }
+    /// Installed system families for the picker, computed once per process:
+    /// the list was rebuilt and re-sorted on every body evaluation (every
+    /// stepper tap). Imported fonts reach the web view through CSS and are
+    /// never registered with UIKit, so `UIFont.familyNames` does not change
+    /// while the app runs.
+    private static let systemFamilies: [String] = UIFont.familyNames
+        .filter { !$0.hasPrefix(".") }
+        .sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
 
     /// Distinguishes faces of the same family in the management list.
     private func faceLabel(for font: CustomFont) -> String {
@@ -822,7 +825,7 @@ private struct AppearanceSheet: View {
                             Text(font.rawValue).tag(font.rawValue)
                         }
                         Section("System Fonts") {
-                            ForEach(systemFamilies, id: \.self) { family in
+                            ForEach(Self.systemFamilies, id: \.self) { family in
                                 Text(family)
                                     .tag(AppearanceStore.systemFontPrefix + family)
                             }

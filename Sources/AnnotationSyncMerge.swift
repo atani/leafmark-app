@@ -46,13 +46,18 @@ enum AnnotationSyncMerge {
             }
         }
         return winners.values
-            .filter { record in
-                guard let deletedAt = record.deletedAt else { return true }
-                return now.timeIntervalSince(deletedAt) < tombstoneRetention
-            }
+            .filter { !isExpiredTombstone(deletedAt: $0.deletedAt, now: now) }
             // Stable ordering so an unchanged merge re-encodes byte-identically,
             // letting the engine skip redundant writes.
             .sorted { $0.id < $1.id }
+    }
+
+    /// True for a tombstone older than the retention window. Shared by the
+    /// merge and the local stores' load-time pruning so both drop exactly the
+    /// same records.
+    static func isExpiredTombstone(deletedAt: Date?, now: Date) -> Bool {
+        guard let deletedAt else { return false }
+        return now.timeIntervalSince(deletedAt) >= tombstoneRetention
     }
 
     private static func pick<R: SyncRecord>(_ a: R, _ b: R) -> R {

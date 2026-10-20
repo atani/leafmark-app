@@ -206,9 +206,7 @@ final class FontStore: ObservableObject {
     }
 
     private func load() {
-        guard let data = try? Data(contentsOf: catalogURL),
-              let decoded = try? JSONDecoder().decode([CustomFont].self, from: data)
-        else { return }
+        guard let decoded = JSONFileStorage.load([CustomFont].self, from: catalogURL) else { return }
         // The catalog lives in a user-writable directory (Files app), so a
         // tampered entry must not (a) escape the Fonts directory via its
         // fileName, or (b) smuggle CSS/HTML-breaking characters through its
@@ -227,8 +225,7 @@ final class FontStore: ObservableObject {
     }
 
     private func save() {
-        guard let data = try? JSONEncoder().encode(fonts) else { return }
-        try? data.write(to: catalogURL, options: .atomic)
+        JSONFileStorage.save(fonts, to: catalogURL)
     }
 }
 

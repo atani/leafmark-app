@@ -28,25 +28,13 @@ final class BookmarkStore: ObservableObject {
     }
 
     private func load() {
-        guard let data = try? Data(contentsOf: storeURL),
-              let decoded = try? JSONDecoder().decode([Bookmark].self, from: data)
-        else { return }
-        bookmarks = Self.pruningExpiredTombstones(decoded)
+        guard let decoded = JSONFileStorage.load([Bookmark].self, from: storeURL) else { return }
+        bookmarks = decoded.prunedOfExpiredTombstones()
         rebuildCache()
     }
 
     private func save() {
-        guard let data = try? JSONEncoder().encode(bookmarks) else { return }
-        try? data.write(to: storeURL, options: .atomic)
-    }
-
-    /// Drops tombstones past the sync retention window so soft-deleted records
-    /// cannot accumulate forever in the local catalog.
-    private static func pruningExpiredTombstones(_ records: [Bookmark], now: Date = Date()) -> [Bookmark] {
-        records.filter { record in
-            guard let deletedAt = record.deletedAt else { return true }
-            return now.timeIntervalSince(deletedAt) < AnnotationSyncMerge.tombstoneRetention
-        }
+        JSONFileStorage.save(bookmarks, to: storeURL)
     }
 
     private func rebuildCache() {
@@ -171,10 +159,15 @@ final class BookmarkStore: ObservableObject {
 
     /// Replaces a book's records with a merged set from the sync layer. Callers
     /// guard against the resulting publisher change re-triggering a push.
+    ///
+    /// When the result holds the same records as now, nothing is published or
+    /// written (see `Array.hasSameRecords(as:)`).
     func applyMerged(_ records: [SyncedBookmark], bookID: String) {
-        bookmarks.removeAll { $0.bookID == bookID }
-        bookmarks.append(contentsOf: records.map { $0.bookmark(bookID: bookID) })
-        bookmarks = Self.pruningExpiredTombstones(bookmarks)
+        var merged = bookmarks.filter { $0.bookID != bookID }
+        merged.append(contentsOf: records.map { $0.bookmark(bookID: bookID) })
+        merged = merged.prunedOfExpiredTombstones()
+        guard !merged.hasSameRecords(as: bookmarks) else { return }
+        bookmarks = merged
         rebuildCache()
         save()
     }

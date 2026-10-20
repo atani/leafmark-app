@@ -71,9 +71,7 @@ final class LibraryStore: ObservableObject {
     // MARK: - Catalog persistence
 
     private func loadCatalog() {
-        guard let data = try? Data(contentsOf: catalogURL),
-              let decoded = try? JSONDecoder().decode([Book].self, from: data)
-        else { return }
+        guard let decoded = JSONFileStorage.load([Book].self, from: catalogURL) else { return }
         var migrated = decoded
         var didMigrate = false
         for index in migrated.indices where migrated[index].contentKey == nil {
@@ -87,8 +85,7 @@ final class LibraryStore: ObservableObject {
     }
 
     private func saveCatalog() {
-        guard let data = try? JSONEncoder().encode(books) else { return }
-        try? data.write(to: catalogURL, options: .atomic)
+        JSONFileStorage.save(books, to: catalogURL)
     }
 
     /// Most-recently-opened-first order (falling back to most-recently-added
@@ -117,8 +114,21 @@ final class LibraryStore: ObservableObject {
         coversDir.appendingPathComponent("\(book.id).png")
     }
 
+    /// Decoded covers keyed by book id. The library grid asks for covers in its
+    /// body, which re-runs on every `books` change — including each page turn
+    /// while the reader is open on top of it — so a cover is read and decoded
+    /// from disk once instead of on every render. A cover file is written once
+    /// at import, before its book is added, and removed only with the book, so
+    /// an entry cannot go stale. Missing covers are not cached.
+    private let coverCache = NSCache<NSString, UIImage>()
+
     func coverImage(for book: Book) -> UIImage? {
-        UIImage(contentsOfFile: coverURL(for: book).path)
+        if let cached = coverCache.object(forKey: book.id as NSString) {
+            return cached
+        }
+        guard let image = UIImage(contentsOfFile: coverURL(for: book).path) else { return nil }
+        coverCache.setObject(image, forKey: book.id as NSString)
+        return image
     }
 
     nonisolated static func contentKey(for data: Data) -> String {
@@ -238,9 +248,13 @@ final class LibraryStore: ObservableObject {
             }
         }
 
+        // Hashing reads the whole EPUB, so it runs off the main actor.
+        let contentKey = await Task.detached {
+            try? Self.contentKey(forFileAt: destination)
+        }.value
         let book = Book(
             id: id,
-            contentKey: try? Self.contentKey(forFileAt: destination),
+            contentKey: contentKey,
             fileName: "\(id).epub",
             title: title,
             author: author,
@@ -259,6 +273,7 @@ final class LibraryStore: ObservableObject {
     func delete(_ book: Book) {
         try? fileManager.removeItem(at: fileURL(for: book))
         try? fileManager.removeItem(at: coverURL(for: book))
+        coverCache.removeObject(forKey: book.id as NSString)
         books.removeAll { $0.id == book.id }
         saveCatalog()
         // Record a tombstone so a fresh install stops suggesting a book the
@@ -292,10 +307,20 @@ final class LibraryStore: ObservableObject {
         )
     }
 
+    /// Called for every book on every sync reconcile pass. When the position is
+    /// stale or already applied, returns before `update`, which would otherwise
+    /// re-sort, republish `books` and rewrite the catalog for no change.
     func applySyncedPosition(_ position: AnnotationSyncPosition?, bookID: String) {
-        guard let position else { return }
+        guard let position,
+              let current = books.first(where: { $0.id == bookID }),
+              position.updatedAt >= (current.positionUpdatedAt ?? .distantPast)
+        else { return }
+        if current.locatorJSON == position.locatorJSON,
+           current.progression == position.progression,
+           current.positionUpdatedAt == position.updatedAt {
+            return
+        }
         update(bookID) {
-            guard position.updatedAt >= ($0.positionUpdatedAt ?? .distantPast) else { return }
             $0.locatorJSON = position.locatorJSON
             $0.progression = position.progression
             $0.positionUpdatedAt = position.updatedAt
@@ -356,15 +381,12 @@ final class LibraryStore: ObservableObject {
     }
 
     private func loadSyncedCatalog() {
-        guard let data = try? Data(contentsOf: syncedCatalogURL),
-              let decoded = try? JSONDecoder().decode(LibraryCatalog.self, from: data)
-        else { return }
+        guard let decoded = JSONFileStorage.load(LibraryCatalog.self, from: syncedCatalogURL) else { return }
         syncedCatalog = decoded
     }
 
     private func saveSyncedCatalog() {
-        guard let data = try? JSONEncoder().encode(syncedCatalog) else { return }
-        try? data.write(to: syncedCatalogURL, options: .atomic)
+        JSONFileStorage.save(syncedCatalog, to: syncedCatalogURL)
     }
 
     /// Records a deletion tombstone for a deliberately removed book. The

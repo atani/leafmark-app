@@ -14,15 +14,21 @@ packages:
     # 3.10.0 + フォント CORS 修正 (#845) を含む develop 固定。3.11 タグが出たら
     # from 指定に戻す (https://github.com/atani/epub-reader-ios/issues/18)。
     revision: 8811f0ec6fff3562ffc4b739d22733cf259431d9
+  Firebase:
+    # Peyo で運用実績のある版 (2026-07-28 公開)。ADR-0009。
+    url: https://github.com/firebase/firebase-ios-sdk
+    exactVersion: 12.17.0
 
 settings:
   base:
-    REVENUECAT_MODE: disabled
-    REVENUECAT_PUBLIC_SDK_KEY: ""
-    REVENUECAT_DATA_SHARING_APPROVED: "NO"
-    REVENUECAT_INTEGRATION_READY: "NO"
-    REVENUECAT_PRIVACY_READY: "NO"
-    REVENUECAT_RELEASE_ENABLED: "NO"
+    # RevenueCat observer (docs/revenuecat-migration.md)。StoreKit が購入と利用権の
+    # 正本のまま。公開 SDK キーはクライアント向けの公開キーで、秘密鍵ではない。
+    REVENUECAT_MODE: observer
+    REVENUECAT_PUBLIC_SDK_KEY: appl_WgQUDiEFTHgxCpPyYycrMwpzxAo
+    REVENUECAT_DATA_SHARING_APPROVED: "YES"
+    REVENUECAT_INTEGRATION_READY: "YES"
+    REVENUECAT_PRIVACY_READY: "YES"
+    REVENUECAT_RELEASE_ENABLED: "YES"
     SWIFT_VERSION: "5.9"
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
     TARGETED_DEVICE_FAMILY: "1,2"
@@ -39,9 +45,24 @@ targets:
         name: Sources
       - path: Resources
         buildPhase: resources
+        # 公開リポジトリのためコミットしない。下の postBuildScripts が、手元に
+        # あるときだけ同梱する（無ければ Firebase を構成せず何も送らない）。
+        excludes:
+          - GoogleService-Info.plist
+    postBuildScripts:
+      - name: Copy GoogleService-Info.plist if present
+        basedOnDependencyAnalysis: false
+        script: |
+          src="${SRCROOT}/Resources/GoogleService-Info.plist"
+          dst="${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleService-Info.plist"
+          if [ -f "$src" ]; then cp "$src" "$dst"; else rm -f "$dst"; fi
     dependencies:
       - package: RevenueCat
         product: RevenueCat
+      # IDFA 対応モジュール (GoogleAppMeasurementIdentitySupport / AdSupport) を
+      # 含まない product。FirebaseAnalytics product は IDFA 対応を同梱する。
+      - package: Firebase
+        product: FirebaseAnalyticsCore
       - package: Readium
         products:
           - ReadiumShared
@@ -56,6 +77,15 @@ targets:
         RevenueCatIntegrationReady: "$(REVENUECAT_INTEGRATION_READY)"
         RevenueCatPrivacyReady: "$(REVENUECAT_PRIVACY_READY)"
         RevenueCatReleaseEnabled: "$(REVENUECAT_RELEASE_ENABLED)"
+        # Firebase Analytics (ADR-0009): 広告系の信号と画面の自動計測を止める。
+        # first_open / session_start などの自動イベントは流入の分母として残す。
+        GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED: false
+        GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS: false
+        GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_STORAGE: false
+        GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_USER_DATA: false
+        GOOGLE_ANALYTICS_REGISTRATION_WITH_AD_NETWORK_ENABLED: false
+        FirebaseAutomaticScreenReportingEnabled: false
+        FirebaseAppDelegateProxyEnabled: false
         CFBundleDisplayName: Leafmark
         # Keep versions pointed at build settings — without these keys
         # xcodegen regenerates Info.plist with hardcoded 1.0/1, which
@@ -94,8 +124,8 @@ targets:
         # bundle id stays com.atani.inkwell; only the iCloud container is
         # namespaced as iCloud.com.atani.inkwell.
         CODE_SIGN_ENTITLEMENTS: Leafmark.entitlements
-        MARKETING_VERSION: "1.19"
-        CURRENT_PROJECT_VERSION: "28"
+        MARKETING_VERSION: "1.20"
+        CURRENT_PROJECT_VERSION: "29"
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon

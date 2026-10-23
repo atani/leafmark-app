@@ -91,7 +91,7 @@ ANNOTATE AND KEEP YOUR NOTES
 
 PRIVACY BY DESIGN
 • No account and no sign-in
-• No tracking and no analytics
+• No tracking and no ads. Only a few anonymous purchase-screen events are measured
 • Everything stays on your device
 
 LEAFMARK PRO
@@ -230,7 +230,7 @@ Leafmark は、じっくり読んでメモを取る人のための、シンプ�
 
 プライバシー重視の設計
 ・アカウント不要、サインイン不要
-・トラッキングなし、アナリティクスなし
+・トラッキングなし、広告なし。計測は購入画面まわりの匿名イベントだけ
 ・すべてのデータはデバイス上に保持
 
 Leafmark Pro

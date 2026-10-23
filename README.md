@@ -2,7 +2,7 @@
 
 パワーユーザー向け・買い切り EPUB リーダー。開発放棄された Marvin の難民市場を対象にする。
 
-**"Your highlights are yours."** — アカウントなし・トラッキングなし・クラウドなし。
+**"Your highlights are yours."** — アカウントなし・トラッキングなし・クラウドなし（購入までの匿名イベントだけ計測。[ADR-0009](docs/adr/0009-purchase-funnel-events.md)）。
 ハイライトはいつでも Markdown でエクスポートできる。
 
 ## ゴール(第1マイルストーン)
@@ -43,3 +43,9 @@ open Leafmark.xcodeproj
 
 Xcode で Signing の Team を選び、実機 or シミュレータで ▶。
 テスト用 EPUB はアプリの Documents 直下に置けば起動時に自動取り込みされる。
+
+Firebase Analytics の設定ファイルはコミットしない。無ければ計測しない（[ADR-0009](docs/adr/0009-purchase-funnel-events.md)）。Release ビルドの前に次のコマンドで取得する。
+
+```bash
+firebase apps:sdkconfig IOS 1:635160739335:ios:1a698def989bbed2eef4a2 --project leafmark-6781045740 -o Resources/GoogleService-Info.plist
+```

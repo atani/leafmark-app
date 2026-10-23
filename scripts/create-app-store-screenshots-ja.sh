@@ -72,43 +72,56 @@ compose_ipad() {
   rm -f "$prepared"
 }
 
+# 番号を振り直したときに古い画像が残らないようにする。
+rm -f "$output_dir"/*.png
+
+# vertical-current.png は青空文庫『夢十夜』（夏目漱石、著作権切れ）から作った
+# 縦書き EPUB3（writing-mode: vertical-rl / page-progression-direction="rtl"）の
+# 1 ページ目を iPhone 18 Pro Max シミュレータで撮影したもの。
+compose \
+  "$capture_dir/vertical-current.png" \
+  '縦書きも、そのまま。' \
+  '縦組み・右開きのEPUBを、本の指定どおりに表示' \
+  "$output_dir/01-vertical-text.png" \
+  2350
+
 compose \
   "$source_dir/05-highlights.png" \
   $'EPUBの読書メモを、\n手元のノートへ。' \
   'ハイライトとメモをMarkdownで書き出せる' \
-  "$output_dir/01-reading-notes.png" \
+  "$output_dir/02-reading-notes.png" \
   1800
 
 compose \
   "$source_dir/04-appearance.png" \
   $'文字も余白も、\n自分の読みやすさに。' \
   'フォント・行間・テーマまで細かく調整' \
-  "$output_dir/02-reading-comfort.png"
+  "$output_dir/03-reading-comfort.png"
 
 compose \
   "$capture_dir/search-current.png" \
   $'うろ覚えの一節も、\n本の中からすぐ検索。' \
   '語句の出現箇所を一覧で確認' \
-  "$output_dir/03-search-inside-book.png"
+  "$output_dir/04-search-inside-book.png"
 
 compose \
   "$source_dir/06-statistics.png" \
   $'今日どれだけ読めたか、\nひと目で。' \
   '今日・今週・累計と、本ごとの読書時間' \
-  "$output_dir/04-reading-history.png" \
+  "$output_dir/05-reading-history.png" \
   1850
 
 compose \
   "$capture_dir/paywall-current.png" \
   $'読むのは無料。\n必要になったら買い切りで。' \
   'サブスクなし。Proで注釈・書き出し・統計を解放' \
-  "$output_dir/05-buy-once.png" \
+  "$output_dir/06-buy-once.png" \
   2050
 
 magick montage "$output_dir"/*.png \
   -font "$font_file" \
   -thumbnail '264x574' \
-  -tile 5x1 \
+  -tile 6x1 \
   -geometry '+18+18' \
   -background '#D8D2C8' \
   "$repo_root/docs/app-store-screenshots/ja/contact-sheet.png"

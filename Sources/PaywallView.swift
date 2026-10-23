@@ -127,6 +127,7 @@ struct PaywallView: View {
                             .controlSize(.large)
                         } else {
                             Button {
+                                FunnelAnalytics.shared.record(.purchaseTapped)
                                 Task {
                                     if await store.purchase() { dismiss() }
                                 }
@@ -178,6 +179,8 @@ struct PaywallView: View {
                 if isPro { dismiss() }
             }
         }
+        // Once per presentation: the paywall pushes no screens of its own.
+        .onAppear { FunnelAnalytics.shared.record(.paywallShown(context.funnelSource)) }
     }
 }
 

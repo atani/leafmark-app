@@ -31,6 +31,7 @@ final class StoreManager: ObservableObject {
     @Published private(set) var productLoadFailed = false
 
     private var updatesTask: Task<Void, Never>?
+    private let analytics: FunnelAnalytics
 
 #if DEBUG
     /// Forces the Pro entitlement for App Store screenshot capture, enabled
@@ -41,7 +42,8 @@ final class StoreManager: ObservableObject {
     private let forcePro = ProcessInfo.processInfo.arguments.contains("-leafmarkForcePro")
 #endif
 
-    init() {
+    init(analytics: FunnelAnalytics? = nil) {
+        self.analytics = analytics ?? .shared
 #if DEBUG
         if forcePro { isPro = true }
 #endif
@@ -97,6 +99,7 @@ final class StoreManager: ObservableObject {
                 RevenueCatObserver.shared.recordPurchase(.success(verification))
                 if case .verified(let transaction) = verification {
                     await transaction.finish()
+                    analytics.record(.purchaseCompleted)
                     await refreshEntitlements()
                     return isPro
                 }
@@ -138,6 +141,7 @@ final class StoreManager: ObservableObject {
         guard !isPro, !hasUsedFreeExport else { return }
         hasUsedFreeExport = true
         UserDefaults.standard.set(true, forKey: Self.freeExportUsedKey)
+        analytics.record(.freeExportUsed)
     }
 
     /// Records the system share completion result; opening or canceling is not an export.

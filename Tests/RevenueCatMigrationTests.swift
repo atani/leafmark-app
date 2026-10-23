@@ -27,21 +27,40 @@ final class RevenueCatMigrationTests: XCTestCase {
         XCTAssertFalse(Purchases.isConfigured)
     }
 
-    func testShippedInfoPlistKeepsObserverDisabledInRelease() {
+    func testShippedInfoPlistEnablesObserverOnlyForTheShippingApp() {
+        // 1.20 から observer を Release で有効にする。StoreKit は購入と利用権の正本のまま。
         let info = Bundle.main.infoDictionary
-        XCTAssertEqual(info?["RevenueCatMode"] as? String, "disabled")
-        XCTAssertEqual(info?["RevenueCatPublicSDKKey"] as? String, "")
+        XCTAssertEqual(info?["RevenueCatMode"] as? String, "observer")
+        XCTAssertEqual((info?["RevenueCatPublicSDKKey"] as? String)?.hasPrefix("appl_"), true)
         for key in ["RevenueCatDataSharingApproved", "RevenueCatIntegrationReady",
                     "RevenueCatPrivacyReady", "RevenueCatReleaseEnabled"] {
-            XCTAssertEqual(info?[key] as? String, "NO", key)
+            XCTAssertEqual(info?[key] as? String, "YES", key)
         }
         let shipped = RevenueCatMigrationConfiguration(infoDictionary: info)
-        let release = executionContext(release: true)
-        XCTAssertFalse(shipped.permitsObserver(in: release))
-        // ログを出す送信・同期経路は、既定設定では起動時点で閉じている。
+        XCTAssertTrue(shipped.permitsObserver(in: executionContext(release: true)))
+        for context in [executionContext(release: true, testing: true), executionContext(release: true, preview: true),
+                        executionContext(release: true, demo: true),
+                        executionContext(bundle: "com.example.other", release: true)] {
+            XCTAssertFalse(shipped.permitsObserver(in: context), "\(context)")
+        }
+        // 起動と復元の経路は、spy の transport を 1 回だけ構成して既存購入を同期する。
         let transport = TransportSpy()
-        let observer = RevenueCatObserver(configuration: shipped, context: release, transport: transport,
-                                          entitlementProductIDs: { ["pro"] })
+        let observer = RevenueCatObserver(configuration: shipped, context: executionContext(release: true),
+                                          transport: transport, entitlementProductIDs: { ["pro"] },
+                                          defaults: isolatedDefaults().0)
+        XCTAssertNotNil(observer.start())
+        XCTAssertNotNil(observer.restoreCompleted())
+        XCTAssertEqual(transport.configurations, 1)
+    }
+
+    func testShippedFlagsWithoutAPublicKeyKeepObserverOff() {
+        var info = Bundle.main.infoDictionary ?? [:]
+        info["RevenueCatPublicSDKKey"] = ""
+        let unkeyed = RevenueCatMigrationConfiguration(infoDictionary: info)
+        XCTAssertFalse(unkeyed.permitsObserver(in: executionContext(release: true)))
+        let transport = TransportSpy()
+        let observer = RevenueCatObserver(configuration: unkeyed, context: executionContext(release: true),
+                                          transport: transport, entitlementProductIDs: { ["pro"] })
         XCTAssertNil(observer.start())
         XCTAssertNil(observer.restoreCompleted())
         XCTAssertEqual(transport.configurations, 0)

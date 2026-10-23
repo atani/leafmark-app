@@ -12,21 +12,12 @@ final class AnnotationStoreSyncTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        highlightURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("h-sync-\(UUID().uuidString).json")
-        bookmarkURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("b-sync-\(UUID().uuidString).json")
-    }
-
-    override func tearDown() {
-        try? FileManager.default.removeItem(at: highlightURL)
-        try? FileManager.default.removeItem(at: bookmarkURL)
-        super.tearDown()
+        highlightURL = makeTemporaryURL("h-sync")
+        bookmarkURL = makeTemporaryURL("b-sync")
     }
 
     private func locator(href: String = "ch1.html", progression: Double = 0.3) throws -> Locator {
-        let json = #"{"href":"\#(href)","type":"text/html","locations":{"totalProgression":\#(progression)}}"#
-        return try XCTUnwrap(try? Locator(json: try JSONValue(jsonString: json), warnings: nil))
+        try makeLocator(json: locatorJSON(href: href, progression: progression))
     }
 
     // MARK: - Highlights

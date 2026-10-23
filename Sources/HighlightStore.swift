@@ -9,6 +9,23 @@ final class HighlightStore: ObservableObject {
 
     private let storeURL: URL
 
+    /// Parsed Locators keyed by highlight id, with the JSON each was parsed
+    /// from. The reading-order sort, the reader's decorations and the export
+    /// ask for locators on every call (the sort on every comparison), so each
+    /// record's JSON is parsed once instead.
+    ///
+    /// Filled lazily on first lookup, so launch does not parse every record
+    /// (tombstones included) on the main thread. Failed parses are cached too.
+    /// An entry is reused only while its JSON matches the record asked about,
+    /// which invalidates it when the JSON changes and lets a caller holding a
+    /// different copy of a record still get that copy's locator.
+    private var locatorCache: [String: CachedLocator] = [:]
+
+    private struct CachedLocator {
+        let json: String
+        let locator: Locator?
+    }
+
     init(storeURL: URL? = nil) {
         self.storeURL = storeURL ?? FileManager.default
             .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -17,24 +34,18 @@ final class HighlightStore: ObservableObject {
     }
 
     private func load() {
-        guard let data = try? Data(contentsOf: storeURL),
-              let decoded = try? JSONDecoder().decode([Highlight].self, from: data)
-        else { return }
-        highlights = Self.pruningExpiredTombstones(decoded)
+        guard let decoded = JSONFileStorage.load([Highlight].self, from: storeURL) else { return }
+        highlights = decoded.prunedOfExpiredTombstones()
     }
 
     private func save() {
-        guard let data = try? JSONEncoder().encode(highlights) else { return }
-        try? data.write(to: storeURL, options: .atomic)
+        JSONFileStorage.save(highlights, to: storeURL)
     }
 
-    /// Drops tombstones past the sync retention window so soft-deleted records
-    /// cannot accumulate forever in the local catalog.
-    private static func pruningExpiredTombstones(_ records: [Highlight], now: Date = Date()) -> [Highlight] {
-        records.filter { record in
-            guard let deletedAt = record.deletedAt else { return true }
-            return now.timeIntervalSince(deletedAt) < AnnotationSyncMerge.tombstoneRetention
-        }
+    /// Drops cache entries of records that are no longer in the store.
+    private func evictRemovedLocators() {
+        let ids = Set(highlights.map(\.id))
+        locatorCache = locatorCache.filter { ids.contains($0.key) }
     }
 
     /// Active highlights across every book. Used for the usage milestone that
@@ -111,6 +122,7 @@ final class HighlightStore: ObservableObject {
     /// device that still holds the book keeps its annotations.
     func removeAll(for bookID: String) {
         highlights.removeAll { $0.bookID == bookID }
+        evictRemovedLocators()
         save()
     }
 
@@ -124,16 +136,26 @@ final class HighlightStore: ObservableObject {
 
     /// Replaces a book's records with a merged set from the sync layer. Callers
     /// guard against the resulting publisher change re-triggering a push.
+    ///
+    /// When nothing would change, nothing is published or written (see
+    /// `Array.replacingRecords(of:with:now:)`).
     func applyMerged(_ records: [SyncedHighlight], bookID: String) {
-        highlights.removeAll { $0.bookID == bookID }
-        highlights.append(contentsOf: records.map { $0.highlight(bookID: bookID) })
-        highlights = Self.pruningExpiredTombstones(highlights)
+        guard let replaced = highlights.replacingRecords(
+            of: bookID,
+            with: records.map { $0.highlight(bookID: bookID) }
+        ) else { return }
+        highlights = replaced
+        evictRemovedLocators()
         save()
     }
 
     func locator(of highlight: Highlight) -> Locator? {
-        guard let value = try? JSONValue(jsonString: highlight.locatorJSON) else { return nil }
-        return try? Locator(json: value, warnings: nil)
+        if let cached = locatorCache[highlight.id], cached.json == highlight.locatorJSON {
+            return cached.locator
+        }
+        let locator = LocatorJSON.parse(highlight.locatorJSON)
+        locatorCache[highlight.id] = CachedLocator(json: highlight.locatorJSON, locator: locator)
+        return locator
     }
 
     private func progression(of highlight: Highlight) -> Double? {
@@ -200,9 +222,17 @@ final class HighlightStore: ObservableObject {
         return lines
     }
 
-    static func frontMatter(for book: Book, exportedAt: Date, timeZone: TimeZone) -> [String] {
+    /// Reused across exports ("Export All" builds one front matter per book).
+    /// Main-actor isolated with the store, so setting `timeZone` per call
+    /// cannot race.
+    private static let exportDateFormatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withFullDate]
+        return formatter
+    }()
+
+    static func frontMatter(for book: Book, exportedAt: Date, timeZone: TimeZone) -> [String] {
+        let formatter = exportDateFormatter
         formatter.timeZone = timeZone
 
         var lines = ["---", "title: \(yamlQuoted(book.title))"]

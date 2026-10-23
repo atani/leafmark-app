@@ -299,76 +299,58 @@ final class SyncEngine: ObservableObject {
     /// yields an empty document (tolerated). Runs off-main; it touches no
     /// MainActor state.
     private nonisolated static func readDocument(at url: URL) async -> AnnotationSyncDocument {
-        await Task.detached {
-            var documents: [AnnotationSyncDocument] = []
-            var coordinationError: NSError?
-            NSFileCoordinator().coordinate(readingItemAt: url, options: [], error: &coordinationError) { readURL in
-                if let document = decode(at: readURL) {
-                    documents.append(document)
-                }
-                let conflicts = NSFileVersion.unresolvedConflictVersionsOfItem(at: readURL) ?? []
-                for version in conflicts {
-                    if let document = decode(at: version.url) {
-                        documents.append(document)
-                    }
-                }
-            }
-            let merged = AnnotationSyncMerge.merge(documents)
-            resolveConflicts(at: url)
-            return merged
-        }.value
+        await readMerged(AnnotationSyncDocument.self, at: url) { AnnotationSyncMerge.merge($0) }
     }
 
     private nonisolated static func writeDocument(_ document: AnnotationSyncDocument, to url: URL) async {
-        await Task.detached {
-            guard let data = try? JSONEncoder().encode(document) else { return }
-            var coordinationError: NSError?
-            NSFileCoordinator().coordinate(
-                writingItemAt: url,
-                options: .forReplacing,
-                error: &coordinationError
-            ) { writeURL in
-                try? FileManager.default.createDirectory(
-                    at: writeURL.deletingLastPathComponent(),
-                    withIntermediateDirectories: true
-                )
-                try? data.write(to: writeURL, options: .atomic)
-            }
-        }.value
+        await writeCoordinated(document, to: url)
     }
 
-    private nonisolated static func decode(at url: URL) -> AnnotationSyncDocument? {
-        guard let data = try? Data(contentsOf: url) else { return nil }
-        return try? JSONDecoder().decode(AnnotationSyncDocument.self, from: data)
-    }
-
-    /// Catalog counterparts of `readDocument` / `writeDocument`: same
-    /// NSFileCoordinator + NSFileVersion conflict-union handling, folding every
+    /// Catalog counterparts of `readDocument` / `writeDocument`, folding every
     /// unresolved conflict copy into one via the idempotent catalog merge.
     private nonisolated static func readCatalog(at url: URL) async -> LibraryCatalog {
+        await readMerged(LibraryCatalog.self, at: url) { CatalogSyncMerge.merge($0) }
+    }
+
+    private nonisolated static func writeCatalog(_ catalog: LibraryCatalog, to url: URL) async {
+        await writeCoordinated(catalog, to: url)
+    }
+
+    /// Coordinated read of `url` and every unresolved conflict version of it,
+    /// folded into one value with `merge`; the conflict is then marked
+    /// resolved. Unreadable copies are skipped, so `merge` may get an empty
+    /// array.
+    private nonisolated static func readMerged<Value: Decodable & Sendable>(
+        _ type: Value.Type,
+        at url: URL,
+        merge: @escaping @Sendable ([Value]) -> Value
+    ) async -> Value {
         await Task.detached {
-            var catalogs: [LibraryCatalog] = []
+            var values: [Value] = []
             var coordinationError: NSError?
             NSFileCoordinator().coordinate(readingItemAt: url, options: [], error: &coordinationError) { readURL in
-                if let catalog = decodeCatalog(at: readURL) {
-                    catalogs.append(catalog)
+                if let value = JSONFileStorage.load(type, from: readURL) {
+                    values.append(value)
                 }
                 let conflicts = NSFileVersion.unresolvedConflictVersionsOfItem(at: readURL) ?? []
                 for version in conflicts {
-                    if let catalog = decodeCatalog(at: version.url) {
-                        catalogs.append(catalog)
+                    if let value = JSONFileStorage.load(type, from: version.url) {
+                        values.append(value)
                     }
                 }
             }
-            let merged = CatalogSyncMerge.merge(catalogs)
+            let merged = merge(values)
             resolveConflicts(at: url)
             return merged
         }.value
     }
 
-    private nonisolated static func writeCatalog(_ catalog: LibraryCatalog, to url: URL) async {
+    private nonisolated static func writeCoordinated<Value: Encodable & Sendable>(
+        _ value: Value,
+        to url: URL
+    ) async {
         await Task.detached {
-            guard let data = try? JSONEncoder().encode(catalog) else { return }
+            guard let data = try? JSONEncoder().encode(value) else { return }
             var coordinationError: NSError?
             NSFileCoordinator().coordinate(
                 writingItemAt: url,
@@ -382,11 +364,6 @@ final class SyncEngine: ObservableObject {
                 try? data.write(to: writeURL, options: .atomic)
             }
         }.value
-    }
-
-    private nonisolated static func decodeCatalog(at url: URL) -> LibraryCatalog? {
-        guard let data = try? Data(contentsOf: url) else { return nil }
-        return try? JSONDecoder().decode(LibraryCatalog.self, from: data)
     }
 
     /// Merge is idempotent and commutative, so once every version is folded in

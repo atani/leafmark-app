@@ -23,15 +23,12 @@ final class StatsStore: ObservableObject {
     }
 
     private func load() {
-        guard let data = try? Data(contentsOf: storeURL),
-              let decoded = try? JSONDecoder().decode([ReadingSession].self, from: data)
-        else { return }
+        guard let decoded = JSONFileStorage.load([ReadingSession].self, from: storeURL) else { return }
         sessions = decoded
     }
 
     private func save() {
-        guard let data = try? JSONEncoder().encode(sessions) else { return }
-        try? data.write(to: storeURL, options: .atomic)
+        JSONFileStorage.save(sessions, to: storeURL)
     }
 
     /// Sessions shorter than this are noise (opened by accident), not reading.

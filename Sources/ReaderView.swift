@@ -62,7 +62,10 @@ final class NavigatorBridge: ObservableObject {
 
 struct ReaderView: UIViewControllerRepresentable {
     let publication: Publication
-    let initialLocation: Locator?
+    /// Resolves the position to open at. Called once when the navigator is
+    /// created, so the saved locator JSON is not re-parsed on each body
+    /// evaluation (one per page turn).
+    let makeInitialLocation: () -> Locator?
     let preferences: EPUBPreferences
     /// Builds the @font-face declarations for user-imported fonts
     /// (FontStore). Called once when the navigator is created — reading
@@ -168,7 +171,7 @@ struct ReaderView: UIViewControllerRepresentable {
             ]
             let navigator = try EPUBNavigatorViewController(
                 publication: publication,
-                initialLocation: initialLocation,
+                initialLocation: makeInitialLocation(),
                 config: config
             )
             navigator.delegate = context.coordinator

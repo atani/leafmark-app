@@ -28,25 +28,13 @@ final class BookmarkStore: ObservableObject {
     }
 
     private func load() {
-        guard let data = try? Data(contentsOf: storeURL),
-              let decoded = try? JSONDecoder().decode([Bookmark].self, from: data)
-        else { return }
-        bookmarks = Self.pruningExpiredTombstones(decoded)
+        guard let decoded = JSONFileStorage.load([Bookmark].self, from: storeURL) else { return }
+        bookmarks = decoded.prunedOfExpiredTombstones()
         rebuildCache()
     }
 
     private func save() {
-        guard let data = try? JSONEncoder().encode(bookmarks) else { return }
-        try? data.write(to: storeURL, options: .atomic)
-    }
-
-    /// Drops tombstones past the sync retention window so soft-deleted records
-    /// cannot accumulate forever in the local catalog.
-    private static func pruningExpiredTombstones(_ records: [Bookmark], now: Date = Date()) -> [Bookmark] {
-        records.filter { record in
-            guard let deletedAt = record.deletedAt else { return true }
-            return now.timeIntervalSince(deletedAt) < AnnotationSyncMerge.tombstoneRetention
-        }
+        JSONFileStorage.save(bookmarks, to: storeURL)
     }
 
     private func rebuildCache() {
@@ -56,15 +44,10 @@ final class BookmarkStore: ObservableObject {
         locatorCache = Dictionary(
             bookmarks.compactMap { bookmark -> (String, Locator)? in
                 guard bookmark.deletedAt == nil else { return nil }
-                return Self.parseLocator(bookmark.locatorJSON).map { (bookmark.id, $0) }
+                return LocatorJSON.parse(bookmark.locatorJSON).map { (bookmark.id, $0) }
             },
             uniquingKeysWith: { current, _ in current }
         )
-    }
-
-    private static func parseLocator(_ json: String) -> Locator? {
-        guard let value = try? JSONValue(jsonString: json) else { return nil }
-        return try? Locator(json: value, warnings: nil)
     }
 
     /// Bookmarks of a book, ordered by reading position.
@@ -171,10 +154,15 @@ final class BookmarkStore: ObservableObject {
 
     /// Replaces a book's records with a merged set from the sync layer. Callers
     /// guard against the resulting publisher change re-triggering a push.
+    ///
+    /// When nothing would change, nothing is published or written (see
+    /// `Array.replacingRecords(of:with:now:)`).
     func applyMerged(_ records: [SyncedBookmark], bookID: String) {
-        bookmarks.removeAll { $0.bookID == bookID }
-        bookmarks.append(contentsOf: records.map { $0.bookmark(bookID: bookID) })
-        bookmarks = Self.pruningExpiredTombstones(bookmarks)
+        guard let replaced = bookmarks.replacingRecords(
+            of: bookID,
+            with: records.map { $0.bookmark(bookID: bookID) }
+        ) else { return }
+        bookmarks = replaced
         rebuildCache()
         save()
     }

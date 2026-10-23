@@ -8,14 +8,8 @@ final class StatsStoreTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        tempURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("stats-\(UUID().uuidString).json")
+        tempURL = makeTemporaryURL("stats")
         store = StatsStore(storeURL: tempURL)
-    }
-
-    override func tearDown() {
-        try? FileManager.default.removeItem(at: tempURL)
-        super.tearDown()
     }
 
     // MARK: - format

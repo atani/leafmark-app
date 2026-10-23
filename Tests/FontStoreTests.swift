@@ -9,13 +9,7 @@ final class FontStoreTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        tempDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("fontstore-\(UUID().uuidString)", isDirectory: true)
-    }
-
-    override func tearDown() {
-        try? FileManager.default.removeItem(at: tempDir)
-        super.tearDown()
+        tempDir = makeTemporaryURL("fontstore", pathExtension: "")
     }
 
     /// Writes a dummy file with the given name into a scratch inbox and

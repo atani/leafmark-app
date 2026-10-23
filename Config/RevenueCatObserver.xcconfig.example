@@ -1,4 +1,6 @@
-// Leafmark専用、レビュー用。実キー/連携/公開privacy未確認のため全ゲートはOFF。
+// Leafmark専用、設定項目の説明用（プロジェクトには適用されない）。
+// 1.20からの実際の値は project.yml の settings.base にある（observer、公開キー、全ゲートYES）。
+// 停止したいときは、このファイルの値を project.yml へ写してビルドし直す。
 // SDKは過去のproduction/Sandbox取引も自動取得する。Sandboxだけの設定ではない。
 REVENUECAT_MODE = observer
 REVENUECAT_PUBLIC_SDK_KEY =
@@ -6,6 +8,5 @@ REVENUECAT_DATA_SHARING_APPROVED = NO
 REVENUECAT_INTEGRATION_READY = NO
 REVENUECAT_PRIVACY_READY = NO
 REVENUECAT_RELEASE_ENABLED = NO
-// 確認順: 正しいapp/bundle/public SDK keyとIAP/catalog → 公開privacy/ASC申告 →
-// Debug検証のopt-in → 実購入/復元/返金/家族共有検証 → 別途Release有効化レビュー。
+// キーが空、またはいずれかのゲートがNOなら起動しない。
 // 旧sandbox設定をONにしても初期化されない。

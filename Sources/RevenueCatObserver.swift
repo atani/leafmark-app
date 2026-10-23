@@ -20,7 +20,7 @@ private struct LiveRevenueCatObserverTransport: RevenueCatObserverTransport {
     func configure(publicSDKKey: String) -> Bool {
         // Re-check the real process, not the injected context, so tests never start the SDK.
         // Refuse to use an SDK instance configured by another owner/key.
-        guard RevenueCatExecutionContext.current.allowsObserver(releaseEnabled: releaseEnabled),
+        guard AppExecutionContext.current.allowsObserver(releaseEnabled: releaseEnabled),
               !Purchases.isConfigured else { return false }
         // SDK error/debug messages can contain complete receipt/customer response bodies.
         Purchases.logHandler = { _, _ in }
@@ -47,17 +47,17 @@ final class RevenueCatObserver {
     private static let productIDs: Set<String> = ["com.atani.inkwell.pro"]
     private static let migrationPrefix = "revenuecat.observer.migration.v2.products."
     // Fixed templates only: operation name and error type, never IDs, receipts or SDK messages.
-    private static let logger = Logger(subsystem: RevenueCatExecutionContext.appBundleIdentifier, category: "RevenueCat")
+    private static let logger = Logger(subsystem: AppExecutionContext.appBundleIdentifier, category: "RevenueCat")
 
     private let configuration: RevenueCatMigrationConfiguration
-    private let context: RevenueCatExecutionContext
+    private let context: AppExecutionContext
     private let transport: any RevenueCatObserverTransport
     private let entitlementProductIDs: () async -> Set<String>
     private let coordinator: RevenueCatMigrationCoordinator
     private var configured = false
 
     init(configuration: RevenueCatMigrationConfiguration? = nil,
-         context: RevenueCatExecutionContext = .current,
+         context: AppExecutionContext = .current,
          transport: (any RevenueCatObserverTransport)? = nil,
          entitlementProductIDs: (() async -> Set<String>)? = nil,
          defaults: UserDefaults = .standard) {
@@ -139,7 +139,8 @@ final class RevenueCatObserver {
         RevenueCatMigrationPurchase(
             productID: transaction.productID, isVerified: true,
             isRevoked: transaction.revocationDate != nil,
-            expirationDate: transaction.expirationDate
+            expirationDate: transaction.expirationDate,
+            isFamilyShared: transaction.ownershipType == .familyShared
         ).isEligible(productIDs: productIDs, now: .now)
     }
 }

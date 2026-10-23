@@ -27,21 +27,40 @@ final class RevenueCatMigrationTests: XCTestCase {
         XCTAssertFalse(Purchases.isConfigured)
     }
 
-    func testShippedInfoPlistKeepsObserverDisabledInRelease() {
+    func testShippedInfoPlistEnablesObserverOnlyForTheShippingApp() {
+        // 1.20 から observer を Release で有効にする。StoreKit は購入と利用権の正本のまま。
         let info = Bundle.main.infoDictionary
-        XCTAssertEqual(info?["RevenueCatMode"] as? String, "disabled")
-        XCTAssertEqual(info?["RevenueCatPublicSDKKey"] as? String, "")
+        XCTAssertEqual(info?["RevenueCatMode"] as? String, "observer")
+        XCTAssertEqual((info?["RevenueCatPublicSDKKey"] as? String)?.hasPrefix("appl_"), true)
         for key in ["RevenueCatDataSharingApproved", "RevenueCatIntegrationReady",
                     "RevenueCatPrivacyReady", "RevenueCatReleaseEnabled"] {
-            XCTAssertEqual(info?[key] as? String, "NO", key)
+            XCTAssertEqual(info?[key] as? String, "YES", key)
         }
         let shipped = RevenueCatMigrationConfiguration(infoDictionary: info)
-        let release = executionContext(release: true)
-        XCTAssertFalse(shipped.permitsObserver(in: release))
-        // ログを出す送信・同期経路は、既定設定では起動時点で閉じている。
+        XCTAssertTrue(shipped.permitsObserver(in: executionContext(release: true)))
+        for context in [executionContext(release: true, testing: true), executionContext(release: true, preview: true),
+                        executionContext(release: true, demo: true),
+                        executionContext(bundle: "com.example.other", release: true)] {
+            XCTAssertFalse(shipped.permitsObserver(in: context), "\(context)")
+        }
+        // 起動と復元の経路は、spy の transport を 1 回だけ構成して既存購入を同期する。
         let transport = TransportSpy()
-        let observer = RevenueCatObserver(configuration: shipped, context: release, transport: transport,
-                                          entitlementProductIDs: { ["pro"] })
+        let observer = RevenueCatObserver(configuration: shipped, context: executionContext(release: true),
+                                          transport: transport, entitlementProductIDs: { ["pro"] },
+                                          defaults: isolatedDefaults().0)
+        XCTAssertNotNil(observer.start())
+        XCTAssertNotNil(observer.restoreCompleted())
+        XCTAssertEqual(transport.configurations, 1)
+    }
+
+    func testShippedFlagsWithoutAPublicKeyKeepObserverOff() {
+        var info = Bundle.main.infoDictionary ?? [:]
+        info["RevenueCatPublicSDKKey"] = ""
+        let unkeyed = RevenueCatMigrationConfiguration(infoDictionary: info)
+        XCTAssertFalse(unkeyed.permitsObserver(in: executionContext(release: true)))
+        let transport = TransportSpy()
+        let observer = RevenueCatObserver(configuration: unkeyed, context: executionContext(release: true),
+                                          transport: transport, entitlementProductIDs: { ["pro"] })
         XCTAssertNil(observer.start())
         XCTAssertNil(observer.restoreCompleted())
         XCTAssertEqual(transport.configurations, 0)
@@ -66,6 +85,12 @@ final class RevenueCatMigrationTests: XCTestCase {
         for value in [purchase(expiration: now), purchase(expiration: Date(timeIntervalSince1970: 99)), purchase(revoked: true), purchase(verified: false), purchase(productID: "other")] {
             XCTAssertFalse(value.isEligible(productIDs: ["pro"], now: now))
         }
+    }
+
+    func testFamilySharedGrantIsNotAMigrationCandidate() {
+        let shared = RevenueCatMigrationPurchase(productID: "pro", isVerified: true, isRevoked: false,
+                                                 expirationDate: nil, isFamilyShared: true)
+        XCTAssertFalse(shared.isEligible(productIDs: ["pro"], now: Date(timeIntervalSince1970: 100)))
     }
 
     func testDisabledAndFreeCustomersNeverSync() async {
@@ -293,13 +318,13 @@ final class RevenueCatMigrationTests: XCTestCase {
                          "-tutorial-live-video-test-mode", "-show-monetization-demo", "-show-ad-demo",
                          "-screenshot-seed", "-screenshot-tab", "-ignore-purchases", "-force-pro",
                          "-leafmarkForcePro", "-ui-test-save-success", "UITEST_PRO", "UITEST_HISTORY", "UITEST_PAYWALL"] {
-            let context = RevenueCatExecutionContext.make(bundleIdentifier: executionContext().bundleIdentifier,
+            let context = AppExecutionContext.make(bundleIdentifier: executionContext().bundleIdentifier,
                 isReleaseBuild: false, arguments: ["app", argument], environment: [:], hasXCTestClass: false)
             XCTAssertTrue(context.isDemo, argument)
             XCTAssertFalse(observerConfiguration().permitsObserver(in: context), argument)
         }
         for key in ["SPH_UI_TEST_EMPTY_STORE", "SPH_UI_TEST_PREVIEW_PLANS", "UITEST_PRO", "PEYO_RECORD_DEMO"] {
-            let context = RevenueCatExecutionContext.make(bundleIdentifier: executionContext().bundleIdentifier,
+            let context = AppExecutionContext.make(bundleIdentifier: executionContext().bundleIdentifier,
                 isReleaseBuild: false, arguments: ["app"], environment: [key: "1"], hasXCTestClass: false)
             XCTAssertTrue(context.isDemo, key)
             XCTAssertFalse(observerConfiguration().permitsObserver(in: context), key)
@@ -308,15 +333,15 @@ final class RevenueCatMigrationTests: XCTestCase {
 
     func testOrdinaryLaunchAndRuntimeTestPreviewDetection() {
         let bundle = executionContext().bundleIdentifier
-        let ordinary = RevenueCatExecutionContext.make(bundleIdentifier: bundle, isReleaseBuild: false,
+        let ordinary = AppExecutionContext.make(bundleIdentifier: bundle, isReleaseBuild: false,
             arguments: ["app", "-AppleLanguages", "(ja)"], environment: [:], hasXCTestClass: false)
         XCTAssertTrue(observerConfiguration().permitsObserver(in: ordinary))
         for environment in [["XCTestConfigurationFilePath": "test.xctest"], ["XCODE_RUNNING_FOR_PREVIEWS": "1"]] {
-            let context = RevenueCatExecutionContext.make(bundleIdentifier: bundle, isReleaseBuild: false,
+            let context = AppExecutionContext.make(bundleIdentifier: bundle, isReleaseBuild: false,
                 arguments: ["app"], environment: environment, hasXCTestClass: false)
             XCTAssertFalse(observerConfiguration().permitsObserver(in: context))
         }
-        let testing = RevenueCatExecutionContext.make(bundleIdentifier: bundle, isReleaseBuild: false,
+        let testing = AppExecutionContext.make(bundleIdentifier: bundle, isReleaseBuild: false,
             arguments: ["app"], environment: [:], hasXCTestClass: true)
         XCTAssertFalse(observerConfiguration().permitsObserver(in: testing))
     }
@@ -328,7 +353,7 @@ final class RevenueCatMigrationTests: XCTestCase {
     }
 
     private func executionContext(bundle: String = "com.atani.inkwell", release: Bool = false,
-                                  testing: Bool = false, preview: Bool = false, demo: Bool = false) -> RevenueCatExecutionContext {
+                                  testing: Bool = false, preview: Bool = false, demo: Bool = false) -> AppExecutionContext {
         .init(bundleIdentifier: bundle, isReleaseBuild: release, isTesting: testing, isPreview: preview, isDemo: demo)
     }
 

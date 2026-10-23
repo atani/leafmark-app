@@ -592,6 +592,7 @@ private struct HighlightsSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showPaywall = false
     @State private var paywallContext: PaywallContext = .export
+    @State private var paywallSource: PaywallSource?
 
     @State private var showExport = false
 
@@ -616,6 +617,7 @@ private struct HighlightsSheet: View {
                                     showExport = true
                                 } else {
                                     paywallContext = .export
+                                    paywallSource = nil
                                     showPaywall = true
                                 }
                             } label: {
@@ -678,7 +680,7 @@ private struct HighlightsSheet: View {
                 }
             }
             .sheet(isPresented: $showPaywall) {
-                PaywallView(store: purchases, context: paywallContext)
+                PaywallView(store: purchases, context: paywallContext, source: paywallSource)
             }
             .sheet(isPresented: $showExport) {
                 ReadingNotesExportView(makeExport: { store.exportFile(for: book, layout: $0) }, purchases: purchases) {
@@ -704,6 +706,7 @@ private struct HighlightsSheet: View {
             .foregroundStyle(.secondary)
             Button("Upgrade") {
                 paywallContext = items.count >= StoreManager.freeHighlightLimit ? .highlightLimit : .highlights
+                paywallSource = .highlightsUpgrade
                 showPaywall = true
             }
             .font(.footnote.weight(.semibold))

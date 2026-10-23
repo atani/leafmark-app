@@ -44,6 +44,8 @@ fastlane/test_output
 *.mobileprovision
 .env
 .env.local
+# Firebase の設定。理由は docs/adr/0009-purchase-funnel-events.md
+GoogleService-Info.plist
 
 # Local test books
 *.epub

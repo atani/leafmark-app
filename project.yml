@@ -21,8 +21,7 @@ packages:
 
 settings:
   base:
-    # RevenueCat observer (docs/revenuecat-migration.md)。StoreKit が購入と利用権の
-    # 正本のまま。公開 SDK キーはクライアント向けの公開キーで、秘密鍵ではない。
+    # RevenueCat observer。設定と公開 SDK キーの扱いは docs/revenuecat-migration.md。
     REVENUECAT_MODE: observer
     REVENUECAT_PUBLIC_SDK_KEY: appl_WgQUDiEFTHgxCpPyYycrMwpzxAo
     REVENUECAT_DATA_SHARING_APPROVED: "YES"
@@ -45,22 +44,26 @@ targets:
         name: Sources
       - path: Resources
         buildPhase: resources
-        # 公開リポジトリのためコミットしない。下の postBuildScripts が、手元に
-        # あるときだけ同梱する（無ければ Firebase を構成せず何も送らない）。
+        # GoogleService-Info.plist の扱いは ADR-0009。Release だけ下のスクリプトで同梱する。
         excludes:
           - GoogleService-Info.plist
     postBuildScripts:
-      - name: Copy GoogleService-Info.plist if present
+      - name: Copy GoogleService-Info.plist for Release
         basedOnDependencyAnalysis: false
         script: |
           src="${SRCROOT}/Resources/GoogleService-Info.plist"
           dst="${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleService-Info.plist"
-          if [ -f "$src" ]; then cp "$src" "$dst"; else rm -f "$dst"; fi
+          rm -f "$dst"
+          if [ "${CONFIGURATION}" != "Release" ]; then exit 0; fi
+          if [ -f "$src" ]; then
+            cp "$src" "$dst"
+          else
+            echo "warning: Resources/GoogleService-Info.plist がありません。このビルドは Firebase Analytics に何も送りません（README の手順で取得してください）。"
+          fi
     dependencies:
       - package: RevenueCat
         product: RevenueCat
-      # IDFA 対応モジュール (GoogleAppMeasurementIdentitySupport / AdSupport) を
-      # 含まない product。FirebaseAnalytics product は IDFA 対応を同梱する。
+      # IDFA 対応を含まない product。理由は ADR-0009。
       - package: Firebase
         product: FirebaseAnalyticsCore
       - package: Readium
@@ -77,8 +80,7 @@ targets:
         RevenueCatIntegrationReady: "$(REVENUECAT_INTEGRATION_READY)"
         RevenueCatPrivacyReady: "$(REVENUECAT_PRIVACY_READY)"
         RevenueCatReleaseEnabled: "$(REVENUECAT_RELEASE_ENABLED)"
-        # Firebase Analytics (ADR-0009): 広告系の信号と画面の自動計測を止める。
-        # first_open / session_start などの自動イベントは流入の分母として残す。
+        # Firebase Analytics の安全設定。理由は ADR-0009。
         GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED: false
         GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS: false
         GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_STORAGE: false

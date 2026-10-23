@@ -7,9 +7,11 @@
 	<key>NSPrivacyTrackingDomains</key>
 	<array/>
 	<key>NSPrivacyCollectedDataTypes</key>
-	<!-- ADR-0009: Firebase Analytics 12.17.0 (FirebaseAnalytics / GoogleAppMeasurement)
-	     ships no privacy manifest, so its collection is declared here.
-	     RevenueCat and FirebaseInstallations declare their own types. -->
+	<!-- The full ASC list is in ADR-0009. Firebase Analytics 12.17.0
+	     (FirebaseAnalytics / GoogleAppMeasurement) ships no privacy manifest,
+	     so its collection is declared here. RevenueCat's manifest adds Purchase
+	     History (App Functionality); FirebaseInstallations' adds Other
+	     Diagnostic Data (Analytics). -->
 	<array>
 		<dict>
 			<!-- The four purchase-funnel events and automatic session events. -->

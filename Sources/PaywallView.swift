@@ -70,6 +70,24 @@ enum PriceChangeNotice {
 struct PaywallView: View {
     @ObservedObject var store: StoreManager
     var context: PaywallContext = .general
+    /// Overrides `context.funnelSource` when one context has several entries.
+    var source: PaywallSource?
+    /// Injected by tests; the app uses `FunnelAnalytics.shared`.
+    var analytics: FunnelAnalytics?
+
+    private var funnelSource: PaywallSource { source ?? context.funnelSource }
+    private var funnel: FunnelAnalytics { analytics ?? .shared }
+
+    /// Once per presentation: the paywall pushes no screens of its own.
+    func recordShown() {
+        funnel.record(.paywallShown(funnelSource))
+    }
+
+    /// Records the tap, then buys. Returns true when Pro was unlocked.
+    func purchaseTapped() async -> Bool {
+        funnel.record(.purchaseTapped(funnelSource))
+        return await store.purchase(source: funnelSource)
+    }
     @Environment(\.dismiss) private var dismiss
 
     private let perks: [(icon: String, title: String, detail: String)] = [
@@ -127,9 +145,8 @@ struct PaywallView: View {
                             .controlSize(.large)
                         } else {
                             Button {
-                                FunnelAnalytics.shared.record(.purchaseTapped)
                                 Task {
-                                    if await store.purchase() { dismiss() }
+                                    if await purchaseTapped() { dismiss() }
                                 }
                             } label: {
                                 Group {
@@ -179,8 +196,7 @@ struct PaywallView: View {
                 if isPro { dismiss() }
             }
         }
-        // Once per presentation: the paywall pushes no screens of its own.
-        .onAppear { FunnelAnalytics.shared.record(.paywallShown(context.funnelSource)) }
+        .onAppear(perform: recordShown)
     }
 }
 

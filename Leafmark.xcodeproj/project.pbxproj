@@ -16,6 +16,7 @@
 		1CDC5B0A3615BC9FAD23B612 /* BookmarkStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CEA69E9BCF0A27ADAAFCCA /* BookmarkStoreTests.swift */; };
 		21BBCDCA9423422809BA1676 /* ReadiumContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A07EAADF1B326EF95C5E10 /* ReadiumContext.swift */; };
 		266A5D2C8CD3F0CD9EFD299C /* AnnotationSyncMerge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D21894100425C23BBC7A1443 /* AnnotationSyncMerge.swift */; };
+		27BC34C23FB0CC10E9B75C5D /* AppExecutionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68B021AD217A19089DF297BD /* AppExecutionContext.swift */; };
 		288150456226968E77F3B60E /* ReadiumStreamer in Frameworks */ = {isa = PBXBuildFile; productRef = BD83301B5EE3E55ADE6EA689 /* ReadiumStreamer */; };
 		2B1DF19A4A2F60CD4FFA10C4 /* SearchSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23C1B97E352C50C8C2297FFE /* SearchSheet.swift */; };
 		2E635D7E7CD5B13158DDA76C /* HighlightStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAAF403AFC257885411DC2B1 /* HighlightStore.swift */; };
@@ -119,6 +120,7 @@
 		5B9939F3BC5DD37BBCACDDF4 /* AnnotationStoreSyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationStoreSyncTests.swift; sourceTree = "<group>"; };
 		5D3451D5040C96C09C7F7E70 /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
 		61C6D4B518701FDF9B5AD443 /* StatsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsStore.swift; sourceTree = "<group>"; };
+		68B021AD217A19089DF297BD /* AppExecutionContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppExecutionContext.swift; sourceTree = "<group>"; };
 		68E127622541F806E6B7F690 /* BookmarkStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkStore.swift; sourceTree = "<group>"; };
 		6CF19B4D39037C54571A1D0B /* CatalogSyncMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogSyncMergeTests.swift; sourceTree = "<group>"; };
 		6FD256E691453FBF4E69442C /* LibrarySortOrderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySortOrderTests.swift; sourceTree = "<group>"; };
@@ -184,6 +186,7 @@
 				D21894100425C23BBC7A1443 /* AnnotationSyncMerge.swift */,
 				BB8EB382B533AF6C7B75F778 /* AnnotationSyncModels.swift */,
 				55CE112C68CD2B9BA6630DB8 /* AppearanceStore.swift */,
+				68B021AD217A19089DF297BD /* AppExecutionContext.swift */,
 				D303918786A66063AE513757 /* AppInfo.swift */,
 				32C43B2B2B3C7796A0CA9260 /* Assets.xcassets */,
 				2FD8F22F199BCC99E005D45D /* Book.swift */,
@@ -290,7 +293,7 @@
 				8337051FCC32A9A2928CFFF6 /* Sources */,
 				A2C0D50AA7E965346BB96103 /* Resources */,
 				8B28333EA74D598538F1ACEB /* Frameworks */,
-				38374EB6F6D2059C5B581E38 /* Copy GoogleService-Info.plist if present */,
+				6EF878E15B5423802856F4C2 /* Copy GoogleService-Info.plist for Release */,
 			);
 			buildRules = (
 			);
@@ -398,7 +401,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		38374EB6F6D2059C5B581E38 /* Copy GoogleService-Info.plist if present */ = {
+		6EF878E15B5423802856F4C2 /* Copy GoogleService-Info.plist for Release */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -408,14 +411,14 @@
 			);
 			inputPaths = (
 			);
-			name = "Copy GoogleService-Info.plist if present";
+			name = "Copy GoogleService-Info.plist for Release";
 			outputFileListPaths = (
 			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "src=\"${SRCROOT}/Resources/GoogleService-Info.plist\"\ndst=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleService-Info.plist\"\nif [ -f \"$src\" ]; then cp \"$src\" \"$dst\"; else rm -f \"$dst\"; fi\n";
+			shellScript = "src=\"${SRCROOT}/Resources/GoogleService-Info.plist\"\ndst=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleService-Info.plist\"\nrm -f \"$dst\"\nif [ \"${CONFIGURATION}\" != \"Release\" ]; then exit 0; fi\nif [ -f \"$src\" ]; then\n  cp \"$src\" \"$dst\"\nelse\n  echo \"warning: Resources/GoogleService-Info.plist がありません。このビルドは Firebase Analytics に何も送りません（README の手順で取得してください）。\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -456,6 +459,7 @@
 			files = (
 				266A5D2C8CD3F0CD9EFD299C /* AnnotationSyncMerge.swift in Sources */,
 				6E932F8C3E4FCD98E66F7DC3 /* AnnotationSyncModels.swift in Sources */,
+				27BC34C23FB0CC10E9B75C5D /* AppExecutionContext.swift in Sources */,
 				C49569F293B65AC30FB7BC55 /* AppInfo.swift in Sources */,
 				C663421BD1272A8066FB67AD /* AppearanceStore.swift in Sources */,
 				7E2EB70DF7F4F83B8C693881 /* Book.swift in Sources */,

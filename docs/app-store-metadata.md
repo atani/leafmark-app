@@ -91,8 +91,8 @@ ANNOTATE AND KEEP YOUR NOTES
 
 PRIVACY BY DESIGN
 • No account and no sign-in
-• No tracking and no ads. Only a few anonymous purchase-screen events are measured
-• Everything stays on your device
+• No tracking and no ads. App usage and the steps to purchase are measured anonymously; book titles and text are never sent
+• Books stay on your device. Highlights, bookmarks and reading positions sync through your own iCloud, not a Leafmark server
 
 LEAFMARK PRO
 Reading is always free. Import your library, render any book and try the feel before you decide. You also get one free Markdown export, so you can see exactly what lands in your notes before paying. A single one-time purchase, Leafmark Pro, unlocks the full annotation workflow: unlimited highlights (the free tier keeps up to three per book), unlimited Markdown export, and reading statistics. Restore your purchase any time.
@@ -230,8 +230,8 @@ Leafmark は、じっくり読んでメモを取る人のための、シンプ�
 
 プライバシー重視の設計
 ・アカウント不要、サインイン不要
-・トラッキングなし、広告なし。計測は購入画面まわりの匿名イベントだけ
-・すべてのデータはデバイス上に保持
+・トラッキングなし、広告なし。アプリの利用状況と購入までの操作を匿名で計測し、書名や本文は送信しません
+・本はデバイス上に保持。ハイライト・しおり・読書位置は Leafmark のサーバーではなく自分の iCloud で同期
 
 Leafmark Pro
 読書は永久無料。ライブラリをインポートし、好きな本をレンダリングし、使い心地を確かめてから購入を決められます。Markdown エクスポートも無料で1回試せるので、手元のノートに何が入るかを確かめてから判断できます。買い切りの Leafmark Pro で、無制限ハイライト（無料版は1冊あたり3件まで）、無制限の Markdown エクスポート、読書統計がアンロックされます。いつでも購入を復元できます。

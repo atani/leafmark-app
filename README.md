@@ -2,7 +2,7 @@
 
 パワーユーザー向け・買い切り EPUB リーダー。開発放棄された Marvin の難民市場を対象にする。
 
-**"Your highlights are yours."** — アカウントなし・トラッキングなし・クラウドなし（購入までの匿名イベントだけ計測。[ADR-0009](docs/adr/0009-purchase-funnel-events.md)）。
+**"Your highlights are yours."** — アカウントなし・トラッキングなし・Leafmark のサーバーなし。注釈は自分の iCloud で同期し、利用状況と購入までの操作だけを匿名で計測する（[ADR-0009](docs/adr/0009-purchase-funnel-events.md)）。
 ハイライトはいつでも Markdown でエクスポートできる。
 
 ## ゴール(第1マイルストーン)

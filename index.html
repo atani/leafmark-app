@@ -3,7 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Leafmark — EPUB Reader</title>
+<title>Leafmark — EPUB Reader with Markdown Highlight Export</title>
+<meta name="description" content="Read EPUBs on iPhone and iPad, highlight passages, and export reading notes to Markdown for Obsidian. Reading and your first export are free.">
+<link rel="canonical" href="https://atani.github.io/leafmark-app/">
+<meta name="apple-itunes-app" content="app-id=6781045740">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Leafmark — Your highlights are yours">
+<meta property="og:description" content="Keep EPUB highlights as Markdown. Read for free and try your first export free on iPhone and iPad.">
+<meta property="og:url" content="https://atani.github.io/leafmark-app/">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1d1d1f; line-height: 1.6; max-width: 640px; margin: 0 auto; padding: 2rem 1.5rem; }
@@ -14,14 +21,28 @@
   li { margin-bottom: .3rem; }
   a { color: #0066cc; text-decoration: none; }
   a:hover { text-decoration: underline; }
+  a:focus-visible { outline: 3px solid #235c40; outline-offset: 4px; }
+  .button { display: inline-block; background: #235c40; color: white; border-radius: 8px; padding: 12px 20px; margin: 1rem 0 .5rem; font-weight: 600; }
+  .fine { color: #53645b; font-size: .9rem; }
+  .guide { background: #edf1e9; padding: 1.5rem; border-radius: 10px; margin: 2rem 0; }
+  p { margin-bottom: 1rem; }
   footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #e5e5e5; color: #6e6e73; font-size: .85rem; }
 </style>
 </head>
 <body>
+<main>
 <h1>Leafmark</h1>
 <p class="tagline">Your highlights are yours.</p>
 
 <p>A buy-once EPUB reader for people who read closely and take their notes with them. No subscription, no account, no cloud lock-in.</p>
+<a class="button" href="https://apps.apple.com/app/apple-store/id6781045740?pt=129044417&amp;ct=lf-web-home&amp;mt=8">Try Leafmark on the App Store</a>
+<p class="fine">Reading is free. First Markdown export free. One-time Pro purchase.</p>
+
+<section class="guide">
+<h2>Bring EPUB highlights into Obsidian</h2>
+<p>Highlight a passage, add your thoughts, and keep both as a Markdown file in your vault. No Obsidian plugin is required.</p>
+<a href="epub-highlights-to-obsidian/">Follow the EPUB-to-Obsidian guide →</a>
+</section>
 
 <h2>Features</h2>
 <ul>
@@ -30,14 +51,23 @@
   <li>Export highlights to Markdown — Obsidian, Notion, or any plain-text vault</li>
   <li>Reading statistics: time today, this week, all time, and your streak</li>
   <li>Import from Files — iCloud Drive, Google Drive, Dropbox</li>
-  <li>Everything stays on your device</li>
+  <li>Highlights, bookmarks and reading positions sync through your own iCloud</li>
 </ul>
+
+<h2>Try the workflow before buying</h2>
+<p>Read and import DRM-free EPUBs for free, with up to three highlights per book and one free Markdown export. Leafmark Pro unlocks unlimited highlights and exports, exporting every book at once, and reading statistics.</p>
+<p>Pro is a one-time purchase. Check the App Store for the current regional price.</p>
+<p class="fine">Requires iOS or iPadOS 17 or later. App interface in English. EPUB only; PDF and DRM-protected books are not supported.</p>
+
+<h2>Your reading content stays yours</h2>
+<p>No ads or Leafmark account. Books, highlights and notes are not sent to us. From version 1.20, anonymous app and purchase-funnel analytics and purchase processing use Firebase Analytics and RevenueCat. See the <a href="privacy.html">privacy policy</a> for details.</p>
 
 <h2>Links</h2>
 <ul>
   <li><a href="privacy.html">Privacy Policy</a></li>
   <li><a href="support.html">Support</a></li>
 </ul>
+</main>
 
 <footer>&copy; 2026 atani</footer>
 </body>

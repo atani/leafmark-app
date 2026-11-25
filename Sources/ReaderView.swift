@@ -316,7 +316,7 @@ final class ReaderContainerViewController: UIViewController {
             resizeTask = nil
             guard view.window != nil, navigator.currentSelection == nil,
                   let current = navigator.currentLocation,
-                  current.href == locator.href, current != locator else { return }
+                  current.href.isEquivalentTo(locator.href), current != locator else { return }
             _ = await navigator.go(to: locator)
         }
     }

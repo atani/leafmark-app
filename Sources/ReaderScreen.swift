@@ -80,7 +80,7 @@ struct ReaderScreen: View {
         .statusBarHidden(!chromeVisible)
     }
 
-    private var reader: some View {
+    private var readerContent: some View {
         ZStack {
             ReaderView(
                 publication: publication,
@@ -155,6 +155,10 @@ struct ReaderScreen: View {
             SwiftUI.Color(uiColor: appearance.theme.readiumTheme.backgroundColor.uiColor)
                 .ignoresSafeArea(.container)
         }
+    }
+
+    private var readerWithSheets: some View {
+        readerContent
         .sheet(isPresented: $showContents) {
             NavigationSheet(
                 publication: publication,
@@ -233,6 +237,10 @@ struct ReaderScreen: View {
                 }
             }
         }
+    }
+
+    private var reader: some View {
+        readerWithSheets
         .onReceive(highlightStore.$highlights) { _ in refreshDecorations() }
         .onChange(of: store.isPro) { _, isPro in
             // The user upgraded mid-flow: finish the highlight they were

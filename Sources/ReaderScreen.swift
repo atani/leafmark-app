@@ -70,6 +70,17 @@ struct ReaderScreen: View {
     }
 
     var body: some View {
+        NavigationStack {
+            reader
+                .navigationTitle(book.title)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { readerToolbar }
+                .toolbar(chromeVisible ? .visible : .hidden, for: .navigationBar)
+        }
+        .statusBarHidden(!chromeVisible)
+    }
+
+    private var reader: some View {
         ZStack {
             ReaderView(
                 publication: publication,
@@ -119,10 +130,16 @@ struct ReaderScreen: View {
                     actionTarget = highlightStore.highlight(withID: id)
                 }
             )
-            .ignoresSafeArea()
+            // Fill behind the top and bottom chrome while keeping the EPUB
+            // viewport clear of side-mounted system controls and the camera.
+            .ignoresSafeArea(.container, edges: .vertical)
 
-            if chromeVisible {
-                chrome
+            if chromeVisible, let progression {
+                VStack {
+                    Spacer()
+                    readingProgress(progression)
+                }
+                .transition(.opacity)
             }
 
             // Optional page header/footer. Shown only while the chrome is
@@ -134,7 +151,10 @@ struct ReaderScreen: View {
                 pageOverlay(info)
             }
         }
-        .statusBarHidden(!chromeVisible)
+        .background {
+            SwiftUI.Color(uiColor: appearance.theme.readiumTheme.backgroundColor.uiColor)
+                .ignoresSafeArea(.container)
+        }
         .sheet(isPresented: $showContents) {
             NavigationSheet(
                 publication: publication,
@@ -369,85 +389,70 @@ struct ReaderScreen: View {
 
     // MARK: - Chrome
 
-    private var chrome: some View {
-        VStack {
-            HStack(spacing: 16) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "chevron.down")
-                        .font(.body.weight(.semibold))
-                }
-                .accessibilityLabel("Close")
-
-                Spacer()
-
-                Text(book.title)
-                    .font(.subheadline.weight(.medium))
-                    .lineLimit(1)
-
-                Spacer()
-
-                if publication.isSearchable {
-                    Button {
-                        showSearch = true
-                    } label: {
-                        Image(systemName: "magnifyingglass")
-                    }
-                    .accessibilityLabel("Search")
-                }
-
-                Button {
-                    toggleBookmark()
-                } label: {
-                    Image(systemName: isCurrentPageBookmarked ? "bookmark.fill" : "bookmark")
-                }
-                .disabled(currentLocator == nil)
-                .accessibilityLabel(isCurrentPageBookmarked ? "Remove Bookmark" : "Add Bookmark")
-
-                Button {
-                    showSettings = true
-                } label: {
-                    Image(systemName: "textformat.size")
-                }
-                .accessibilityLabel("Appearance")
-
-                Button {
-                    showHighlights = true
-                } label: {
-                    Image(systemName: "highlighter")
-                }
-                .accessibilityLabel("Highlights")
-
-                Button {
-                    showContents = true
-                } label: {
-                    Image(systemName: "list.bullet")
-                }
-                .accessibilityLabel("Contents")
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 10)
-            .background(.bar)
-
-            Spacer()
-
-            if let progression {
-                VStack(spacing: 4) {
-                    ProgressView(value: progression)
-                        .tint(.secondary)
-                    Text("\(Int((progression * 100).rounded()))%")
-                        .font(.caption2.monospacedDigit())
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 8)
-                .background(.bar, in: RoundedRectangle(cornerRadius: 8))
-                .padding(.horizontal, 16)
-                .padding(.bottom, 12)
+    @ToolbarContentBuilder
+    private var readerToolbar: some ToolbarContent {
+        ToolbarItem(placement: .cancellationAction) {
+            Button {
+                dismiss()
+            } label: {
+                Label("Close", systemImage: "chevron.down")
             }
         }
-        .transition(.opacity)
+
+        ToolbarItem(placement: .primaryAction) {
+            Button {
+                showContents = true
+            } label: {
+                Label("Contents", systemImage: "list.bullet")
+            }
+        }
+
+        ToolbarItem(placement: .primaryAction) {
+            Button {
+                toggleBookmark()
+            } label: {
+                Label(isCurrentPageBookmarked ? "Remove Bookmark" : "Add Bookmark",
+                      systemImage: isCurrentPageBookmarked ? "bookmark.fill" : "bookmark")
+            }
+            .disabled(currentLocator == nil)
+        }
+
+        ToolbarItemGroup(placement: .secondaryAction) {
+            if publication.isSearchable {
+                Button {
+                    showSearch = true
+                } label: {
+                    Label("Search", systemImage: "magnifyingglass")
+                }
+            }
+
+            Button {
+                showSettings = true
+            } label: {
+                Label("Appearance", systemImage: "textformat.size")
+            }
+
+            Button {
+                showHighlights = true
+            } label: {
+                Label("Highlights", systemImage: "highlighter")
+            }
+        }
+    }
+
+    private func readingProgress(_ progression: Double) -> some View {
+        VStack(spacing: 4) {
+            ProgressView(value: progression)
+                .tint(.secondary)
+            Text("\(Int((progression * 100).rounded()))%")
+                .font(.caption2.monospacedDigit())
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 8)
+        .background(.bar, in: RoundedRectangle(cornerRadius: 8))
+        .padding(.horizontal, 16)
+        .padding(.bottom, 12)
     }
 }
 
@@ -483,18 +488,22 @@ private struct NavigationSheet: View {
                 case .bookmarks: bookmarksList
                 }
             }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                Picker("View", selection: $tab) {
+                    Text("Contents").tag(Tab.contents)
+                    Text("Bookmarks").tag(Tab.bookmarks)
+                }
+                .pickerStyle(.segmented)
+                .frame(maxWidth: 320)
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+                .frame(maxWidth: .infinity)
+                .background(.bar)
+            }
             .navigationTitle(tab == .contents ? "Contents" : "Bookmarks")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Picker("View", selection: $tab) {
-                        Text("Contents").tag(Tab.contents)
-                        Text("Bookmarks").tag(Tab.bookmarks)
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(maxWidth: 240)
-                }
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }
             }

@@ -11,12 +11,15 @@ import ReadiumShared
 @MainActor
 final class NavigatorBridge: ObservableObject {
     fileprivate(set) weak var navigator: EPUBNavigatorViewController?
+    fileprivate weak var container: ReaderContainerViewController?
 
     func go(to link: ReadiumShared.Link) {
+        container?.cancelPendingResize()
         Task { _ = await navigator?.go(to: link) }
     }
 
     func go(to locator: Locator) {
+        container?.cancelPendingResize()
         Task { _ = await navigator?.go(to: locator) }
     }
 
@@ -129,19 +132,6 @@ struct ReaderView: UIViewControllerRepresentable {
         do {
             var config = EPUBNavigatorViewController.Configuration()
             config.preferences = preferences
-            // Keep Readium's default vertical reservation. See the constants
-            // above: shrinking it to reclaim the landscape bands (issue #20)
-            // broke pagination, so correctness wins over the white space.
-            config.contentInset = [
-                .compact: (
-                    top: Self.verticalContentInsetCompact,
-                    bottom: Self.verticalContentInsetCompact
-                ),
-                .regular: (
-                    top: Self.verticalContentInsetRegular,
-                    bottom: Self.verticalContentInsetRegular
-                ),
-            ]
             // Let the text block span the full landscape width. Readium CSS
             // caps the body at `--RS__maxLineLength` (40rem ≈ 640pt) and
             // centres it with `margin: 0 auto`, which is what leaves the wide
@@ -216,6 +206,7 @@ struct ReaderView: UIViewControllerRepresentable {
             })
 
             let container = ReaderContainerViewController(navigator: navigator)
+            bridge.container = container
             container.onHighlight = onHighlightSelection
             container.onNote = onNoteSelection
             return container
@@ -245,6 +236,26 @@ struct ReaderView: UIViewControllerRepresentable {
             // Surfaced through the reading view itself; nothing actionable here.
         }
 
+        func navigatorContentInset(_ navigator: VisualNavigator) -> UIEdgeInsets? {
+            guard let navigator = navigator as? EPUBNavigatorViewController else { return nil }
+
+            // The SwiftUI host already fits the navigator inside the horizontal
+            // safe area. Readium only needs the physical insets on the vertical
+            // axis, where the reader still extends behind its chrome.
+            let insets = navigator.view.window?.safeAreaInsets ?? .zero
+            let verticalReservation: CGFloat
+            if navigator.publication.metadata.layout == .fixed {
+                verticalReservation = 0
+            } else {
+                verticalReservation = navigator.traitCollection.verticalSizeClass == .compact
+                    ? ReaderView.verticalContentInsetCompact
+                    : ReaderView.verticalContentInsetRegular
+            }
+
+            return UIEdgeInsets(top: max(insets.top, verticalReservation), left: 0,
+                                bottom: max(insets.bottom, verticalReservation), right: 0)
+        }
+
         // Note: tap handling (chrome toggle / image zoom) is wired through the
         // navigator's InputObservable observers in `makeUIViewController`, not
         // `didTapAt`, because that pipeline also exposes the tapped element.
@@ -255,6 +266,9 @@ struct ReaderView: UIViewControllerRepresentable {
 /// the responder chain (see ADR-0004).
 final class ReaderContainerViewController: UIViewController {
     private let navigator: EPUBNavigatorViewController
+    private var lastViewportSize: CGSize?
+    private var resizeLocator: Locator?
+    private var resizeTask: Task<Void, Never>?
     var onHighlight: (() -> Void)?
     var onNote: (() -> Void)?
 
@@ -275,6 +289,42 @@ final class ReaderContainerViewController: UIViewController {
         navigator.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(navigator.view)
         navigator.didMove(toParent: self)
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        let size = navigator.view.bounds.size
+        guard size.width > 0, size.height > 0, size != lastViewportSize else { return }
+        let hadViewport = lastViewportSize != nil
+        lastViewportSize = size
+        guard hadViewport, navigator.publication.metadata.layout != .fixed else { return }
+
+        // A reflow can move the apparent page even when Readium doesn't
+        // rebuild its spreads. Keep the first locator across a burst of size
+        // changes and seek to it after the web view has had time to reflow.
+        guard let locator = resizeLocator ?? navigator.currentLocation else { return }
+        resizeLocator = locator
+        resizeTask?.cancel()
+        resizeTask = Task { @MainActor [weak self] in
+            do {
+                try await Task.sleep(for: .milliseconds(150))
+            } catch {
+                return
+            }
+            guard let self else { return }
+            resizeLocator = nil
+            resizeTask = nil
+            guard view.window != nil, navigator.currentSelection == nil,
+                  let current = navigator.currentLocation,
+                  current.href == locator.href, current != locator else { return }
+            _ = await navigator.go(to: locator)
+        }
+    }
+
+    fileprivate func cancelPendingResize() {
+        resizeTask?.cancel()
+        resizeTask = nil
+        resizeLocator = nil
     }
 
     @objc func highlightSelection() {

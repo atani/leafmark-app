@@ -76,3 +76,55 @@ final class ImageZoomMathTests: XCTestCase {
         XCTAssertEqual(insets.bottom, 200, accuracy: 0.0001)
     }
 }
+
+@MainActor
+final class ImageZoomResizeTests: XCTestCase {
+    func testFittedImageRefitsWhenViewportChangesSize() {
+        let viewer = makeViewer()
+        XCTAssertEqual(viewer.zoomScale, 0.3, accuracy: 0.001)
+
+        viewer.frame.size = CGSize(width: 700, height: 550)
+        viewer.layoutIfNeeded()
+
+        XCTAssertEqual(viewer.minimumZoomScale, 0.55, accuracy: 0.001)
+        XCTAssertEqual(viewer.zoomScale, 0.55, accuracy: 0.001)
+        XCTAssertEqual(viewer.contentOffset.x, -75, accuracy: 0.5)
+        XCTAssertEqual(viewer.contentOffset.y, 0, accuracy: 0.5)
+
+        viewer.frame.size = CGSize(width: 300, height: 500)
+        viewer.layoutIfNeeded()
+
+        XCTAssertEqual(viewer.zoomScale, 0.3, accuracy: 0.001)
+        XCTAssertEqual(viewer.contentOffset.y, -100, accuracy: 0.5)
+    }
+
+    func testZoomedImageKeepsMagnificationAndFocalPointOnResize() {
+        let viewer = makeViewer()
+        viewer.zoomScale = 0.6
+        viewer.contentOffset = CGPoint(x: 210, y: 80)
+        viewer.layoutIfNeeded()
+
+        viewer.frame.size = CGSize(width: 700, height: 550)
+        viewer.layoutIfNeeded()
+
+        XCTAssertEqual(viewer.zoomScale, 1.1, accuracy: 0.001)
+        // The original viewport was centered at image coordinates (600, 550).
+        XCTAssertEqual(viewer.contentOffset.x, 310, accuracy: 0.5)
+        XCTAssertEqual(viewer.contentOffset.y, 330, accuracy: 0.5)
+    }
+
+    private func makeViewer() -> ImageZoomScrollView {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        let image = UIGraphicsImageRenderer(size: CGSize(width: 1000, height: 1000), format: format)
+            .image { _ in }
+        let viewer = ImageZoomScrollView(
+            image: image,
+            onDismissDragChanged: { _ in },
+            onDismissDragEnded: { _ in }
+        )
+        viewer.frame.size = CGSize(width: 300, height: 500)
+        viewer.layoutIfNeeded()
+        return viewer
+    }
+}

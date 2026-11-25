@@ -87,7 +87,6 @@ struct ZoomableImageView: View {
                     }
                 }
             )
-            .ignoresSafeArea()
             .offset(y: dragOffset)
         } else if didFail {
             VStack(spacing: 12) {
@@ -114,8 +113,9 @@ struct ZoomableImageView: View {
                     Image(systemName: "xmark")
                         .font(.body.weight(.semibold))
                         .foregroundStyle(.white)
-                        .padding(10)
+                        .frame(minWidth: 44, minHeight: 44)
                         .background(.black.opacity(0.35), in: Circle())
+                        .contentShape(Circle())
                 }
                 .accessibilityLabel("Close")
                 .padding(.trailing, 16)
@@ -172,7 +172,8 @@ final class ImageZoomScrollView: UIScrollView, UIScrollViewDelegate, UIGestureRe
     private let imageView = UIImageView()
     private var onDismissDragChanged: (CGFloat) -> Void
     private var onDismissDragEnded: (Bool) -> Void
-    private var hasConfiguredZoom = false
+    private var lastViewportSize: CGSize?
+    private var viewportCenter: CGPoint?
 
     init(
         image: UIImage,
@@ -219,19 +220,35 @@ final class ImageZoomScrollView: UIScrollView, UIScrollViewDelegate, UIGestureRe
     }
 
     override func layoutSubviews() {
+        let viewportSize = bounds.size
+        let previousSize = lastViewportSize
+        let shouldResize = viewportSize != previousSize
+            && viewportSize.width > 0 && viewportSize.height > 0
+        let anchor = zoomScale > minimumZoomScale ? viewportCenter : nil
+        let relativeZoom = anchor == nil ? 1 : zoomScale / minimumZoomScale
         super.layoutSubviews()
-        // 初回レイアウトで実寸が確定してから fit 倍率を計算する。
-        if !hasConfiguredZoom, let image = imageView.image,
-           bounds.width > 0, bounds.height > 0 {
-            hasConfiguredZoom = true
-            imageView.frame = CGRect(origin: .zero, size: image.size)
-            contentSize = image.size
-            let fit = ImageZoomMath.fitScale(imageSize: image.size, boundsSize: bounds.size)
+
+        if shouldResize, let image = imageView.image {
+            lastViewportSize = viewportSize
+            if previousSize == nil {
+                imageView.frame = CGRect(origin: .zero, size: image.size)
+                contentSize = image.size
+            }
+
+            let fit = ImageZoomMath.fitScale(imageSize: image.size, boundsSize: viewportSize)
+            let maximum = ImageZoomMath.maxScale(fitScale: fit)
+            // Keep the allowed range valid even when the displays differ
+            // enough that the new minimum exceeds the previous maximum.
+            minimumZoomScale = min(minimumZoomScale, fit)
+            maximumZoomScale = maximum
             minimumZoomScale = fit
-            maximumZoomScale = ImageZoomMath.maxScale(fitScale: fit)
-            zoomScale = fit
+            zoomScale = min(fit * relativeZoom, maximum)
+            centerImage()
+            restoreViewportCenter(anchor)
+        } else {
+            centerImage()
         }
-        centerImage()
+        rememberViewportCenter()
     }
 
     /// 表示中の画像が等倍（fit）付近かどうか。下スワイプで閉じてよい状態の判定。
@@ -240,10 +257,36 @@ final class ImageZoomScrollView: UIScrollView, UIScrollViewDelegate, UIGestureRe
     }
 
     private func centerImage() {
-        contentInset = ImageZoomMath.centeringInsets(
+        let insets = ImageZoomMath.centeringInsets(
             contentSize: imageView.frame.size,
             boundsSize: bounds.size
         )
+        if contentInset != insets {
+            contentInset = insets
+        }
+    }
+
+    private func restoreViewportCenter(_ anchor: CGPoint?) {
+        let minimumOffset = CGPoint(x: -contentInset.left, y: -contentInset.top)
+        guard let anchor else {
+            contentOffset = minimumOffset
+            return
+        }
+
+        let center = convert(anchor, from: imageView)
+        let maximumX = max(minimumOffset.x, contentSize.width + contentInset.right - bounds.width)
+        let maximumY = max(minimumOffset.y, contentSize.height + contentInset.bottom - bounds.height)
+        contentOffset = CGPoint(
+            x: min(max(center.x - bounds.width / 2, minimumOffset.x), maximumX),
+            y: min(max(center.y - bounds.height / 2, minimumOffset.y), maximumY)
+        )
+    }
+
+    private func rememberViewportCenter() {
+        // A bounds change can clamp the scroll offset before layout runs.
+        // Only sample the center once the matching zoom range is in place.
+        guard bounds.size == lastViewportSize else { return }
+        viewportCenter = imageView.convert(CGPoint(x: bounds.midX, y: bounds.midY), from: self)
     }
 
     // MARK: UIScrollViewDelegate
@@ -254,6 +297,11 @@ final class ImageZoomScrollView: UIScrollView, UIScrollViewDelegate, UIGestureRe
 
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
         centerImage()
+        rememberViewportCenter()
+    }
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        rememberViewportCenter()
     }
 
     // MARK: Gestures
